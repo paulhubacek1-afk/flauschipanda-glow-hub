@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -80,7 +80,8 @@ type Topic = { id?: string; category_id: string; slug: string; title: string; ex
 
 function useRefreshSite() {
   const qc = useQueryClient();
-  return () => qc.invalidateQueries();
+  const router = useRouter();
+  return () => { qc.invalidateQueries(); router.invalidate(); };
 }
 
 function ContentTab() {
