@@ -1,12 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { directoryQuery, settingsQuery } from "@/lib/cms";
+import type { Settings } from "@/lib/cms";
 import { Button } from "@/components/ui/button";
 
-export function SiteHeader() {
-  const { data: s } = useQuery(settingsQuery);
-  const { data: cats } = useQuery(directoryQuery);
+type Nav = { id: string; slug: string; title: string; icon: string }[];
+
+export function SiteHeader({ settings: s, nav: cats }: { settings: Settings; nav: Nav }) {
   return (
     <header className="border-b border-border bg-background/60 backdrop-blur">
       <div className="mx-auto max-w-7xl px-4 py-6 text-center">
@@ -35,8 +34,7 @@ export function SiteHeader() {
   );
 }
 
-export function SiteFooter({ onCookies }: { onCookies: () => void }) {
-  const { data: s } = useQuery(settingsQuery);
+export function SiteFooter({ settings: s, onCookies }: { settings: Settings; onCookies: () => void }) {
   return (
     <footer className="mt-16 border-t border-border bg-background/80 py-8 text-center text-sm text-muted-foreground">
       <div className="flex flex-wrap justify-center gap-4">

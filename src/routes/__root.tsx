@@ -80,10 +80,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
   }),
   loader: async ({ context }) => {
-    await Promise.all([
-      context.queryClient.ensureQueryData(settingsQuery),
-      context.queryClient.ensureQueryData(directoryQuery),
+    const [settings, cats] = await Promise.all([
+      context.queryClient.fetchQuery(settingsQuery),
+      context.queryClient.fetchQuery(directoryQuery),
     ]);
+    return { settings, nav: cats.map((c) => ({ id: c.id, slug: c.slug, title: c.title, icon: c.icon })) };
   },
   shellComponent: RootShell,
   component: RootComponent,
@@ -108,13 +109,14 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const cookie = useCookieBanner();
+  const { settings, nav } = Route.useLoaderData();
   return (
     <QueryClientProvider client={queryClient}>
-      <SiteHeader />
+      <SiteHeader settings={settings} nav={nav} />
       <main className="mx-auto max-w-7xl px-4 py-8">
         <Outlet />
       </main>
-      <SiteFooter onCookies={() => cookie.setOpen(true)} />
+      <SiteFooter settings={settings} onCookies={() => cookie.setOpen(true)} />
       <CookieBanner open={cookie.open} setOpen={cookie.setOpen} />
       <Toaster />
     </QueryClientProvider>
