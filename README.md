@@ -4,6 +4,17 @@ Die Panda Toolbox ist als großes Themen- und Communityportal geplant. Sie verbi
 
 **Technik:** Next.js · React · Tailwind CSS v4 · shadcn/ui · **Payload CMS** (Backend unter `/admin`) · Postgres
 
+## Veröffentlichung
+
+Die Website läuft unter **https://flauschigespanda.webdock.dev**, das Payload-CMS
+unter **https://flauschigespanda.webdock.dev/admin**.
+
+Pushes auf `main` lösen im Vercel-Projekt `spitzli/flauschipanda-glow-hub`
+automatisch einen Produktionsbuild aus. Erst ein erfolgreicher Build aktualisiert
+die Live-Seite. Functions, PostgreSQL und Medienspeicher sind in Frankfurt;
+Vercels Standard-Buildinfrastruktur ist für dieses Projekt ausdrücklich erlaubt.
+Geheimnisse bleiben in den Vercel-Umgebungsvariablen und gehören nie ins Repo.
+
 ## Einrichtung
 
 1. **Datenbank anlegen:** Du brauchst eine Postgres-Datenbank, z. B. ein kostenloses Projekt bei Supabase oder Neon. Kopiere die Verbindungs-URL.
