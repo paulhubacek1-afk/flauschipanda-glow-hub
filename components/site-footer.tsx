@@ -3,12 +3,12 @@
 import Link from "next/link";
 
 import { openConsentSettings } from "@/lib/consent";
-import { categoryPath, hierarchy } from "@/lib/hierarchy";
+import type { NavLite } from "@/lib/cms";
 import { legalNav, siteConfig } from "@/lib/site";
 
 import { PandaLogo } from "./panda-logo";
 
-export function SiteFooter() {
+export function SiteFooter({ nav }: { nav: NavLite[] }) {
   return (
     <footer className="mt-24 border-t border-primary/10 bg-card/40">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-[1.2fr_2.5fr]">
@@ -28,9 +28,9 @@ export function SiteFooter() {
           <div>
             <h2 className="mb-3 text-sm font-semibold text-foreground">Kategorien</h2>
             <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
-              {hierarchy.map((c) => (
+              {nav.map((c) => (
                 <li key={c.slug}>
-                  <Link href={categoryPath(c.slug)} className="hover:text-primary">
+                  <Link href={`/${c.slug}`} className="hover:text-primary">
                     {c.title}
                   </Link>
                 </li>

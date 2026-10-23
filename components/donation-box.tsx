@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { HeartHandshake } from "lucide-react";
 
-import { donationConfig } from "@/lib/site";
+import type { SiteSettingsData } from "@/lib/cms";
 
 import { PandaLogo } from "./panda-logo";
 import { Button } from "./ui/button";
 
-/** Baustein "Spendenbox Panda GreenCore" – Inhalte zentral in lib/site.ts. */
-export function DonationBox() {
-  const { headline, text, purpose, url, aboutHref, name } = donationConfig;
+/** Panda-GreenCore-Box – erscheint automatisch auf jeder Landingpage. Texte im Admin unter „Website-Einstellungen“. */
+export function DonationBox({ greencore }: { greencore: SiteSettingsData["greencore"] }) {
+  const { headline, text, purpose, url, aboutHref, name } = greencore;
   return (
     <section
       aria-labelledby="spende"

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Clock } from "lucide-react";
 
-import type { PageSummary } from "@/lib/content";
+import type { PageSummary } from "@/lib/cms";
 import { cn } from "@/lib/utils";
 
 import { Cover } from "./cover";

@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 
-import type { PageSummary } from "@/lib/content";
+import type { PageSummary } from "@/lib/cms";
 
 import { PageCard } from "./page-card";
 import { Input } from "./ui/input";

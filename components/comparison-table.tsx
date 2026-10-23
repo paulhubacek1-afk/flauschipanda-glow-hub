@@ -1,9 +1,9 @@
 import { Scale } from "lucide-react";
 
-import type { Page } from "@/lib/content";
+import type { Comparison } from "@/lib/cms";
 
 /** Baustein "Vergleich" einer Landingpage. */
-export function ComparisonTable({ comparison }: { comparison: NonNullable<Page["comparison"]> }) {
+export function ComparisonTable({ comparison }: { comparison: Comparison }) {
   return (
     <section aria-labelledby="vergleich" className="space-y-4">
       <h2 id="vergleich" className="flex items-center gap-2 font-display text-2xl font-semibold">

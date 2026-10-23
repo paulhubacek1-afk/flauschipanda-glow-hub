@@ -1,43 +1,50 @@
 /**
- * Exportiert die komplette Seiten-Hierarchie als STRUKTUR.md (Baumansicht).
+ * Exportiert den Strukturplan (lib/hierarchy.ts = Startstruktur für den CMS-Import) als STRUKTUR.md.
  *   npm run struktur
- * Live geschaltete Seiten werden mit ● markiert, geplante mit ○.
+ * ● = Inhalt vorhanden (content/…md) · ○ = geplant · 💰 Money Page · 📈 Traffic Page
+ * Hinweis: Nach dem Import ist das CMS die maßgebliche Quelle (Admin → Seiten).
  */
 import fs from "node:fs";
 import path from "node:path";
 
-import { getLiveIds } from "../lib/content";
 import { hierarchy, hierarchyStats, pagePath } from "../lib/hierarchy";
+import { pageTypeFor } from "../lib/page-types";
 
-const live = getLiveIds();
 const stats = hierarchyStats();
-const lines: string[] = [
-  "# Panda Toolbox (FlauschiPandas) – Seiten-Hierarchie",
-  "",
-  `${stats.categories} Hauptkategorien · ${stats.groups} Unterthemen · ${stats.pages} Landingpages · ${live.size} live`,
-  "",
-  "Hauptkategorie → Unterthema → Landingpage. ● = live, ○ = geplant. Quelle: `lib/hierarchy.ts`",
-  "",
-  "Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Panda GreenCore",
-  "",
-  "```",
-];
+const hasContent = (id: string) => fs.existsSync(path.join(process.cwd(), "content", `${id}.md`));
+const marker = (id: string) => ({ money: " 💰", traffic: " 📈", standard: "" })[pageTypeFor(id)];
 
+let withContent = 0;
+const lines: string[] = [];
 for (const c of hierarchy) {
   lines.push(`${c.number} ${c.title}  (/${c.slug})`);
   c.groups.forEach((g, gi) => {
-    const lastGroup = gi === c.groups.length - 1;
-    lines.push(`${lastGroup ? "└──" : "├──"} ${g.title}  (/${c.slug}/${g.slug})`);
+    const lg = gi === c.groups.length - 1;
+    lines.push(`${lg ? "└──" : "├──"} ${g.title}  (/${c.slug}/${g.slug})`);
     g.pages.forEach((p, pi) => {
-      const lastPage = pi === g.pages.length - 1;
-      const mark = live.has(`${c.slug}/${g.slug}/${p.slug}`) ? "●" : "○";
-      lines.push(`${lastGroup ? "    " : "│   "}${lastPage ? "└──" : "├──"} ${mark} ${p.title}  ${pagePath(c.slug, g.slug, p.slug)}`);
+      const id = `${c.slug}/${g.slug}/${p.slug}`;
+      const done = hasContent(id);
+      if (done) withContent++;
+      lines.push(`${lg ? "    " : "│   "}${pi === g.pages.length - 1 ? "└──" : "├──"} ${done ? "●" : "○"} ${p.title}${marker(id)}  ${pagePath(c.slug, g.slug, p.slug)}`);
     });
   });
   lines.push("");
 }
-lines.push("```", "");
 
-const out = path.join(process.cwd(), "STRUKTUR.md");
-fs.writeFileSync(out, lines.join("\n"));
-console.log(`STRUKTUR.md geschrieben: ${stats.pages} Landingpages, davon ${live.size} live.`);
+const out = [
+  "# Panda Toolbox (FlauschiPandas) – Seiten-Hierarchie",
+  "",
+  `${stats.categories} Hauptkategorien · ${stats.groups} Unterthemen · ${stats.pages} Landingpages · ${withContent} mit Inhalt`,
+  "",
+  "Hauptkategorie → Unterthema → Landingpage. ● = Inhalt vorhanden, ○ = geplant · 💰 Money Page · 📈 Traffic Page",
+  "",
+  "Startstruktur für den CMS-Import (`npm run seed`). Danach wird alles im Admin unter /admin gepflegt.",
+  "",
+  "```",
+  ...lines,
+  "```",
+  "",
+].join("\n");
+
+fs.writeFileSync(path.join(process.cwd(), "STRUKTUR.md"), out);
+console.log(`STRUKTUR.md geschrieben: ${stats.pages} Landingpages, davon ${withContent} mit Inhalt.`);

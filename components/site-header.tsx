@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, LayoutGrid, Menu, X } from "lucide-react";
 
-import { categoryPath, groupPath, hierarchy } from "@/lib/hierarchy";
+import type { NavLite } from "@/lib/cms";
 import { siteConfig } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -13,8 +13,8 @@ import { CategoryIcon } from "./category-icon";
 import { PandaLogo } from "./panda-logo";
 import { Button } from "./ui/button";
 
-/** Header mit Mega-Menü – wird vollständig aus lib/hierarchy.ts erzeugt. */
-export function SiteHeader() {
+/** Header mit Mega-Menü – wird vollständig aus dem CMS erzeugt. */
+export function SiteHeader({ nav }: { nav: NavLite[] }) {
   const pathname = usePathname();
   const [megaOpen, setMegaOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -111,10 +111,10 @@ export function SiteHeader() {
         {megaOpen && (
           <div id="mega-menu" className="glass absolute inset-x-0 top-full hidden max-h-[75vh] overflow-y-auto border-b border-primary/15 shadow-[var(--glow-md)] md:block">
             <div className="mx-auto grid max-w-7xl gap-x-6 gap-y-7 px-4 py-8 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {hierarchy.map((c) => (
+              {nav.map((c) => (
                 <div key={c.slug} className="space-y-2">
                   <Link
-                    href={categoryPath(c.slug)}
+                    href={`/${c.slug}`}
                     className={cn(
                       "flex items-center gap-2 font-display text-sm font-semibold hover:text-primary",
                       activeCategory === c.slug && "text-primary",
@@ -126,14 +126,14 @@ export function SiteHeader() {
                   <ul className="space-y-1 border-l border-primary/15 pl-3 text-sm">
                     {c.groups.slice(0, 5).map((g) => (
                       <li key={g.slug}>
-                        <Link href={groupPath(c.slug, g.slug)} className="text-muted-foreground hover:text-primary">
+                        <Link href={`/${c.slug}/${g.slug}`} className="text-muted-foreground hover:text-primary">
                           {g.title}
                         </Link>
                       </li>
                     ))}
                     {c.groups.length > 5 && (
                       <li>
-                        <Link href={categoryPath(c.slug)} className="text-xs text-primary/80 hover:text-primary">
+                        <Link href={`/${c.slug}`} className="text-xs text-primary/80 hover:text-primary">
                           + {c.groups.length - 5} weitere
                         </Link>
                       </li>
@@ -155,10 +155,10 @@ export function SiteHeader() {
                 Startseite
               </Link>
             </li>
-            {hierarchy.map((c) => (
+            {nav.map((c) => (
               <li key={c.slug}>
                 <div className="flex items-center">
-                  <Link href={categoryPath(c.slug)} className="flex flex-1 items-center gap-2 rounded-md px-3 py-2.5 hover:bg-accent">
+                  <Link href={`/${c.slug}`} className="flex flex-1 items-center gap-2 rounded-md px-3 py-2.5 hover:bg-accent">
                     <CategoryIcon name={c.icon} className="size-4 text-primary" />
                     {c.title}
                   </Link>
@@ -176,7 +176,7 @@ export function SiteHeader() {
                   <ul className="mb-2 ml-6 space-y-0.5 border-l border-primary/15 pl-3 text-sm">
                     {c.groups.map((g) => (
                       <li key={g.slug}>
-                        <Link href={groupPath(c.slug, g.slug)} className="block py-1.5 text-muted-foreground hover:text-primary">
+                        <Link href={`/${c.slug}/${g.slug}`} className="block py-1.5 text-muted-foreground hover:text-primary">
                           {g.title}
                         </Link>
                       </li>

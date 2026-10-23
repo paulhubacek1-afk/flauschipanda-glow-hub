@@ -1,4 +1,5 @@
 import { unified, type Plugin } from "unified";
+import rehypeParse from "rehype-parse";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
@@ -7,12 +8,19 @@ import rehypeStringify from "rehype-stringify";
 import { visit } from "unist-util-visit";
 import { visitParents, SKIP } from "unist-util-visit-parents";
 import { toString as hastToString } from "hast-util-to-string";
-import type { Root as MdRoot, Link, PhrasingContent, Parent as MdParent, Text } from "mdast";
-import type { Root as HastRoot, Element } from "hast";
+import type { Root as HastRoot, Element, ElementContent, Parent as HastParent, Text as HastText } from "hast";
 
-import { AFFILIATE_REL, getAffiliate } from "./affiliate";
-import type { Page } from "./content";
+import { AFFILIATE_REL } from "./affiliate";
+import type { AffiliateItem, Page } from "./cms";
 import { MAX_AUTO_LINKS, buildLinkTargets, findFirstMatch, type LinkTarget } from "./linking";
+
+/**
+ * Infotext → HTML.
+ * Zwei Quellen: Rich-Text aus dem CMS (bereits HTML) oder importiertes Markdown.
+ * Beide laufen durch dieselben Schritte auf HTML-Ebene:
+ *   Affiliate-Links (aff:kennung) · externe Links absichern · automatische interne Verlinkung ·
+ *   Anker für Überschriften · Inhaltsverzeichnis einsammeln
+ */
 
 export interface TocHeading {
   id: string;
@@ -25,119 +33,119 @@ export interface RenderedPage {
   headings: TocHeading[];
   /** IDs der Seiten, auf die automatisch verlinkt wurde */
   autoLinked: string[];
-  /** Affiliate-IDs, die im Text verwendet werden */
+  /** Affiliate-Kennungen, die im Text verlinkt sind */
   affiliateIds: string[];
-  unknownAffiliateIds: string[];
 }
 
+type AffiliateLookup = (key: string) => AffiliateItem | undefined;
+
+const isElement = (n: unknown): n is Element => (n as Element)?.type === "element";
+
 /* ------------------------------------------------------------------ */
-/* remark: Affiliate-Links  [Text](aff:produkt-id)                      */
+/* Links: Affiliate (aff:kennung), externe Links, manuelle interne Links */
 /* ------------------------------------------------------------------ */
-interface AffiliateOptions {
-  onAffiliate: (id: string) => void;
-  onUnknown: (id: string) => void;
+interface LinkOptions {
+  lookup: AffiliateLookup;
+  onAffiliate: (key: string) => void;
+  manualInternal: Set<string>;
 }
 
-const remarkAffiliate: Plugin<[AffiliateOptions], MdRoot> = (options) => (tree) => {
-  visit(tree, "link", (node: Link) => {
-    if (!node.url.startsWith("aff:")) return;
-    const id = node.url.slice(4);
-    const product = getAffiliate(id);
-    if (!product) {
-      options.onUnknown(id);
-      node.url = "#";
+const rehypeLinks: Plugin<[LinkOptions], HastRoot> = (opts) => (tree) => {
+  visit(tree, "element", (node: Element, index, parent) => {
+    if (node.tagName !== "a") return;
+    const href = String(node.properties?.href ?? "");
+
+    if (href.startsWith("aff:")) {
+      const key = href.slice(4);
+      const product = opts.lookup(key);
+      if (!product && parent && typeof index === "number") {
+        // Unbekannter oder noch nicht freigegebener Partnerlink: nur den Text zeigen
+        (parent as HastParent).children.splice(index, 1, ...(node.children as ElementContent[]));
+        return [SKIP, index];
+      }
+      if (product) {
+        node.properties = {
+          href: product.url,
+          rel: AFFILIATE_REL,
+          target: "_blank",
+          title: "Affiliate-Link – wir erhalten ggf. eine Provision",
+          dataAffiliate: "true",
+        };
+        opts.onAffiliate(key);
+      }
       return;
     }
-    node.url = product.url;
-    node.title = "Affiliate-Link – wir erhalten ggf. eine Provision";
-    node.data = {
-      ...node.data,
-      hProperties: { rel: AFFILIATE_REL, target: "_blank", "data-affiliate": "true" },
-    } as Link["data"];
-    options.onAffiliate(id);
+    if (/^https?:\/\//.test(href)) {
+      node.properties = { ...node.properties, rel: "noopener noreferrer", target: "_blank" };
+      return;
+    }
+    if (href.startsWith("/")) opts.manualInternal.add(href.replace(/[#?].*$/, "").replace(/\/$/, ""));
   });
 };
 
 /* ------------------------------------------------------------------ */
-/* remark: externe Links sicher öffnen                                 */
-/* ------------------------------------------------------------------ */
-const remarkExternalLinks: Plugin<[], MdRoot> = () => (tree) => {
-  visit(tree, "link", (node: Link) => {
-    if (!/^https?:\/\//.test(node.url)) return;
-    const existing = (node.data as { hProperties?: Record<string, unknown> } | undefined)?.hProperties;
-    if (existing?.["data-affiliate"]) return;
-    node.data = {
-      ...node.data,
-      hProperties: { ...existing, rel: "noopener noreferrer", target: "_blank" },
-    } as Link["data"];
-  });
-};
-
-/* ------------------------------------------------------------------ */
-/* remark: automatische interne Verlinkung                              */
+/* Automatische interne Verlinkung                                      */
 /* ------------------------------------------------------------------ */
 interface AutoLinkOptions {
   targets: LinkTarget[];
   max: number;
+  manualInternal: Set<string>;
   onLink: (id: string) => void;
 }
 
-const SKIP_ANCESTORS = new Set(["link", "linkReference", "heading", "table", "tableCell", "inlineCode", "code"]);
+const SKIP_TAGS = new Set(["a", "h1", "h2", "h3", "h4", "h5", "h6", "code", "pre", "table", "script", "style", "button"]);
+const BLOCK_TAGS = new Set(["p", "li"]);
 
-const remarkAutoLink: Plugin<[AutoLinkOptions], MdRoot> = (options) => (tree) => {
-  // Bereits manuell verlinkte Ziele nicht zusätzlich automatisch verlinken.
-  const manual = new Set<string>();
-  visit(tree, "link", (node: Link) => {
-    if (node.url.startsWith("/")) manual.add(node.url.replace(/[#?].*$/, "").replace(/\/$/, ""));
-  });
-
-  let remaining = options.targets.filter((t) => !manual.has(t.href));
-  const usedParagraphs = new Set<unknown>();
+const rehypeAutoLink: Plugin<[AutoLinkOptions], HastRoot> = (opts) => (tree) => {
+  let remaining = opts.targets.filter((t) => !opts.manualInternal.has(t.href));
+  const usedBlocks = new Set<Element>();
   let count = 0;
 
-  visitParents(tree, "text", (node: Text, ancestors) => {
-    if (count >= options.max || remaining.length === 0) return;
-    if (ancestors.some((a) => SKIP_ANCESTORS.has(a.type))) return;
-
-    const paragraph = [...ancestors].reverse().find((a) => a.type === "paragraph");
-    if (!paragraph || usedParagraphs.has(paragraph)) return;
+  visitParents(tree, "text", (node: HastText, ancestors) => {
+    if (count >= opts.max || remaining.length === 0) return;
+    if (ancestors.some((a) => isElement(a) && SKIP_TAGS.has(a.tagName))) return;
+    const block = [...ancestors].reverse().find((a): a is Element => isElement(a) && BLOCK_TAGS.has(a.tagName));
+    if (!block || usedBlocks.has(block)) return;
 
     const match = findFirstMatch(node.value, remaining);
     if (!match) return;
 
-    const parent = ancestors[ancestors.length - 1] as MdParent;
+    const parent = ancestors[ancestors.length - 1] as HastParent;
     const index = parent.children.indexOf(node);
     if (index < 0) return;
 
     const before = node.value.slice(0, match.index);
     const after = node.value.slice(match.index + match.length);
-    const link: Link = {
-      type: "link",
-      url: match.target.href,
-      title: match.target.title,
+    const link: Element = {
+      type: "element",
+      tagName: "a",
+      properties: { href: match.target.href, title: match.target.title, dataAutolink: "true" },
       children: [{ type: "text", value: match.text }],
-      data: { hProperties: { "data-autolink": "true" } } as Link["data"],
     };
-
-    const replacement: PhrasingContent[] = [];
+    const replacement: ElementContent[] = [];
     if (before) replacement.push({ type: "text", value: before });
     replacement.push(link);
     if (after) replacement.push({ type: "text", value: after });
+    parent.children.splice(index, 1, ...replacement);
 
-    (parent.children as PhrasingContent[]).splice(index, 1, ...replacement);
-
-    usedParagraphs.add(paragraph);
+    usedBlocks.add(block);
     count += 1;
     remaining = remaining.filter((t) => t.id !== match.target.id);
-    options.onLink(match.target.id);
-
+    opts.onLink(match.target.id);
     return [SKIP, index + replacement.length];
   });
 };
 
 /* ------------------------------------------------------------------ */
-/* rehype: Überschriften für das Inhaltsverzeichnis einsammeln           */
+/* Überschriften: H1 im Text zu H2 machen (der Seitentitel ist die H1)  */
+/* und fürs Inhaltsverzeichnis einsammeln                               */
 /* ------------------------------------------------------------------ */
+const rehypeDemoteH1: Plugin<[], HastRoot> = () => (tree) => {
+  visit(tree, "element", (node: Element) => {
+    if (node.tagName === "h1") node.tagName = "h2";
+  });
+};
+
 const rehypeCollectHeadings: Plugin<[TocHeading[]], HastRoot> = (out) => (tree) => {
   visit(tree, "element", (node: Element) => {
     if (node.tagName !== "h2" && node.tagName !== "h3") return;
@@ -149,39 +157,36 @@ const rehypeCollectHeadings: Plugin<[TocHeading[]], HastRoot> = (out) => (tree) 
 
 /* ------------------------------------------------------------------ */
 
+/** Rich-Text-HTML oder Markdown in einen HTML-Syntaxbaum umwandeln. */
+async function toHast(page: Page): Promise<HastRoot> {
+  if (page.contentHtml) return unified().use(rehypeParse, { fragment: true }).parse(page.contentHtml) as HastRoot;
+  // Rohes HTML im Markdown wird bewusst NICHT übernommen (Sicherheit).
+  const md = unified().use(remarkParse).use(remarkGfm).use(remarkRehype);
+  return (await md.run(md.parse(page.body))) as HastRoot;
+}
+
 export async function renderPage(
   page: Page,
   linkCandidates: Page[],
-  opts: { autoLink?: boolean } = {},
+  opts: { lookup?: AffiliateLookup; autoLink?: boolean } = {},
 ): Promise<RenderedPage> {
   const headings: TocHeading[] = [];
   const autoLinked: string[] = [];
   const affiliateIds: string[] = [];
-  const unknownAffiliateIds: string[] = [];
-
+  const manualInternal = new Set<string>();
+  const lookup: AffiliateLookup = opts.lookup ?? (() => undefined);
   const targets = opts.autoLink === false ? [] : buildLinkTargets(page, linkCandidates);
 
-  const file = await unified()
-    .use(remarkParse)
-    .use(remarkGfm)
-    .use(remarkAffiliate, {
-      onAffiliate: (id) => affiliateIds.push(id),
-      onUnknown: (id) => unknownAffiliateIds.push(id),
-    })
-    .use(remarkExternalLinks)
-    .use(remarkAutoLink, { targets, max: MAX_AUTO_LINKS, onLink: (id) => autoLinked.push(id) })
-    // Rohes HTML im Markdown wird bewusst NICHT übernommen (Sicherheit).
-    .use(remarkRehype)
+  const processor = unified()
+    .use(rehypeDemoteH1)
+    .use(rehypeLinks, { lookup, onAffiliate: (k) => affiliateIds.push(k), manualInternal })
+    .use(rehypeAutoLink, { targets, max: MAX_AUTO_LINKS, manualInternal, onLink: (id) => autoLinked.push(id) })
     .use(rehypeSlug)
     .use(rehypeCollectHeadings, headings)
-    .use(rehypeStringify)
-    .process(page.body);
+    .use(rehypeStringify);
 
-  return {
-    html: String(file),
-    headings,
-    autoLinked,
-    affiliateIds: Array.from(new Set(affiliateIds)),
-    unknownAffiliateIds,
-  };
+  const tree = (await processor.run(await toHast(page))) as HastRoot;
+  const html = processor.stringify(tree);
+
+  return { html: String(html), headings, autoLinked, affiliateIds: Array.from(new Set(affiliateIds)) };
 }

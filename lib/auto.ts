@@ -3,22 +3,36 @@
  *  Automatik: Aus einem Seitentitel wird eine vollständige Landingpage
  * ============================================================================
  *
- *  Eingabe:  "Gesundes Hundefutter"
- *  Ergebnis: SEO-Titel · Meta-Beschreibung · verwandte Seiten · Affiliate-Box ·
- *            Spendenbox · Panda-GreenCore-Hinweis
+ *  Eingabe im Admin:  "Gesundes Hundefutter" (Unterthema: Hunde)
+ *  Automatisch:       URL · Breadcrumb · interne Links · SEO-Titel · Meta-Beschreibung ·
+ *                     verwandte Artikel · GreenCore-Box · Affiliate-Bereich (nur Money Pages)
  *
- * Diese Funktionen werden an zwei Stellen genutzt:
- *  1. beim Anlegen einer Seite (Generator: `npm run neu` und /redaktion/neu)
- *  2. zur Laufzeit als Rückfallebene, wenn in der Frontmatter etwas fehlt
- *
- * Reine Funktionen, keine Datei- oder React-Zugriffe.
+ * SEO-Titel und Meta-Beschreibung werden bei jedem Seitenaufruf neu berechnet, solange die
+ * Felder im Admin leer sind – so bleibt z. B. die Jahreszahl immer aktuell.
+ * Reine Funktionen ohne Datenbank-, Datei- oder React-Zugriffe.
  */
-import { affiliateProducts } from "./affiliate";
-import { allPageNodes, slugify, type CategoryNode, type GroupNode, type PageNode } from "./hierarchy";
+import { slugify } from "./hierarchy";
+
+export type PageType = "money" | "traffic" | "standard";
 
 export const SEO_TITLE_MAX = 60;
 export const DESCRIPTION_MIN = 70;
 export const DESCRIPTION_MAX = 160;
+
+export const PAGE_TYPE_LABELS: Record<PageType, string> = {
+  money: "Money Page",
+  traffic: "Traffic Page",
+  standard: "Standard",
+};
+
+interface AutoContext {
+  categorySlug?: string;
+  groupTitle?: string;
+  pageType?: PageType;
+  year?: number;
+}
+
+const visitCategories = new Set(["zoos", "freizeitparks"]);
 
 /** Begleittext je Kategorie – sorgt für natürlich klingende Meta-Beschreibungen. */
 const categoryPitch: Record<string, string> = {
@@ -35,97 +49,70 @@ const categoryPitch: Record<string, string> = {
   freizeitparks: "Infos für die Planung, Tipps für den Besuch und Antworten auf häufige Fragen",
   "urlaub-reisen": "Planungshilfe, Checklisten und Antworten auf häufige Fragen",
   "autos-mobilitaet": "verständlich erklärt, mit Vergleich und Antworten auf häufige Fragen",
-  "projekte-community": "alles Wichtige auf einen Blick",
-  "panda-branding": "alles Wichtige auf einen Blick",
 };
 
-/** SEO-Titel: Suchbegriff vorne, ergänzt um einen Nutzenhinweis – max. 60 Zeichen. */
-export function autoSeoTitle(title: string, category?: CategoryNode): string {
-  const suffixes =
-    category?.slug === "zoos" || category?.slug === "freizeitparks"
-      ? [": Infos & Tipps für deinen Besuch", ": Infos & Tipps", " – Tipps"]
-      : category?.slug === "urlaub-reisen"
-        ? [": Tipps & Checkliste", " – Tipps"]
-      : category?.slug === "tools-apps" || category?.slug === "ki"
-        ? [": Anleitung, Tipps & Vergleich", ": Tipps & Vergleich", " – Ratgeber"]
-        : [": Ratgeber, Tipps & Vergleich", ": Tipps & Vergleich", " – Ratgeber"];
-  for (const s of suffixes) {
-    if (title.includes(":")) break; // Titel hat schon einen Zusatz
-    const candidate = `${title}${s}`;
-    if (candidate.length <= SEO_TITLE_MAX) return candidate;
-  }
-  return title.length <= SEO_TITLE_MAX ? title : `${title.slice(0, SEO_TITLE_MAX - 1).trimEnd()}…`;
+function fit(candidates: string[], max: number, min = 0) {
+  for (const c of candidates) if (c.length <= max && c.length >= min) return c;
+  const last = candidates[candidates.length - 1];
+  return last.length > max ? `${last.slice(0, max - 1).trimEnd()}…` : last;
 }
 
-/** Meta-Beschreibung: Suchbegriff + Nutzen + Marke, 70–160 Zeichen. */
-export function autoDescription(title: string, category?: CategoryNode, group?: GroupNode): string {
-  const pitch = (category && categoryPitch[category.slug]) ?? "Tipps, Vergleich und Antworten auf häufige Fragen";
-  const candidates = [
-    `${title}: ${pitch}. Verständlich erklärt in der Panda Toolbox.`,
-    `${title}: ${pitch}.`,
-    `${title} – ${group ? `${group.title}-Ratgeber` : "Ratgeber"} mit Tipps und FAQ.`,
-  ];
-  for (const c of candidates) {
-    if (c.length >= DESCRIPTION_MIN && c.length <= DESCRIPTION_MAX) return c;
+/**
+ * SEO-Titel, z. B. „Gesundes Hundefutter 2026 – Tipps & Vergleich“ (Money Page).
+ * Traffic Pages bekommen einen Wissens-Zusatz, Ausflugsziele einen Besuchs-Zusatz.
+ */
+export function autoSeoTitle(title: string, ctx: AutoContext = {}): string {
+  const year = ctx.year ?? new Date().getFullYear();
+  if (title.includes(":")) return fit([title], SEO_TITLE_MAX);
+  if (ctx.pageType === "money") {
+    return fit([`${title} ${year} – Tipps & Vergleich`, `${title} ${year} – Vergleich`, `${title} ${year}`, title], SEO_TITLE_MAX);
   }
-  const fallback = candidates[candidates.length - 1];
-  return fallback.length > DESCRIPTION_MAX ? `${fallback.slice(0, DESCRIPTION_MAX - 1).trimEnd()}…` : fallback;
+  if (ctx.pageType === "traffic") {
+    return fit([`${title}: Fakten & Wissen einfach erklärt`, `${title}: Fakten & Wissen`, `${title} – einfach erklärt`, title], SEO_TITLE_MAX);
+  }
+  if (ctx.categorySlug && visitCategories.has(ctx.categorySlug)) {
+    return fit([`${title}: Infos & Tipps für deinen Besuch`, `${title}: Infos & Tipps`, title], SEO_TITLE_MAX);
+  }
+  if (ctx.categorySlug === "urlaub-reisen") return fit([`${title}: Tipps & Checkliste`, `${title} – Tipps`, title], SEO_TITLE_MAX);
+  return fit([`${title}: Ratgeber, Tipps & Vergleich`, `${title}: Tipps & Vergleich`, `${title} – Ratgeber`, title], SEO_TITLE_MAX);
+}
+
+/** Meta-Beschreibung (70–160 Zeichen): Suchbegriff + Nutzen + Marke. */
+export function autoDescription(title: string, ctx: AutoContext = {}): string {
+  const year = ctx.year ?? new Date().getFullYear();
+  const pitch = (ctx.categorySlug && categoryPitch[ctx.categorySlug]) ?? "Tipps, Vergleich und Antworten auf häufige Fragen";
+  const candidates =
+    ctx.pageType === "money"
+      ? [
+          `${title}: Worauf du achten solltest, ehrlicher Vergleich und Antworten auf häufige Fragen – Stand ${year}. Panda Toolbox.`,
+          `${title}: Worauf du achten solltest, ehrlicher Vergleich und häufige Fragen – Stand ${year}.`,
+        ]
+      : ctx.pageType === "traffic"
+        ? [
+            `${title}: spannende Fakten, einfach erklärt – mit Antworten auf häufige Fragen. Entdecke mehr in der Panda Toolbox.`,
+            `${title}: spannende Fakten, einfach erklärt – mit Antworten auf häufige Fragen.`,
+          ]
+        : [`${title}: ${pitch}. Verständlich erklärt in der Panda Toolbox.`, `${title}: ${pitch}.`];
+  candidates.push(`${title} – ${ctx.groupTitle ? `${ctx.groupTitle}-Ratgeber` : "Ratgeber"} mit Tipps und FAQ in der Panda Toolbox.`);
+  return fit(candidates, DESCRIPTION_MAX, DESCRIPTION_MIN);
 }
 
 /** Ankertexte, über die andere Seiten automatisch hierher verlinken. */
-export function autoLinkAnchors(page: PageNode): string[] {
+export function autoLinkAnchors(page: { title: string; label?: string | null }): string[] {
   const set = new Set<string>([page.title]);
-  if (page.label !== page.title && page.label.length > 6 && !/^(faq|tipps|tickets|preise|hotels)/i.test(page.label)) {
-    set.add(page.label);
+  const label = page.label?.trim();
+  if (label && label !== page.title && label.length > 6 && !/^(faq|tipps|tickets|preise|hotels|prompts)\b/i.test(label)) {
+    set.add(label);
   }
   return [...set];
 }
 
-/**
- * Verwandte Seiten aus der Hierarchie: zuerst Nachbarseiten im selben Unterthema,
- * dann thematisch passende Seiten aus anderen Kategorien (gleiche Schlüsselwörter im Titel).
- */
-export function autoRelatedIds(categorySlug: string, groupSlug: string, pageSlug: string, limit = 4): string[] {
-  const nodes = allPageNodes();
-  const self = nodes.find((n) => n.category.slug === categorySlug && n.group.slug === groupSlug && n.page.slug === pageSlug);
-  if (!self) return [];
-  const siblings = nodes.filter((n) => n.category.slug === categorySlug && n.group.slug === groupSlug && n.id !== self.id);
-
-  const words = slugify(self.page.title)
-    .split("-")
-    .filter((w) => w.length > 4 && !GENERIC_WORDS.has(w));
-  const crossLinks = nodes
-    .filter((n) => n.category.slug !== categorySlug)
-    .map((n) => ({ n, hits: words.filter((w) => n.id.includes(w)).length }))
-    .filter((x) => x.hits > 0)
-    .sort((a, b) => b.hits - a.hits)
-    .map((x) => x.n);
-
-  return [...siblings.slice(0, Math.max(2, limit - crossLinks.length)), ...crossLinks]
-    .slice(0, limit)
-    .map((n) => n.id);
+/** URL aus Kategorie, Unterthema und Seite: /tiere/hunde/gesundes-hundefutter */
+export function buildPath(categorySlug: string, groupSlug: string, pageSlugOrTitle: string) {
+  return `/${categorySlug}/${groupSlug}/${slugify(pageSlugOrTitle)}`;
 }
 
-/** Zu allgemeine Wörter erzeugen keine Querverweise zwischen Kategorien. */
-const GENERIC_WORDS = new Set([
-  "kostenlose", "kostenlos", "beste", "besten", "tipps", "ratgeber", "vergleich", "planen", "tickets", "hotels",
-  "preise", "anleitung", "einsteiger", "naehe", "fuer", "alltag", "faq", "standorte", "kindern",
-  "europa", "oesterreich", "deutschland",
-]);
-
-/** Affiliate-Produkte, die laut Register zum Unterthema oder zur Kategorie passen (max. 3). */
-export function autoProducts(categorySlug: string, groupSlug: string, limit = 3): string[] {
-  const exact = affiliateProducts.filter((p) => p.topics.includes(`${categorySlug}/${groupSlug}`));
-  const broad = affiliateProducts.filter((p) => !exact.includes(p) && p.topics.includes(categorySlug));
-  return [...exact, ...broad].slice(0, limit).map((p) => p.id);
-}
-
-/** Findet Landingpages in der Hierarchie anhand eines eingegebenen Titels. */
-export function findPageNodes(query: string) {
-  const q = slugify(query);
-  if (!q) return [];
-  const nodes = allPageNodes();
-  const exact = nodes.filter((n) => slugify(n.page.title) === q || slugify(n.page.label) === q || n.id === query.trim());
-  if (exact.length) return exact;
-  return nodes.filter((n) => slugify(n.page.title).includes(q) || n.id.includes(q)).slice(0, 12);
+/** Breadcrumb-Text, wie er im Admin als Vorschau erscheint. */
+export function breadcrumbText(categoryTitle: string, groupTitle: string, label: string) {
+  return ["Start", categoryTitle, groupTitle, label].join(" › ");
 }

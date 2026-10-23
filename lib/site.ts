@@ -25,9 +25,8 @@ export function absoluteUrl(path: string) {
 }
 
 /**
- * Spendenbox "Panda GreenCore" – erscheint auf jeder Landingpage (abschaltbar per Frontmatter `donation: false`).
- * Zweck und Link bitte hier eintragen. Solange sie fehlen, warnt die Prüfung,
- * und im Release-Modus wird die Veröffentlichung blockiert.
+ * Startwerte für die Panda-GreenCore-Box beim Erstimport (npm run seed).
+ * Danach werden Texte, Zweck und Spendenlink im Admin unter „Website-Einstellungen“ gepflegt.
  */
 export const donationConfig = {
   name: "Panda GreenCore",
@@ -37,7 +36,7 @@ export const donationConfig = {
   purpose: "",
   /** Kurzer Hinweis, der automatisch auf jeder Landingpage erscheint. */
   notice: "Diese Seite ist Teil der Panda Toolbox. Mit Panda GreenCore wächst hier ein eigenes Projekt, das du freiwillig unterstützen kannst.",
-  url: process.env.NEXT_PUBLIC_DONATION_URL?.trim() || "",
+  url: "",
   aboutHref: "/panda-branding/greencore",
 };
 

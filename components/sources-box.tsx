@@ -1,6 +1,6 @@
 import { BookCheck } from "lucide-react";
 
-import type { Page } from "@/lib/content";
+import type { Page } from "@/lib/cms";
 import { formatDate, toIsoDate } from "@/lib/utils";
 
 /** Quellenangaben + Stand des Artikels. Macht nachvollziehbar, worauf Aussagen beruhen. */

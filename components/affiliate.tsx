@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ExternalLink, Info } from "lucide-react";
 
-import { AFFILIATE_REL, getAffiliate, type AffiliateProduct } from "@/lib/affiliate";
+import { AFFILIATE_REL } from "@/lib/affiliate";
+import type { AffiliateItem } from "@/lib/cms";
 
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -23,9 +24,8 @@ export function AffiliateDisclosure() {
   );
 }
 
-/** Produktbox am Artikelende – Produkte kommen aus dem Affiliate-Register. */
-export function AffiliateBox({ ids, title = "Passende Helfer" }: { ids: string[]; title?: string }) {
-  const products = ids.map(getAffiliate).filter((p): p is AffiliateProduct => Boolean(p));
+/** Affiliate-Bereich – nur auf Money Pages; Produkte kommen aus dem CMS. */
+export function AffiliateBox({ products, title = "Passende Empfehlungen" }: { products: AffiliateItem[]; title?: string }) {
   if (!products.length) return null;
 
   return (
@@ -38,8 +38,8 @@ export function AffiliateBox({ ids, title = "Passende Helfer" }: { ids: string[]
       </div>
       <ul className="grid gap-4 sm:grid-cols-2">
         {products.map((p) => (
-          <li key={p.id} className="flex flex-col gap-2 rounded-lg border bg-background/50 p-4">
-            <span className="text-xs uppercase tracking-wider text-muted-foreground">{p.category}</span>
+          <li key={p.key} className="flex flex-col gap-2 rounded-lg border bg-background/50 p-4">
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">{p.label}</span>
             <span className="font-medium">{p.name}</span>
             <p className="text-sm text-muted-foreground">{p.pitch}</p>
             <Button asChild variant="outline" size="sm" className="mt-auto w-fit">

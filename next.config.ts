@@ -1,3 +1,4 @@
+import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
 
 const securityHeaders = [
@@ -25,4 +26,5 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// withPayload bindet das Admin-Backend (/admin) und die API (/api) ein.
+export default withPayload(nextConfig, { devBundleServerPackages: false });

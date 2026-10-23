@@ -1,29 +1,29 @@
 # Panda Toolbox (FlauschiPandas) – Seiten-Hierarchie
 
-15 Hauptkategorien · 96 Unterthemen · 387 Landingpages · 12 live
+15 Hauptkategorien · 96 Unterthemen · 387 Landingpages · 14 mit Inhalt
 
-Hauptkategorie → Unterthema → Landingpage. ● = live, ○ = geplant. Quelle: `lib/hierarchy.ts` · neu erzeugen mit `npm run struktur`
+Hauptkategorie → Unterthema → Landingpage. ● = Inhalt vorhanden, ○ = geplant · 💰 Money Page · 📈 Traffic Page
 
-Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Panda GreenCore
+Startstruktur für den CMS-Import (`npm run seed`). Danach wird alles im Admin unter /admin gepflegt.
 
 ```
 1 Tiere  (/tiere)
 ├── Hunde  (/tiere/hunde)
-│   ├── ● Gesundes Hundefutter  /tiere/hunde/gesundes-hundefutter
+│   ├── ● Gesundes Hundefutter 💰  /tiere/hunde/gesundes-hundefutter
 │   ├── ○ Welpenfutter  /tiere/hunde/welpenfutter
 │   ├── ○ Trockenfutter für Hunde  /tiere/hunde/trockenfutter
 │   ├── ○ Nassfutter für Hunde  /tiere/hunde/nassfutter
 │   ├── ○ Hundespielzeug  /tiere/hunde/hundespielzeug
-│   ├── ○ Hundebetten  /tiere/hunde/hundebetten
-│   ├── ○ Hundeversicherung  /tiere/hunde/hundeversicherung
+│   ├── ○ Hundebetten 💰  /tiere/hunde/hundebetten
+│   ├── ○ Hundeversicherung 💰  /tiere/hunde/hundeversicherung
 │   ├── ○ Hundetraining  /tiere/hunde/hundetraining
 │   ├── ○ Hundepflege  /tiere/hunde/hundepflege
 │   └── ○ Hunde-FAQ  /tiere/hunde/faq
 ├── Katzen  (/tiere/katzen)
-│   ├── ○ Gesundes Katzenfutter  /tiere/katzen/gesundes-katzenfutter
+│   ├── ○ Gesundes Katzenfutter 💰  /tiere/katzen/gesundes-katzenfutter
 │   ├── ○ Kittenfutter  /tiere/katzen/kittenfutter
-│   ├── ○ Trockenfutter für Katzen  /tiere/katzen/trockenfutter
-│   ├── ○ Nassfutter für Katzen  /tiere/katzen/nassfutter
+│   ├── ○ Trockenfutter für Katzen 💰  /tiere/katzen/trockenfutter
+│   ├── ○ Nassfutter für Katzen 💰  /tiere/katzen/nassfutter
 │   ├── ○ Katzenspielzeug  /tiere/katzen/katzenspielzeug
 │   ├── ○ Kratzbaum  /tiere/katzen/kratzbaum
 │   ├── ○ Katzenklo  /tiere/katzen/katzenklo
@@ -58,28 +58,28 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 │   ├── ○ Meerschweinchenpflege  /tiere/meerschweinchen/meerschweinchenpflege
 │   └── ○ Meerschweinchen-FAQ  /tiere/meerschweinchen/faq
 ├── Pandas  (/tiere/pandas)
-│   ├── ○ Panda Steckbrief  /tiere/pandas/steckbrief
+│   ├── ○ Panda Steckbrief 📈  /tiere/pandas/steckbrief
 │   ├── ○ Lebensraum der Pandas  /tiere/pandas/lebensraum
 │   ├── ○ Was fressen Pandas?  /tiere/pandas/ernaehrung
-│   ├── ○ Panda-Fakten für Kinder  /tiere/pandas/fakten-fuer-kinder
+│   ├── ○ Panda-Fakten für Kinder 📈  /tiere/pandas/fakten-fuer-kinder
 │   └── ○ Wo kann man Pandas sehen?  /tiere/pandas/wo-sehen
 ├── Wölfe  (/tiere/woelfe)
-│   ├── ○ Wolf Steckbrief  /tiere/woelfe/steckbrief
+│   ├── ○ Wolf Steckbrief 📈  /tiere/woelfe/steckbrief
 │   ├── ○ Lebensraum der Wölfe  /tiere/woelfe/lebensraum
 │   ├── ○ Was fressen Wölfe?  /tiere/woelfe/ernaehrung
-│   ├── ○ Wolf-Fakten für Kinder  /tiere/woelfe/fakten-fuer-kinder
+│   ├── ○ Wolf-Fakten für Kinder 📈  /tiere/woelfe/fakten-fuer-kinder
 │   └── ○ Wo kann man Wölfe sehen?  /tiere/woelfe/wo-sehen
 ├── Füchse  (/tiere/fuechse)
-│   ├── ○ Fuchs Steckbrief  /tiere/fuechse/steckbrief
+│   ├── ○ Fuchs Steckbrief 📈  /tiere/fuechse/steckbrief
 │   ├── ○ Lebensraum der Füchse  /tiere/fuechse/lebensraum
 │   ├── ○ Was fressen Füchse?  /tiere/fuechse/ernaehrung
-│   ├── ○ Fuchs-Fakten für Kinder  /tiere/fuechse/fakten-fuer-kinder
+│   ├── ○ Fuchs-Fakten für Kinder 📈  /tiere/fuechse/fakten-fuer-kinder
 │   └── ○ Wo kann man Füchse sehen?  /tiere/fuechse/wo-sehen
 ├── Pinguine  (/tiere/pinguine)
-│   ├── ○ Pinguin Steckbrief  /tiere/pinguine/steckbrief
+│   ├── ○ Pinguin Steckbrief 📈  /tiere/pinguine/steckbrief
 │   ├── ○ Lebensraum der Pinguine  /tiere/pinguine/lebensraum
 │   ├── ○ Was fressen Pinguine?  /tiere/pinguine/ernaehrung
-│   ├── ○ Pinguin-Fakten für Kinder  /tiere/pinguine/fakten-fuer-kinder
+│   ├── ○ Pinguin-Fakten für Kinder 📈  /tiere/pinguine/fakten-fuer-kinder
 │   └── ○ Wo kann man Pinguine sehen?  /tiere/pinguine/wo-sehen
 ├── Tierwissen & Pflege  (/tiere/tierwissen)
 │   ├── ○ Haustier anschaffen  /tiere/tierwissen/haustier-anschaffen
@@ -87,11 +87,11 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 │   ├── ○ Tierversicherungen im Vergleich  /tiere/tierwissen/tierversicherungen-im-vergleich
 │   └── ○ Giftige Lebensmittel für Haustiere  /tiere/tierwissen/giftige-lebensmittel-fuer-haustiere
 ├── Tier-Malvorlagen  (/tiere/tier-malvorlagen)
-│   ├── ○ Hunde-Malvorlagen  /tiere/tier-malvorlagen/hunde-malvorlagen
-│   ├── ○ Katzen-Malvorlagen  /tiere/tier-malvorlagen/katzen-malvorlagen
-│   ├── ○ Pferde-Malvorlagen  /tiere/tier-malvorlagen/pferde-malvorlagen
-│   ├── ○ Wildtier-Malvorlagen  /tiere/tier-malvorlagen/wildtier-malvorlagen
-│   └── ○ Zootier-Malvorlagen  /tiere/tier-malvorlagen/zootier-malvorlagen
+│   ├── ○ Hunde-Malvorlagen 📈  /tiere/tier-malvorlagen/hunde-malvorlagen
+│   ├── ○ Katzen-Malvorlagen 📈  /tiere/tier-malvorlagen/katzen-malvorlagen
+│   ├── ○ Pferde-Malvorlagen 📈  /tiere/tier-malvorlagen/pferde-malvorlagen
+│   ├── ○ Wildtier-Malvorlagen 📈  /tiere/tier-malvorlagen/wildtier-malvorlagen
+│   └── ○ Zootier-Malvorlagen 📈  /tiere/tier-malvorlagen/zootier-malvorlagen
 └── Tier-KI-Prompts  (/tiere/tier-ki-prompts)
     ├── ○ Tierbilder mit KI  /tiere/tier-ki-prompts/tierbilder-mit-ki
     ├── ○ Hunde-Prompts  /tiere/tier-ki-prompts/hunde-prompts
@@ -111,7 +111,7 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 │   ├── ○ Beikost-Start  /babys-kinder/baby-tipps/beikost-start
 │   └── ○ Babys erste Reise  /babys-kinder/baby-tipps/babys-erste-reise
 ├── Malvorlagen & Lernen  (/babys-kinder/lernen)
-│   ├── ○ Kinder-Malvorlagen  /babys-kinder/lernen/kinder-malvorlagen
+│   ├── ○ Kinder-Malvorlagen 📈  /babys-kinder/lernen/kinder-malvorlagen
 │   ├── ○ Lernkarten  /babys-kinder/lernen/lernkarten
 │   ├── ○ Glow-Kinderdesigns  /babys-kinder/lernen/glow-kinderdesigns
 │   └── ○ Lernmaterialien  /babys-kinder/lernen/lernmaterialien
@@ -174,10 +174,10 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 │   └── ○ Schlafzimmer optimieren  /gesundheit-wohlbefinden/schlaf/schlafzimmer-optimieren
 ├── Achtsamkeit & Motivation  (/gesundheit-wohlbefinden/achtsamkeit)
 │   ├── ○ Stress reduzieren  /gesundheit-wohlbefinden/achtsamkeit/stress-reduzieren
-│   ├── ○ Achtsamkeit lernen  /gesundheit-wohlbefinden/achtsamkeit/achtsamkeit-lernen
-│   ├── ○ Meditation für Einsteiger  /gesundheit-wohlbefinden/achtsamkeit/meditation-fuer-einsteiger
-│   ├── ○ Positive Routinen  /gesundheit-wohlbefinden/achtsamkeit/positive-routinen
-│   ├── ○ Motivation finden  /gesundheit-wohlbefinden/achtsamkeit/motivation-finden
+│   ├── ○ Achtsamkeit lernen 📈  /gesundheit-wohlbefinden/achtsamkeit/achtsamkeit-lernen
+│   ├── ○ Meditation für Einsteiger 📈  /gesundheit-wohlbefinden/achtsamkeit/meditation-fuer-einsteiger
+│   ├── ○ Positive Routinen 📈  /gesundheit-wohlbefinden/achtsamkeit/positive-routinen
+│   ├── ○ Motivation finden 📈  /gesundheit-wohlbefinden/achtsamkeit/motivation-finden
 │   └── ○ Spiritualität im Alltag  /gesundheit-wohlbefinden/achtsamkeit/spiritualitaet-im-alltag
 └── Gesundheit im Alltag  (/gesundheit-wohlbefinden/alltag)
     ├── ○ Hausapotheke  /gesundheit-wohlbefinden/alltag/hausapotheke
@@ -187,7 +187,7 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 
 5 KI-Tools & Prompts  (/ki)
 ├── ChatGPT  (/ki/chatgpt)
-│   ├── ● ChatGPT Prompts  /ki/chatgpt/prompts
+│   ├── ● ChatGPT Prompts 💰  /ki/chatgpt/prompts
 │   ├── ○ ChatGPT für SEO  /ki/chatgpt/seo
 │   ├── ○ ChatGPT für YouTube  /ki/chatgpt/youtube
 │   ├── ○ ChatGPT fürs Bloggen  /ki/chatgpt/blogging
@@ -200,14 +200,14 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 │   ├── ○ Gemini Prompts  /ki/gemini/prompts
 │   └── ○ Gemini im Alltag  /ki/gemini/alltag
 ├── KI-Bildgeneratoren  (/ki/bildgeneratoren)
-│   ├── ○ Bildgeneratoren im Vergleich  /ki/bildgeneratoren/bildgeneratoren-im-vergleich
+│   ├── ○ Bildgeneratoren im Vergleich 💰  /ki/bildgeneratoren/bildgeneratoren-im-vergleich
 │   └── ○ Glow-Bilder erstellen  /ki/bildgeneratoren/glow-bilder-erstellen
 ├── KI-Basics  (/ki/ki-basics)
-│   ├── ○ Was ist KI?  /ki/ki-basics/was-ist-ki
-│   ├── ○ KI-Fehler vermeiden  /ki/ki-basics/ki-fehler-vermeiden
-│   ├── ○ KI-Workflows  /ki/ki-basics/ki-workflows
-│   ├── ○ KI-Automatisierung  /ki/ki-basics/ki-automatisierung
-│   └── ○ KI und Datenschutz  /ki/ki-basics/ki-und-datenschutz
+│   ├── ○ Was ist KI? 📈  /ki/ki-basics/was-ist-ki
+│   ├── ○ KI-Fehler vermeiden 📈  /ki/ki-basics/ki-fehler-vermeiden
+│   ├── ○ KI-Workflows 📈  /ki/ki-basics/ki-workflows
+│   ├── ○ KI-Automatisierung 📈  /ki/ki-basics/ki-automatisierung
+│   └── ○ KI und Datenschutz 📈  /ki/ki-basics/ki-und-datenschutz
 └── Prompts  (/ki/prompts)
     ├── ○ Bild-Prompts  /ki/prompts/bild-prompts
     ├── ○ Business-Prompts  /ki/prompts/business-prompts
@@ -241,8 +241,8 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 
 7 Tools & Apps  (/tools-apps)
 ├── Canva-Alternativen  (/tools-apps/canva-alternativen)
-│   ├── ○ Kostenlose Canva-Alternativen  /tools-apps/canva-alternativen/kostenlose-canva-alternativen
-│   ├── ○ Canva-Alternativen im Vergleich  /tools-apps/canva-alternativen/canva-alternativen-im-vergleich
+│   ├── ○ Kostenlose Canva-Alternativen 💰  /tools-apps/canva-alternativen/kostenlose-canva-alternativen
+│   ├── ○ Canva-Alternativen im Vergleich 💰  /tools-apps/canva-alternativen/canva-alternativen-im-vergleich
 │   ├── ○ Design-Tools für Einsteiger  /tools-apps/canva-alternativen/design-tools-fuer-einsteiger
 │   └── ○ Glow-Plugins  /tools-apps/canva-alternativen/glow-plugins
 ├── YouTube-Tools  (/tools-apps/youtube-tools)
@@ -250,8 +250,8 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 │   ├── ○ Thumbnail-Tools  /tools-apps/youtube-tools/thumbnail-tools
 │   └── ○ Tools für YouTube-Shorts  /tools-apps/youtube-tools/tools-fuer-youtube-shorts
 ├── Keyword-Tools  (/tools-apps/keyword-tools)
-│   ├── ○ Kostenlose Keyword-Tools  /tools-apps/keyword-tools/kostenlose-keyword-tools
-│   ├── ○ Keyword-Tools im Vergleich  /tools-apps/keyword-tools/keyword-tools-im-vergleich
+│   ├── ○ Kostenlose Keyword-Tools 💰  /tools-apps/keyword-tools/kostenlose-keyword-tools
+│   ├── ○ Keyword-Tools im Vergleich 💰  /tools-apps/keyword-tools/keyword-tools-im-vergleich
 │   ├── ○ Keyword-Recherche Anleitung  /tools-apps/keyword-tools/keyword-recherche-anleitung
 │   └── ○ Keyword-Tools für YouTube  /tools-apps/keyword-tools/keyword-tools-fuer-youtube
 ├── Online-Rechner  (/tools-apps/rechner)
@@ -305,11 +305,11 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 ├── Budget  (/finanzen-sparen/budget)
 │   ├── ○ Haushaltsbudget erstellen  /finanzen-sparen/budget/haushaltsbudget-erstellen
 │   ├── ○ Budget-Methoden  /finanzen-sparen/budget/budget-methoden
-│   └── ○ Budget-Apps  /finanzen-sparen/budget/budget-apps
+│   └── ○ Budget-Apps 💰  /finanzen-sparen/budget/budget-apps
 ├── Finanz-Basics  (/finanzen-sparen/finanz-basics)
 │   ├── ○ Notgroschen  /finanzen-sparen/finanz-basics/notgroschen
 │   ├── ○ Schulden vermeiden  /finanzen-sparen/finanz-basics/schulden-vermeiden
-│   ├── ○ Girokonto vergleichen  /finanzen-sparen/finanz-basics/girokonto-vergleichen
+│   ├── ○ Girokonto vergleichen 💰  /finanzen-sparen/finanz-basics/girokonto-vergleichen
 │   └── ○ Versicherungen verstehen  /finanzen-sparen/finanz-basics/versicherungen-verstehen
 ├── Geld verdienen online  (/finanzen-sparen/online-verdienen)
 │   ├── ○ Nebenverdienst online  /finanzen-sparen/online-verdienen/nebenverdienst-online
@@ -321,41 +321,41 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 
 10 Zoos & Aquarien  (/zoos)
 ├── Zoo Berlin  (/zoos/zoo-berlin)
-│   ├── ○ Zoo Berlin Tickets  /zoos/zoo-berlin/tickets
+│   ├── ○ Zoo Berlin Tickets 💰  /zoos/zoo-berlin/tickets
 │   ├── ○ Zoo Berlin Preise  /zoos/zoo-berlin/preise
 │   ├── ○ Zoo Berlin Öffnungszeiten  /zoos/zoo-berlin/oeffnungszeiten
 │   ├── ○ Pandas im Zoo Berlin  /zoos/zoo-berlin/pandas
 │   ├── ○ Aquarium Zoo Berlin  /zoos/zoo-berlin/aquarium
-│   ├── ○ Hotels in der Nähe vom Zoo Berlin  /zoos/zoo-berlin/hotels
+│   ├── ○ Hotels in der Nähe vom Zoo Berlin 💰  /zoos/zoo-berlin/hotels
 │   └── ○ Zoo Berlin Tipps  /zoos/zoo-berlin/tipps
 ├── Tiergarten Schönbrunn  (/zoos/tiergarten-schoenbrunn)
 │   ├── ○ Tiergarten Schönbrunn Tickets  /zoos/tiergarten-schoenbrunn/tickets
 │   ├── ○ Tiergarten Schönbrunn Preise  /zoos/tiergarten-schoenbrunn/preise
 │   ├── ○ Tiergarten Schönbrunn Öffnungszeiten  /zoos/tiergarten-schoenbrunn/oeffnungszeiten
 │   ├── ○ Pandas im Tiergarten Schönbrunn  /zoos/tiergarten-schoenbrunn/pandas
-│   ├── ○ Hotels in der Nähe vom Tiergarten Schönbrunn  /zoos/tiergarten-schoenbrunn/hotels
+│   ├── ○ Hotels in der Nähe vom Tiergarten Schönbrunn 💰  /zoos/tiergarten-schoenbrunn/hotels
 │   └── ○ Tiergarten Schönbrunn Tipps  /zoos/tiergarten-schoenbrunn/tipps
 ├── Tierpark Hellabrunn  (/zoos/tierpark-hellabrunn)
 │   ├── ○ Tierpark Hellabrunn Tickets  /zoos/tierpark-hellabrunn/tickets
 │   ├── ○ Tierpark Hellabrunn Preise  /zoos/tierpark-hellabrunn/preise
 │   ├── ○ Tierpark Hellabrunn Öffnungszeiten  /zoos/tierpark-hellabrunn/oeffnungszeiten
-│   ├── ○ Hotels in der Nähe vom Tierpark Hellabrunn  /zoos/tierpark-hellabrunn/hotels
+│   ├── ○ Hotels in der Nähe vom Tierpark Hellabrunn 💰  /zoos/tierpark-hellabrunn/hotels
 │   └── ○ Tierpark Hellabrunn Tipps  /zoos/tierpark-hellabrunn/tipps
 ├── Zoo Leipzig  (/zoos/zoo-leipzig)
 │   ├── ○ Zoo Leipzig Tickets  /zoos/zoo-leipzig/tickets
 │   ├── ○ Zoo Leipzig Preise  /zoos/zoo-leipzig/preise
 │   ├── ○ Zoo Leipzig Öffnungszeiten  /zoos/zoo-leipzig/oeffnungszeiten
-│   ├── ○ Hotels in der Nähe vom Zoo Leipzig  /zoos/zoo-leipzig/hotels
+│   ├── ○ Hotels in der Nähe vom Zoo Leipzig 💰  /zoos/zoo-leipzig/hotels
 │   └── ○ Zoo Leipzig Tipps  /zoos/zoo-leipzig/tipps
 ├── Zoo Zürich  (/zoos/zoo-zuerich)
 │   ├── ○ Zoo Zürich Tickets  /zoos/zoo-zuerich/tickets
 │   ├── ○ Zoo Zürich Preise  /zoos/zoo-zuerich/preise
 │   ├── ○ Zoo Zürich Öffnungszeiten  /zoos/zoo-zuerich/oeffnungszeiten
-│   ├── ○ Hotels in der Nähe vom Zoo Zürich  /zoos/zoo-zuerich/hotels
+│   ├── ○ Hotels in der Nähe vom Zoo Zürich 💰  /zoos/zoo-zuerich/hotels
 │   └── ○ Zoo Zürich Tipps  /zoos/zoo-zuerich/tipps
 ├── SEA LIFE  (/zoos/sea-life)
 │   ├── ○ SEA LIFE Tickets  /zoos/sea-life/tickets
-│   ├── ○ Hotels in der Nähe von SEA LIFE  /zoos/sea-life/hotels
+│   ├── ○ Hotels in der Nähe von SEA LIFE 💰  /zoos/sea-life/hotels
 │   ├── ○ SEA LIFE Standorte  /zoos/sea-life/standorte
 │   ├── ○ SEA LIFE mit Kindern  /zoos/sea-life/mit-kindern
 │   └── ○ SEA LIFE Tipps  /zoos/sea-life/tipps
@@ -367,13 +367,13 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 
 11 Freizeitparks  (/freizeitparks)
 ├── Europa-Park  (/freizeitparks/europa-park)
-│   ├── ○ Europa-Park Tickets  /freizeitparks/europa-park/tickets
+│   ├── ○ Europa-Park Tickets 💰  /freizeitparks/europa-park/tickets
 │   ├── ○ Europa-Park Hotels  /freizeitparks/europa-park/hotels
 │   ├── ○ Achterbahnen im Europa-Park  /freizeitparks/europa-park/achterbahnen
 │   ├── ○ Europa-Park mit Kindern  /freizeitparks/europa-park/mit-kindern
 │   └── ○ Europa-Park Tipps  /freizeitparks/europa-park/tipps
 ├── Phantasialand  (/freizeitparks/phantasialand)
-│   ├── ○ Phantasialand Tickets  /freizeitparks/phantasialand/tickets
+│   ├── ○ Phantasialand Tickets 💰  /freizeitparks/phantasialand/tickets
 │   ├── ○ Phantasialand Hotels  /freizeitparks/phantasialand/hotels
 │   ├── ○ Achterbahnen im Phantasialand  /freizeitparks/phantasialand/achterbahnen
 │   ├── ○ Phantasialand mit Kindern  /freizeitparks/phantasialand/mit-kindern
@@ -411,7 +411,7 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 │   └── ○ Urlaub in den Bergen  /urlaub-reisen/urlaubsziele/urlaub-in-den-bergen
 ├── Familienurlaub  (/urlaub-reisen/familienurlaub)
 │   ├── ○ Familienurlaub planen  /urlaub-reisen/familienurlaub/familienurlaub-planen
-│   ├── ○ Familienhotels  /urlaub-reisen/familienurlaub/familienhotels
+│   ├── ○ Familienhotels 💰  /urlaub-reisen/familienurlaub/familienhotels
 │   ├── ○ Urlaub mit Baby  /urlaub-reisen/familienurlaub/urlaub-mit-baby
 │   └── ○ Urlaub mit Kleinkind  /urlaub-reisen/familienurlaub/urlaub-mit-kleinkind
 ├── Urlaub mit Hund  (/urlaub-reisen/mit-hund)
@@ -436,12 +436,12 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 │   ├── ○ Neuvorstellungen  /autos-mobilitaet/fahrzeugportraets/neuvorstellungen
 │   └── ○ Klassiker  /autos-mobilitaet/fahrzeugportraets/klassiker
 ├── Marken & Modelle  (/autos-mobilitaet/marken-modelle)
-│   ├── ○ Karosserieformen im Vergleich  /autos-mobilitaet/marken-modelle/karosserieformen-vergleich
+│   ├── ● Karosserieformen im Vergleich  /autos-mobilitaet/marken-modelle/karosserieformen-vergleich
 │   ├── ○ Automarken im Überblick  /autos-mobilitaet/marken-modelle/automarken-im-ueberblick
 │   └── ○ Modellvergleiche  /autos-mobilitaet/marken-modelle/modellvergleiche
 ├── Antriebe  (/autos-mobilitaet/antriebe)
 │   ├── ● Elektro, Hybrid oder Verbrenner  /autos-mobilitaet/antriebe/elektroauto-hybrid-verbrenner-vergleich
-│   ├── ○ Elektroauto zu Hause laden  /autos-mobilitaet/antriebe/elektroauto-zuhause-laden
+│   ├── ● Elektroauto zu Hause laden  /autos-mobilitaet/antriebe/elektroauto-zuhause-laden
 │   ├── ○ Plug-in-Hybrid erklärt  /autos-mobilitaet/antriebe/plug-in-hybrid-erklaert
 │   └── ○ Wasserstoffauto  /autos-mobilitaet/antriebe/wasserstoffauto
 ├── Autotechnik  (/autos-mobilitaet/autotechnik)
@@ -455,9 +455,9 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 │   ├── ○ Auto waschen  /autos-mobilitaet/pflege/auto-waschen
 │   └── ○ Innenraum reinigen  /autos-mobilitaet/pflege/innenraum-reinigen
 ├── Zubehör & Apps  (/autos-mobilitaet/zubehoer)
-│   ├── ● Auto-Gadgets & Apps  /autos-mobilitaet/zubehoer/nuetzliche-auto-gadgets-apps
-│   ├── ○ Dashcams  /autos-mobilitaet/zubehoer/dashcams
-│   ├── ○ Kindersitze  /autos-mobilitaet/zubehoer/kindersitze
+│   ├── ● Auto-Gadgets & Apps 💰  /autos-mobilitaet/zubehoer/nuetzliche-auto-gadgets-apps
+│   ├── ○ Dashcams 💰  /autos-mobilitaet/zubehoer/dashcams
+│   ├── ○ Kindersitze 💰  /autos-mobilitaet/zubehoer/kindersitze
 │   └── ○ Dachboxen  /autos-mobilitaet/zubehoer/dachboxen
 ├── Sparen  (/autos-mobilitaet/sparen)
 │   ├── ● Sprit sparen  /autos-mobilitaet/sparen/spritsparen-tipps
@@ -514,7 +514,7 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 ├── Panda-Designs  (/panda-branding/panda-designs)
 │   ├── ○ Panda-Wallpaper  /panda-branding/panda-designs/panda-wallpaper
 │   ├── ○ Panda-Designs  /panda-branding/panda-designs/panda-designs
-│   ├── ○ Panda-Malvorlagen  /panda-branding/panda-designs/panda-malvorlagen
+│   ├── ○ Panda-Malvorlagen 📈  /panda-branding/panda-designs/panda-malvorlagen
 │   └── ○ Panda-KI-Prompts  /panda-branding/panda-designs/panda-ki-prompts
 └── Downloads  (/panda-branding/downloads)
     ├── ○ Digitale Produkte  /panda-branding/downloads/digitale-produkte

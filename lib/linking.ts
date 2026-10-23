@@ -1,4 +1,4 @@
-import type { Page } from "./content";
+import type { Page } from "./cms";
 
 /**
  * Interne Verlinkung – Regeln
@@ -13,7 +13,7 @@ import type { Page } from "./content";
  * 6. Bei Gleichstand gewinnt die thematisch nähere Seite (gleiches Unterthema > gleiche Kategorie).
  *
  * Zusätzlich verbindet die Hierarchie automatisch: Breadcrumbs, Geschwisterseiten
- * im selben Unterthema und "Weiterlesen" nach thematischer Nähe.
+ * im selben Unterthema und "Weiterlesen" nach thematischer Nähe (Traffic → Money Pages).
  */
 export const MAX_AUTO_LINKS = 5;
 
@@ -45,6 +45,8 @@ export function affinity(a: Page, b: Page) {
   if (a.category.slug === b.category.slug && a.group.slug === b.group.slug) score += 3;
   score += a.tags.filter((t) => b.tags.includes(t)).length;
   if (a.related.includes(b.id)) score += 4;
+  // Traffic Pages führen Besucher bevorzugt zu Money Pages derselben Kategorie
+  if (a.pageType === "traffic" && b.pageType === "money" && a.category.slug === b.category.slug) score += 2;
   return score;
 }
 

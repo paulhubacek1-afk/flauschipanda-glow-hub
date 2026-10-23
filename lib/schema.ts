@@ -1,4 +1,4 @@
-import type { Page } from "./content";
+import type { Page } from "./cms";
 import { absoluteUrl, siteConfig } from "./site";
 
 /** Strukturierte Daten (schema.org) als JSON-LD. */
