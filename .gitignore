@@ -8,3 +8,5 @@ next-env.d.ts
 .DS_Store
 media/
 payload-types.ts.bak
+.vercel
+.env*

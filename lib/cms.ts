@@ -4,7 +4,7 @@
  */
 import config from "@payload-config";
 import { convertLexicalToHTML } from "@payloadcms/richtext-lexical/html";
-import { getPayload } from "payload";
+import { getPayload, type Where } from "payload";
 import { cache } from "react";
 
 import { lexicalToPlainText } from "@/cms/lexical-text";
@@ -141,7 +141,7 @@ export const getPayloadClient = cache(async () => getPayload({ config }));
 
 const idOf = (v: unknown) => (v && typeof v === "object" ? (v as Doc).id : v) as string | number;
 
-const liveWhere = (now: Date) => ({
+const liveWhere = (now: Date): Where => ({
   and: [
     { _status: { equals: "published" } },
     { or: [{ publishedAt: { exists: false } }, { publishedAt: { less_than_equal: now.toISOString() } }] },

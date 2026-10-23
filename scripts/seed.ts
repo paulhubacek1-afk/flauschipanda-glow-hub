@@ -12,7 +12,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import matter from "gray-matter";
-import { getPayload } from "payload";
+import { getPayload, type RequiredDataFromCollectionSlug } from "payload";
 
 import config from "../payload.config";
 import { affiliateProducts } from "../lib/affiliate";
@@ -33,7 +33,7 @@ async function findOne(collection: "categories" | "groups" | "pages" | "affiliat
 }
 
 /* ---------------- Kategorien ---------------- */
-const categoryIds = new Map<string, string | number>();
+const categoryIds = new Map<string, number>();
 for (const [i, c] of hierarchy.entries()) {
   let doc = await findOne("categories", { slug: { equals: c.slug } });
   if (!doc) {
@@ -48,7 +48,7 @@ for (const [i, c] of hierarchy.entries()) {
 }
 
 /* ---------------- Unterthemen ---------------- */
-const groupIds = new Map<string, string | number>();
+const groupIds = new Map<string, number>();
 for (const c of hierarchy) {
   for (const [j, g] of c.groups.entries()) {
     const groupPath = `/${c.slug}/${g.slug}`;
@@ -56,7 +56,7 @@ for (const c of hierarchy) {
     if (!doc) {
       doc = await payload.create({
         collection: "groups",
-        data: { title: g.title, slug: g.slug, category: categoryIds.get(c.slug), description: g.description, order: (j + 1) * 10 },
+        data: { title: g.title, slug: g.slug, category: categoryIds.get(c.slug)!, description: g.description, order: (j + 1) * 10 },
         context,
       });
       stats.groups++;
@@ -66,7 +66,7 @@ for (const c of hierarchy) {
 }
 
 /* ---------------- Affiliate-Produkte ---------------- */
-const affiliateIds = new Map<string, string | number>();
+const affiliateIds = new Map<string, number>();
 for (const p of affiliateProducts) {
   let doc = await findOne("affiliates", { key: { equals: p.id } });
   if (!doc) {
@@ -93,7 +93,7 @@ for (const p of affiliateProducts) {
         topics,
         active: true,
         placeholder: Boolean(p.placeholder),
-      } as Doc,
+      } as RequiredDataFromCollectionSlug<"affiliates">,
       context,
     });
     stats.affiliates++;
@@ -104,7 +104,7 @@ for (const p of affiliateProducts) {
 /* ---------------- Seiten ---------------- */
 const contentDir = path.join(process.cwd(), "content");
 const relatedQueue: { id: string | number; related: string[] }[] = [];
-const pageIds = new Map<string, string | number>();
+const pageIds = new Map<string, number>();
 
 for (const n of allPageNodes()) {
   const pagePath = `/${n.id}`;
@@ -175,7 +175,7 @@ for (const n of allPageNodes()) {
         notes: fm.factCheck?.notes,
       },
       reviewIntervalMonths: fm.reviewIntervalMonths ?? 12,
-    } as Doc,
+    } as RequiredDataFromCollectionSlug<"pages">,
   });
   pageIds.set(n.id, doc.id);
   if (fm.related?.length) relatedQueue.push({ id: doc.id, related: fm.related });

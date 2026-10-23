@@ -66,7 +66,7 @@ const rehypeLinks: Plugin<[LinkOptions], HastRoot> = (opts) => (tree) => {
       if (product) {
         node.properties = {
           href: product.url,
-          rel: AFFILIATE_REL,
+          rel: AFFILIATE_REL.split(" "),
           target: "_blank",
           title: "Affiliate-Link – wir erhalten ggf. eine Provision",
           dataAffiliate: "true",
@@ -76,7 +76,7 @@ const rehypeLinks: Plugin<[LinkOptions], HastRoot> = (opts) => (tree) => {
       return;
     }
     if (/^https?:\/\//.test(href)) {
-      node.properties = { ...node.properties, rel: "noopener noreferrer", target: "_blank" };
+      node.properties = { ...node.properties, rel: ["noopener", "noreferrer"], target: "_blank" };
       return;
     }
     if (href.startsWith("/")) opts.manualInternal.add(href.replace(/[#?].*$/, "").replace(/\/$/, ""));
