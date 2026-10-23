@@ -14,7 +14,7 @@ export function DonationBox({ greencore }: { greencore: SiteSettingsData["greenc
       aria-labelledby="spende"
       className="relative overflow-hidden rounded-xl border border-success/30 bg-gradient-to-br from-success/10 via-card/80 to-card p-6"
     >
-      <PandaLogo className="absolute -right-4 -top-4 size-28 opacity-15" />
+      <PandaLogo className="absolute -right-6 -top-6 size-36 opacity-20 drop-shadow-none" sizes="144px" />
       <div className="relative space-y-3">
         <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-success">
           <HeartHandshake className="size-4" aria-hidden="true" /> {name}

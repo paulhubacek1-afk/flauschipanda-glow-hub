@@ -29,13 +29,13 @@ export function Cover({
       )}
       style={{
         background: `radial-gradient(120% 90% at 80% 0%, oklch(0.55 0.13 ${hue} / 0.45), transparent 60%),
-                     radial-gradient(90% 80% at 0% 100%, oklch(0.45 0.12 ${(hue + 40) % 360} / 0.35), transparent 60%),
-                     oklch(0.17 0.03 235)`,
+                     radial-gradient(90% 80% at 0% 100%, oklch(0.5 0.19 300 / 0.35), transparent 60%),
+                     oklch(0.17 0.04 280)`,
       }}
       aria-hidden="true"
     >
       <div className="bg-grid absolute inset-0 -z-10 opacity-60 [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
-      <div className="absolute -bottom-10 left-1/2 -z-10 h-24 w-3/4 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl animate-pulse-glow" />
+      <div className="absolute -bottom-10 left-1/2 -z-10 h-24 w-3/4 -translate-x-1/2 rounded-full bg-purple/25 blur-3xl animate-pulse-glow" />
       <CategoryIcon
         name={icon}
         className={cn(

@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown, LayoutGrid, Menu, X } from "lucide-react";
 
 import type { NavLite } from "@/lib/cms";
-import { siteConfig } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 import { CategoryIcon } from "./category-icon";
@@ -43,7 +42,7 @@ export function SiteHeader({ nav }: { nav: NavLite[] }) {
   const activeCategory = pathname.split("/")[1];
 
   return (
-    <header className="glass sticky top-0 z-40 border-b border-primary/10">
+    <header className="glass sticky top-0 z-40 border-b border-purple/20">
       <a
         href="#inhalt"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground"
@@ -52,10 +51,10 @@ export function SiteHeader({ nav }: { nav: NavLite[] }) {
       </a>
       <div ref={panelRef} className="relative">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
-          <Link href="/startseite" className="flex items-center gap-2.5" aria-label={`${siteConfig.name} – Startseite`}>
-            <PandaLogo />
-            <span className="font-display text-lg font-semibold tracking-tight">
-              Flauschi<span className="text-glow">Pandas</span>
+          <Link href="/startseite" className="flex items-center gap-2" aria-label="Panda Toolbox – Startseite">
+            <PandaLogo className="size-12" priority sizes="48px" />
+            <span className="font-display text-lg font-bold tracking-tight">
+              Panda <span className="text-glow">Toolbox</span>
             </span>
           </Link>
 

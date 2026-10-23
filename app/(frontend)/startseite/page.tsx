@@ -13,7 +13,7 @@ import { siteConfig } from "@/lib/site";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: { absolute: `Panda Toolbox – ${siteConfig.name}` },
+  title: { absolute: `${siteConfig.name} – Wissen, Tools & Tipps` },
   description:
     "Die Panda Toolbox: Themen- und Communityportal mit Ratgebern, Vergleichen und Tools zu Tieren, Zoos, Freizeitparks, KI, Gesundheit, Urlaub, Finanzen und mehr.",
   alternates: { canonical: "/startseite" },
@@ -25,12 +25,18 @@ export default async function StartPage() {
 
   return (
     <>
-      <section className="relative overflow-hidden border-b border-primary/10">
+      <section className="relative overflow-hidden border-b border-purple/20">
         <div className="bg-grid absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]" />
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 py-20 text-center md:py-24">
-          <PandaLogo className="size-16 animate-pulse-glow" />
-          <h1 className="text-4xl font-bold md:text-6xl">
-            Die Panda <span className="text-glow">Toolbox</span>
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 pb-20 pt-10 text-center md:pb-24 md:pt-14">
+          {/* Logo mit Türkis-Lila-Leuchten */}
+          <div className="relative">
+            <div className="absolute inset-6 -z-10 rounded-full bg-primary/25 blur-3xl animate-pulse-glow" aria-hidden="true" />
+            <div className="absolute inset-10 -z-10 translate-x-8 rounded-full bg-purple/30 blur-3xl" aria-hidden="true" />
+            <PandaLogo className="size-60 drop-shadow-[0_0_24px_oklch(0.72_0.19_300/0.45)] md:size-80" priority sizes="(min-width: 768px) 320px, 240px" alt="Panda Toolbox" />
+          </div>
+          <h1 className="text-3xl font-bold md:text-5xl">
+            <span className="sr-only">Panda Toolbox – </span>
+            Wissen, Tools & Tipps in <span className="text-glow">einer Toolbox</span>
           </h1>
           <p className="max-w-2xl text-lg text-muted-foreground">
             Ein großes Themen- und Communityportal: Tiere, Zoos, Freizeitparks, KI, Tools, Creator-Wissen, Finanzen und eigene

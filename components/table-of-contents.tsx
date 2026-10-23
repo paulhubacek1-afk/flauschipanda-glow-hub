@@ -41,7 +41,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
               href={`#${h.id}`}
               className={cn(
                 "block border-l-2 border-transparent py-0.5 pl-3 text-muted-foreground transition-colors hover:text-primary",
-                active === h.id && "border-primary text-primary",
+                active === h.id && "border-purple text-purple",
               )}
             >
               {h.text}

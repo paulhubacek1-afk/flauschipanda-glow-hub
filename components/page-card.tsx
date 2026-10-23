@@ -14,7 +14,7 @@ export function PageCard({ page, className, showCategory = true }: { page: PageS
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div className="flex flex-wrap gap-1.5">
           {showCategory && <Badge variant="outline">{page.categoryTitle}</Badge>}
-          <Badge>{page.groupTitle}</Badge>
+          <Badge variant="purple">{page.groupTitle}</Badge>
         </div>
         <h3 className="font-display text-lg font-semibold leading-snug">
           <Link href={page.href} className="after:absolute after:inset-0 group-hover:text-primary">

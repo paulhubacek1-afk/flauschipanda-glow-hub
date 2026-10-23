@@ -4,7 +4,7 @@ import { LegalPage } from "@/components/legal-page";
 
 export const metadata: Metadata = {
   title: "Transparenz: Werbung, Affiliate-Links & Faktenprüfung",
-  description: "Wie FlauschiPandas Geld verdient, wie wir Werbung und Affiliate-Links kennzeichnen und wie wir Fakten prüfen.",
+  description: "Wie die Panda Toolbox Geld verdient, wie wir Werbung und Affiliate-Links kennzeichnen und wie wir Fakten prüfen.",
   alternates: { canonical: "/transparenz" },
 };
 
@@ -12,7 +12,7 @@ export default function TransparenzPage() {
   return (
     <LegalPage title="Transparenz & Werbung" href="/transparenz">
       <p>
-        FlauschiPandas ist kostenlos lesbar. Damit das so bleibt, verdienen wir an einigen Stellen Geld. Hier erklären
+        Die Panda Toolbox ist kostenlos lesbar. Damit das so bleibt, verdienen wir an einigen Stellen Geld. Hier erklären
         wir offen, wie – und wie wir dafür sorgen, dass Empfehlungen trotzdem ehrlich bleiben.
       </p>
 

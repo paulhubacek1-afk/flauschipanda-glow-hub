@@ -9,10 +9,10 @@ export function Faq({ items }: { items: { q: string; a: string }[] }) {
       </h2>
       <div className="space-y-2">
         {items.map((item) => (
-          <details key={item.q} className="group rounded-lg border bg-card/60 open:border-primary/30">
+          <details key={item.q} className="group rounded-lg border bg-card/60 open:border-purple/40">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-medium [&::-webkit-details-marker]:hidden">
               {item.q}
-              <ChevronDown className="size-4 shrink-0 text-primary transition-transform group-open:rotate-180" aria-hidden="true" />
+              <ChevronDown className="size-4 shrink-0 text-purple transition-transform group-open:rotate-180" aria-hidden="true" />
             </summary>
             <p className="px-5 pb-5 text-muted-foreground">{item.a}</p>
           </details>

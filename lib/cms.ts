@@ -227,7 +227,7 @@ export const getSettings = cache(async (): Promise<SiteSettingsData> => {
   const s = (await payload.findGlobal({ slug: "site-settings", depth: 0 })) as Doc;
   const g = (s.greencore ?? {}) as Doc;
   return {
-    siteName: s.siteName || "FlauschiPandas",
+    siteName: s.siteName || "Panda Toolbox",
     tagline: s.tagline || "Die Panda Toolbox – Themen- und Communityportal",
     greencore: {
       name: g.name || "Panda GreenCore",

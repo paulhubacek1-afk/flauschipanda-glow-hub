@@ -10,13 +10,13 @@ import { PandaLogo } from "./panda-logo";
 
 export function SiteFooter({ nav }: { nav: NavLite[] }) {
   return (
-    <footer className="mt-24 border-t border-primary/10 bg-card/40">
+    <footer className="mt-24 border-t border-purple/20 bg-card/40">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-[1.2fr_2.5fr]">
         <div className="space-y-3">
           <Link href="/startseite" className="flex items-center gap-2.5">
-            <PandaLogo className="size-8" />
-            <span className="font-display font-semibold">
-              Flauschi<span className="text-glow">Pandas</span>
+            <PandaLogo className="size-16" sizes="64px" />
+            <span className="font-display text-lg font-bold">
+              Panda <span className="text-glow">Toolbox</span>
             </span>
           </Link>
           <p className="max-w-xs text-sm text-muted-foreground">

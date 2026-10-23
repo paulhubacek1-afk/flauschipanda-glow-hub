@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 export default function NotFound() {
   return (
     <div className="mx-auto flex max-w-xl flex-col items-center gap-5 px-4 py-28 text-center">
-      <PandaLogo className="size-16 opacity-80" />
+      <PandaLogo className="size-40" sizes="160px" alt="Panda Toolbox" />
       <p className="font-display text-6xl font-bold text-glow">404</p>
       <h1 className="text-2xl font-semibold">Diese Seite hat sich im Bambuswald verlaufen.</h1>
       <p className="text-muted-foreground">Vielleicht ist sie noch in Vorbereitung oder wurde verschoben.</p>

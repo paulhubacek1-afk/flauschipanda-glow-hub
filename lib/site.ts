@@ -4,11 +4,11 @@
  * NEXT_PUBLIC_SITE_URL wird nur für Canonical-URLs, Sitemap und Open Graph gebraucht.
  */
 export const siteConfig = {
-  name: "FlauschiPandas",
-  tagline: "Die Panda Toolbox – Themen- und Communityportal",
+  name: "Panda Toolbox",
+  tagline: "Themen- und Communityportal",
   locale: "de_AT",
   language: "de",
-  defaultAuthor: "FlauschiPandas Redaktion",
+  defaultAuthor: "Panda Toolbox Redaktion",
 } as const;
 
 export function getSiteUrl(): URL {
@@ -31,7 +31,7 @@ export function absoluteUrl(path: string) {
 export const donationConfig = {
   name: "Panda GreenCore",
   headline: "Unterstütze Panda GreenCore",
-  text: "FlauschiPandas ist kostenlos und ohne Bezahlschranke. Wenn dir diese Seite geholfen hat, kannst du mit einer freiwilligen Spende an Panda GreenCore etwas zurückgeben.",
+  text: "Die Panda Toolbox ist kostenlos und ohne Bezahlschranke. Wenn dir diese Seite geholfen hat, kannst du mit einer freiwilligen Spende an Panda GreenCore etwas zurückgeben.",
   /** Wofür Spenden konkret verwendet werden – Pflicht vor dem Livegang. */
   purpose: "",
   /** Kurzer Hinweis, der automatisch auf jeder Landingpage erscheint. */

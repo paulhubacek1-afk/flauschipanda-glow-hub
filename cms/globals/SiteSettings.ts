@@ -11,8 +11,8 @@ export const SiteSettings: GlobalConfig = {
   access: { read: anyone, update: isAdmin },
   hooks: { afterChange: [revalidateGlobal] },
   fields: [
-    { name: "siteName", label: "Website-Name", type: "text", defaultValue: "FlauschiPandas" },
-    { name: "tagline", label: "Untertitel", type: "text", defaultValue: "Die Panda Toolbox – Themen- und Communityportal" },
+    { name: "siteName", label: "Website-Name", type: "text", defaultValue: "Panda Toolbox" },
+    { name: "tagline", label: "Untertitel", type: "text", defaultValue: "Themen- und Communityportal" },
     {
       name: "greencore",
       label: "Panda GreenCore",

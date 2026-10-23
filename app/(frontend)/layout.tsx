@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     default: `${siteConfig.name} – ${siteConfig.tagline}`,
     template: `%s | ${siteConfig.name}`,
   },
-  description: "FlauschiPandas: verständliche Ratgeber, ehrliche Vergleiche und transparente Empfehlungen.",
+  description: "Panda Toolbox: verständliche Ratgeber, ehrliche Vergleiche und transparente Empfehlungen.",
   applicationName: siteConfig.name,
   openGraph: {
     siteName: siteConfig.name,
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b1620",
+  themeColor: "#120f24",
   colorScheme: "dark",
 };
 
