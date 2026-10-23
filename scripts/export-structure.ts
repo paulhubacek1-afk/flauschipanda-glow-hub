@@ -12,7 +12,7 @@ import { hierarchy, hierarchyStats, pagePath } from "../lib/hierarchy";
 const live = getLiveIds();
 const stats = hierarchyStats();
 const lines: string[] = [
-  "# FlauschiPandas – Seiten-Hierarchie",
+  "# Panda Toolbox (FlauschiPandas) – Seiten-Hierarchie",
   "",
   `${stats.categories} Hauptkategorien · ${stats.groups} Unterthemen · ${stats.pages} Landingpages · ${live.size} live`,
   "",

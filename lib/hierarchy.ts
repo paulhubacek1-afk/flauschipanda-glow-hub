@@ -34,7 +34,9 @@ export type IconName =
   | "ferris"
   | "car"
   | "users"
-  | "panda";
+  | "panda"
+  | "heart"
+  | "plane";
 
 export interface PageNode {
   slug: string;
@@ -171,12 +173,11 @@ function park(name: string, o: { slug?: string; rides?: string; hotels?: boolean
 }
 
 /* ---------------------------------------------------------------------------
- * Die 13 Hauptkategorien
+ * Die Hauptkategorien (Reihenfolge = Nummerierung)
  * ------------------------------------------------------------------------- */
 
-export const hierarchy: CategoryNode[] = [
+const categories: Omit<CategoryNode, "number">[] = [
   {
-    number: 1,
     slug: "tiere",
     title: "Tiere",
     description: "Haustiere richtig versorgen und Wildtiere entdecken: Futter, Zubehör, Pflege, Wissen und Malvorlagen.",
@@ -213,7 +214,7 @@ export const hierarchy: CategoryNode[] = [
       wildAnimal("Wölfe", "Wolf"),
       wildAnimal("Füchse", "Fuchs"),
       wildAnimal("Pinguine", "Pinguin"),
-      group("Tierwissen & Pflege", ["Haustier anschaffen", "Tierarztkosten", "Tierversicherungen im Vergleich", "Tiere im Urlaub", "Giftige Lebensmittel für Haustiere"], {
+      group("Tierwissen & Pflege", ["Haustier anschaffen", "Tierarztkosten", "Tierversicherungen im Vergleich", "Giftige Lebensmittel für Haustiere"], {
         slug: "tierwissen",
       }),
       group("Tier-Malvorlagen", ["Hunde-Malvorlagen", "Katzen-Malvorlagen", "Pferde-Malvorlagen", "Wildtier-Malvorlagen", "Zootier-Malvorlagen"]),
@@ -221,7 +222,6 @@ export const hierarchy: CategoryNode[] = [
     ],
   },
   {
-    number: 2,
     slug: "babys-kinder",
     title: "Babys & Kinder",
     description: "Von der Erstausstattung bis zum Familienausflug: Basics, Lernmaterial, Basteln und Ausflugsideen.",
@@ -232,14 +232,13 @@ export const hierarchy: CategoryNode[] = [
       group("Baby-Tipps", ["Das erste Jahr", "Zahnen", "Beikost-Start", "Babys erste Reise"]),
       group("Malvorlagen & Lernen", ["Kinder-Malvorlagen", "Lernkarten", "Glow-Kinderdesigns", "Lernmaterialien"], { slug: "lernen" }),
       group("Basteln & Beschäftigung", ["Bastelideen", "Ideen für Regentage", "Spiele für drinnen", "Spiele für draußen"], { slug: "basteln" }),
-      group("Ausflüge mit Kindern", ["Zoos mit Kindern", "Freizeitparks mit Kindern", "Familienurlaub", "Ausflugsziele Österreich", "Ausflugsziele Deutschland"], {
+      group("Ausflüge mit Kindern", ["Zoos mit Kindern", "Freizeitparks mit Kindern", "Ausflugsziele Österreich", "Ausflugsziele Deutschland"], {
         slug: "ausfluege",
       }),
       group("Kinder & KI", ["Kinder-KI-Prompts", "KI-Geschichten für Kinder", "Medienkompetenz für Kinder"], { slug: "kinder-ki" }),
     ],
   },
   {
-    number: 3,
     slug: "haushalt-wohnen",
     title: "Haushalt & Wohnen",
     description: "Ordnung, Putzen, Sparen und schönes Wohnen – plus Basics zu Wohnungssuche und Umzug.",
@@ -254,7 +253,22 @@ export const hierarchy: CategoryNode[] = [
     ],
   },
   {
-    number: 4,
+    slug: "gesundheit-wohlbefinden",
+    title: "Gesundheit & Wohlbefinden",
+    description: "Ernährung, Bewegung, Schlaf und mentale Balance – alltagstaugliche Tipps, die ärztlichen Rat nicht ersetzen.",
+    icon: "heart",
+    hue: 350,
+    groups: [
+      group("Ernährung", ["Gesunde Ernährung", "Gesund kochen im Alltag", "Genug trinken", "Gesunde Snacks"]),
+      group("Bewegung & Fitness", ["Fitness für Einsteiger", "Workouts für zu Hause", "Mehr Bewegung im Alltag", "Wandern & Spazieren"], { slug: "bewegung" }),
+      group("Schlaf", ["Besser schlafen", "Abendroutine", "Schlafzimmer optimieren"]),
+      group("Achtsamkeit & Motivation", ["Stress reduzieren", "Achtsamkeit lernen", "Meditation für Einsteiger", "Positive Routinen", "Motivation finden", "Spiritualität im Alltag"], {
+        slug: "achtsamkeit",
+      }),
+      group("Gesundheit im Alltag", ["Hausapotheke", "Vorsorge-Checkliste", "Bildschirmzeit reduzieren", "Ergonomisch arbeiten"], { slug: "alltag" }),
+    ],
+  },
+  {
     slug: "ki",
     title: "KI-Tools & Prompts",
     description: "KI verständlich nutzen: Prompts, Workflows und Anleitungen für ChatGPT, Claude, Gemini und Bildgeneratoren.",
@@ -281,20 +295,19 @@ export const hierarchy: CategoryNode[] = [
         { label: "Prompts", title: "Gemini Prompts" },
         { label: "Im Alltag", title: "Gemini im Alltag", slug: "alltag" },
       ]),
-      group("KI-Bildgeneratoren", ["Bild-Prompts", "Bildgeneratoren im Vergleich", "Glow-Bilder erstellen"], { slug: "bildgeneratoren" }),
+      group("KI-Bildgeneratoren", ["Bildgeneratoren im Vergleich", "Glow-Bilder erstellen"], { slug: "bildgeneratoren" }),
       group("KI-Basics", ["Was ist KI?", "KI-Fehler vermeiden", "KI-Workflows", "KI-Automatisierung", "KI und Datenschutz"]),
-      group("Prompt-Sammlungen", ["Business-Prompts", "Schreib-Prompts", "Lern-Prompts", "Social-Media-Prompts"], { slug: "prompts" }),
+      group("Prompts", ["Bild-Prompts", "Business-Prompts", "Schreib-Prompts", "Lern-Prompts", "Social-Media-Prompts"], { slug: "prompts" }),
     ],
   },
   {
-    number: 5,
     slug: "creator",
     title: "Creator-Tipps",
     description: "YouTube, Shorts und Branding: Wachstum, Content-Planung, Monetarisierung und Community-Aufbau.",
     icon: "clapperboard",
     hue: 15,
     groups: [
-      group("YouTube-Wachstum", ["YouTube-Kanal starten", "Algorithmus-Tipps", "Thumbnails gestalten", "Viral-Shorts"], { slug: "youtube" }),
+      group("YouTube", ["YouTube-Kanal starten", "Algorithmus-Tipps", "Thumbnails gestalten", "Viral-Shorts"], { slug: "youtube" }),
       group("Branding & Design", ["Branding für Creator", "Glow-Design", "Logo erstellen", "Farbschema finden"], { slug: "branding" }),
       group("Content-Planung", ["Content-Plan erstellen", "Storytelling", "Videoideen finden"]),
       group("Monetarisierung", ["Geld verdienen mit YouTube", "Affiliate für Creator", "Sponsoring"]),
@@ -302,16 +315,16 @@ export const hierarchy: CategoryNode[] = [
     ],
   },
   {
-    number: 6,
     slug: "tools-apps",
     title: "Tools & Apps",
-    description: "Die Toolbox: Online-Rechner, Design-, Business- und Automatisierungs-Tools – mit kostenlosen Alternativen.",
+    description: "Die Toolbox: Canva-Alternativen, YouTube- und Keyword-Tools, Online-Rechner und kostenlose Alternativen.",
     icon: "wrench",
     hue: 195,
     groups: [
+      group("Canva-Alternativen", ["Kostenlose Canva-Alternativen", "Canva-Alternativen im Vergleich", "Design-Tools für Einsteiger", "Glow-Plugins"]),
+      group("YouTube-Tools", ["Beste YouTube-Tools", "Thumbnail-Tools", "Tools für YouTube-Shorts"]),
+      group("Keyword-Tools", ["Kostenlose Keyword-Tools", "Keyword-Tools im Vergleich", "Keyword-Recherche Anleitung", "Keyword-Tools für YouTube"]),
       group("Online-Rechner", ["Spritkosten-Rechner", "Stromkosten-Rechner", "Budget-Rechner", "Prozentrechner"], { slug: "rechner" }),
-      group("YouTube-Tools", ["Beste YouTube-Tools", "Thumbnail-Tools", "Keyword-Tools für YouTube"]),
-      group("Design-Tools", ["Kostenlose Design-Tools", "Canva-Alternativen", "Glow-Plugins"]),
       group("Business-Tools", ["Rechnungs-Tools", "Projektmanagement-Tools", "Newsletter-Tools"]),
       group("Social-Media-Tools", ["Social-Media-Planer", "Link-in-Bio-Tools", "Analyse-Tools"]),
       group("Automatisierungs-Tools", ["Automatisierung für Einsteiger", "Workflow-Tools im Vergleich"], { slug: "automatisierung" }),
@@ -319,7 +332,6 @@ export const hierarchy: CategoryNode[] = [
     ],
   },
   {
-    number: 7,
     slug: "musik-entertainment",
     title: "Musik & Entertainment",
     description: "EDM, Musik für Videos, Playlists und Musikproduktion – auch mit KI.",
@@ -334,7 +346,6 @@ export const hierarchy: CategoryNode[] = [
     ],
   },
   {
-    number: 8,
     slug: "finanzen-sparen",
     title: "Finanzen & Sparen",
     description: "Budget, Sparen im Alltag und Finanz-Basics – verständlich, ohne Anlageberatung.",
@@ -349,10 +360,9 @@ export const hierarchy: CategoryNode[] = [
     ],
   },
   {
-    number: 9,
     slug: "zoos",
-    title: "Zoos & Tierparks",
-    description: "Zoos besuchen: Tickets, Preise, Öffnungszeiten, Highlights wie Pandas und Hotels in der Nähe.",
+    title: "Zoos & Aquarien",
+    description: "Zoos und Aquarien besuchen: Tickets, Hotels in der Nähe, Preise, Highlights wie Pandas und SEA LIFE.",
     icon: "trees",
     hue: 120,
     groups: [
@@ -361,11 +371,21 @@ export const hierarchy: CategoryNode[] = [
       zoo("Tierpark Hellabrunn", []),
       zoo("Zoo Leipzig", []),
       zoo("Zoo Zürich", []),
+      group(
+        "SEA LIFE",
+        [
+          { label: "Tickets", title: "SEA LIFE Tickets" },
+          { label: "Hotels in der Nähe", title: "Hotels in der Nähe von SEA LIFE", slug: "hotels" },
+          { label: "Standorte", title: "SEA LIFE Standorte" },
+          { label: "Mit Kindern", title: "SEA LIFE mit Kindern", slug: "mit-kindern" },
+          { label: "Tipps", title: "SEA LIFE Tipps" },
+        ],
+        { slug: "sea-life", description: "SEA LIFE besuchen: Tickets, Hotels in der Nähe, Standorte und Tipps für den Besuch mit Kindern." },
+      ),
       group("Zoo-Ratgeber", ["Zoos mit Pandas in Europa", "Zoo-Jahreskarte", "Zoobesuch mit Kindern", "Zoo bei Regen"], { slug: "ratgeber" }),
     ],
   },
   {
-    number: 10,
     slug: "freizeitparks",
     title: "Freizeitparks",
     description: "Freizeitparks planen: Tickets, Hotels, Achterbahnen, Familienurlaub und Insider-Tipps.",
@@ -375,15 +395,28 @@ export const hierarchy: CategoryNode[] = [
       park("Europa-Park"),
       park("Phantasialand"),
       park("Heide Park"),
-      park("Familypark", { rides: "Attraktionen", hotels: false }),
-      park("Wiener Prater", { rides: "Attraktionen", hotels: false }),
+      park("Familypark", { rides: "Attraktionen" }),
+      park("Wiener Prater", { rides: "Attraktionen" }),
       group("Freizeitpark-Ratgeber", ["Freizeitpark-Tickets sparen", "Beste Reisezeit für Freizeitparks", "Freizeitparks in Österreich", "Freizeitparks in Deutschland"], {
         slug: "ratgeber",
       }),
     ],
   },
   {
-    number: 11,
+    slug: "urlaub-reisen",
+    title: "Urlaub & Reisen",
+    description: "Urlaub planen: Reiseziele, Familienurlaub, Reisen mit Hund, Packlisten und Spartipps.",
+    icon: "plane",
+    hue: 200,
+    groups: [
+      group("Urlaubsziele", ["Urlaub in Österreich", "Urlaub in Deutschland", "Urlaub am Meer", "Städtereisen", "Urlaub in den Bergen"]),
+      group("Familienurlaub", ["Familienurlaub planen", "Familienhotels", "Urlaub mit Baby", "Urlaub mit Kleinkind"]),
+      group("Urlaub mit Hund", ["Urlaub mit Hund planen", "Hundefreundliche Hotels", "Reisen mit Haustier", "Packliste für den Hund"], { slug: "mit-hund" }),
+      group("Reiseplanung", ["Packliste Urlaub", "Günstig reisen", "Reiseversicherung", "Roadtrip planen", "Reise-Apps"]),
+      group("Hotels & Unterkünfte", ["Hotel finden", "Ferienwohnung oder Hotel", "Camping für Einsteiger"], { slug: "unterkuenfte" }),
+    ],
+  },
+  {
     slug: "autos-mobilitaet",
     title: "Autos & Mobilität",
     description: "Autotechnik einfach erklärt, Antriebe im Vergleich, Spartipps, Pflege, Autokauf und die Zukunft der Mobilität.",
@@ -421,7 +454,6 @@ export const hierarchy: CategoryNode[] = [
     ],
   },
   {
-    number: 12,
     slug: "projekte-community",
     title: "Projekte & Community",
     description: "KiToolsReport, Panda-Merch, die Community und alles über FlauschiPandas.",
@@ -435,7 +467,6 @@ export const hierarchy: CategoryNode[] = [
     ],
   },
   {
-    number: 13,
     slug: "panda-branding",
     title: "Panda-Branding",
     description: "Panda GreenCore, die Panda-Story, Designs, Wallpaper und digitale Produkte.",
@@ -449,6 +480,9 @@ export const hierarchy: CategoryNode[] = [
     ],
   },
 ];
+
+/** Nummerierung ergibt sich aus der Reihenfolge – neue Kategorien einfach einfügen. */
+export const hierarchy: CategoryNode[] = categories.map((c, i) => ({ ...c, number: i + 1 }));
 
 /* ---------------------------------------------------------------------------
  * Abfragen

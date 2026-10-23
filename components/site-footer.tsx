@@ -13,7 +13,7 @@ export function SiteFooter() {
     <footer className="mt-24 border-t border-primary/10 bg-card/40">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-[1.2fr_2.5fr]">
         <div className="space-y-3">
-          <Link href="/home" className="flex items-center gap-2.5">
+          <Link href="/startseite" className="flex items-center gap-2.5">
             <PandaLogo className="size-8" />
             <span className="font-display font-semibold">
               Flauschi<span className="text-glow">Pandas</span>

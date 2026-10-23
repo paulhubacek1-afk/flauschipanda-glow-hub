@@ -23,7 +23,7 @@ export default function StructurePage() {
   return (
     <div className="mx-auto max-w-7xl space-y-10 px-4 py-10">
       <header className="space-y-4">
-        <Breadcrumbs items={[{ name: "Home", href: "/home" }, { name: "Seitenstruktur", href: "/seitenstruktur" }]} />
+        <Breadcrumbs items={[{ name: "Startseite", href: "/startseite" }, { name: "Seitenstruktur", href: "/seitenstruktur" }]} />
         <h1 className="text-4xl font-bold">Seitenstruktur</h1>
         <p className="max-w-3xl text-lg text-muted-foreground">
           {stats.categories} Kategorien · {stats.groups} Unterthemen · {stats.pages} geplante Seiten, davon{" "}

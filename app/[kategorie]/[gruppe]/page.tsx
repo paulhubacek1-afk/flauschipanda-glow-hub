@@ -53,7 +53,7 @@ export default async function GroupPage({ params }: Props) {
       <header className="space-y-6">
         <Breadcrumbs
           items={[
-            { name: "Home", href: "/home" },
+            { name: "Startseite", href: "/startseite" },
             { name: category.title, href: categoryPath(category.slug) },
             { name: group.title, href: path },
           ]}

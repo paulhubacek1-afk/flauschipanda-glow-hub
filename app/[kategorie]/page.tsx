@@ -52,7 +52,7 @@ export default async function CategoryPage({ params }: Props) {
       <JsonLd data={collectionSchema(category.title, category.description, path, live)} />
 
       <header className="space-y-5">
-        <Breadcrumbs items={[{ name: "Home", href: "/home" }, { name: category.title, href: path }]} />
+        <Breadcrumbs items={[{ name: "Startseite", href: "/startseite" }, { name: category.title, href: path }]} />
         <div className="flex items-center gap-4">
           <span className="flex size-14 items-center justify-center rounded-xl bg-primary/10 shadow-[var(--glow-sm)]">
             <CategoryIcon name={category.icon} className="size-7 text-primary" />

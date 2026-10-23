@@ -9,9 +9,16 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  // Die Startseite liegt unter /home (keine home.html, saubere URLs ohne Endungen).
+  // Die Startseite liegt unter /startseite – ohne .html, alle URLs ohne Dateiendung.
   async redirects() {
-    return [{ source: "/", destination: "/home", permanent: true }];
+    return [
+      { source: "/", destination: "/startseite", permanent: true },
+      { source: "/home", destination: "/startseite", permanent: true },
+      { source: "/startseite.html", destination: "/startseite", permanent: true },
+      { source: "/index.html", destination: "/startseite", permanent: true },
+      // Jede andere .html-Adresse auf die saubere URL ohne Endung umleiten
+      { source: "/:path(.*)\\.html", destination: "/:path", permanent: true },
+    ];
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

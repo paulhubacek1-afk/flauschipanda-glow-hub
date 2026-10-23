@@ -11,6 +11,7 @@ import { CostCalculator } from "@/components/cost-calculator";
 import { Cover } from "@/components/cover";
 import { DonationBox } from "@/components/donation-box";
 import { Faq } from "@/components/faq";
+import { GreenCoreNotice } from "@/components/greencore-notice";
 import { JsonLd } from "@/components/json-ld";
 import { PageCard } from "@/components/page-card";
 import { PageList } from "@/components/page-list";
@@ -28,6 +29,7 @@ import { formatDate, toIsoDate } from "@/lib/utils";
 /**
  * Landingpage-Vorlage – für jede Seite der Hierarchie gleich aufgebaut:
  *   Infotext → FAQ → Vergleich → Affiliate-Box → Spendenbox Panda GreenCore (→ Quellen)
+ *   + automatisch: SEO-Titel, Meta-Beschreibung, verwandte Seiten, Affiliate-Auswahl, GreenCore-Hinweis
  *
  * Geplante Veröffentlichung: Seiten werden stündlich neu erzeugt (ISR). Erreicht eine
  * Seite ihren publishedAt-Zeitpunkt, erscheint sie automatisch.
@@ -45,7 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { kategorie, gruppe, seite } = await params;
   const page = getLivePage(kategorie, gruppe, seite);
   if (!page) return {};
-  const title = page.seoTitle ?? page.title;
+  const title = page.seoTitle;
   return {
     title: { absolute: `${title} | ${siteConfig.name}` },
     description: page.description,
@@ -87,7 +89,7 @@ export default async function LandingPage({ params }: Props) {
       <header className="mb-10 space-y-6">
         <Breadcrumbs
           items={[
-            { name: "Home", href: "/home" },
+            { name: "Startseite", href: "/startseite" },
             { name: category.title, href: categoryPath(category.slug) },
             { name: group.title, href: groupPath(category.slug, group.slug) },
             { name: page.node.label, href: page.href },
@@ -159,6 +161,7 @@ export default async function LandingPage({ params }: Props) {
               </p>
               <PageList categorySlug={category.slug} group={group} liveIds={liveIds} currentSlug={page.slug} dense />
             </nav>
+            {page.donation && <GreenCoreNotice />}
           </div>
         </aside>
       </div>
@@ -168,6 +171,7 @@ export default async function LandingPage({ params }: Props) {
         <p className="mb-2 px-2.5 text-sm font-semibold">Mehr zu {group.title}</p>
         <PageList categorySlug={category.slug} group={group} liveIds={liveIds} currentSlug={page.slug} dense />
       </nav>
+      {page.donation && <GreenCoreNotice className="mt-6 lg:hidden" />}
 
       {related.length > 0 && (
         <section aria-labelledby="weiterlesen" className="mt-20">

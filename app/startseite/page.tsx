@@ -16,11 +16,11 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: { absolute: `${siteConfig.name} – ${siteConfig.tagline}` },
   description:
-    "FlauschiPandas ist deine Toolbox: Ratgeber, Vergleiche und Tipps zu Tieren, Familie, Haushalt, KI, Freizeitparks, Zoos, Autos und mehr – ehrlich und transparent.",
-  alternates: { canonical: "/home" },
+    "Die Panda Toolbox: Themen- und Communityportal mit Ratgebern, Vergleichen und Tools zu Tieren, Zoos, Freizeitparks, KI, Gesundheit, Urlaub, Finanzen und mehr.",
+  alternates: { canonical: "/startseite" },
 };
 
-export default function HomePage() {
+export default function StartPage() {
   const live = getLivePages();
   const stats = hierarchyStats();
 
@@ -31,11 +31,15 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 py-20 text-center md:py-24">
           <PandaLogo className="size-16 animate-pulse-glow" />
           <h1 className="text-4xl font-bold md:text-6xl">
-            Die Panda-<span className="text-glow">Toolbox</span>
+            Die Panda <span className="text-glow">Toolbox</span>
           </h1>
           <p className="max-w-2xl text-lg text-muted-foreground">
-            {stats.categories} Kategorien, {stats.groups} Unterthemen und eine wachsende Sammlung an Ratgebern, Vergleichen und
-            Werkzeugen – von gesundem Hundefutter bis zu KI-Prompts.
+            Ein großes Themen- und Communityportal: Tiere, Zoos, Freizeitparks, KI, Tools, Creator-Wissen, Finanzen und eigene
+            Projekte wie Panda GreenCore – vereint in einer gemeinsamen Struktur.
+          </p>
+          <p className="max-w-2xl text-sm text-muted-foreground/80">
+            Aktuell entsteht das Fundament: {stats.categories} Kategorien und {stats.groups} Unterthemen, auf denen nach und nach
+            Inhalte, Tools, Communityfunktionen und Empfehlungen wachsen.
           </p>
           <div className="w-full max-w-2xl text-left">
             <PageSearch pages={live.map(toSummary)} />

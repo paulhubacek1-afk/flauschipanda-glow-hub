@@ -4,10 +4,12 @@ import {
   Car,
   Clapperboard,
   FerrisWheel,
+  HeartPulse,
   House,
   Music,
   PawPrint,
   PiggyBank,
+  Plane,
   Trees,
   Users,
   Wrench,
@@ -32,6 +34,8 @@ const icons: Record<Exclude<IconName, "panda">, LucideIcon> = {
   ferris: FerrisWheel,
   car: Car,
   users: Users,
+  heart: HeartPulse,
+  plane: Plane,
 };
 
 export function CategoryIcon({ name, className }: { name: IconName; className?: string }) {

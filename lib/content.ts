@@ -3,6 +3,7 @@ import path from "node:path";
 import matter from "gray-matter";
 import { z } from "zod";
 
+import { autoDescription, autoLinkAnchors, autoProducts, autoRelatedIds, autoSeoTitle } from "./auto";
 import {
   getCategory,
   getGroup,
@@ -25,8 +26,10 @@ export const CONTENT_DIR = path.join(process.cwd(), "content");
 export const frontmatterSchema = z.object({
   /** H1 – Standard: Titel aus der Hierarchie */
   title: z.string().min(5).optional(),
+  /** Fehlt er, wird er automatisch erzeugt (lib/auto.ts) */
   seoTitle: z.string().optional(),
-  description: z.string().min(20),
+  /** Fehlt sie, wird sie automatisch erzeugt (lib/auto.ts) */
+  description: z.string().min(20).optional(),
   /** draft = Entwurf, review = wartet auf Prüfung, published = freigegeben (ab publishedAt sichtbar) */
   status: z.enum(["draft", "review", "published"]),
   /** Liegt der Zeitpunkt in der Zukunft, ist die Seite "geplant" und erscheint automatisch. */
@@ -43,6 +46,8 @@ export const frontmatterSchema = z.object({
   related: z.array(z.string()).default([]),
   /** Affiliate-Box: IDs aus lib/affiliate.ts */
   products: z.array(z.string()).default([]),
+  /** Ohne eigene `products` werden passende Produkte automatisch aus dem Affiliate-Register gewählt. */
+  autoAffiliate: z.boolean().default(true),
   widgets: z.array(z.enum(["kostenrechner"])).default([]),
   faq: z.array(z.object({ q: z.string(), a: z.string() })).default([]),
   /** Vergleichstabelle */
@@ -74,11 +79,15 @@ export const frontmatterSchema = z.object({
 
 export type Frontmatter = z.infer<typeof frontmatterSchema>;
 
-export interface Page extends Omit<Frontmatter, "title" | "focusKeyword"> {
+export interface Page extends Omit<Frontmatter, "title" | "focusKeyword" | "seoTitle" | "description"> {
   /** "kategorie/unterthema/seite" */
   id: string;
   title: string;
+  seoTitle: string;
+  description: string;
   focusKeyword: string;
+  /** Welche Felder automatisch ergänzt wurden – das Redaktions-Cockpit zeigt es an. */
+  auto: { seoTitle: boolean; description: boolean; related: boolean; products: boolean; linkAnchors: boolean };
   category: CategoryNode;
   group: GroupNode;
   node: PageNode;
@@ -155,11 +164,25 @@ function loadFromDisk(): LoadResult {
     const fm = parsed.data;
     const wordCount = countWords(content);
 
+    const title = fm.title ?? node.title;
+    const autoProductIds = fm.products.length === 0 && fm.autoAffiliate ? autoProducts(category.slug, group.slug) : [];
     pages.push({
       ...fm,
       id: `${category.slug}/${group.slug}/${node.slug}`,
-      title: fm.title ?? node.title,
+      title,
+      seoTitle: fm.seoTitle ?? autoSeoTitle(node.title, category),
+      description: fm.description ?? autoDescription(node.title, category, group),
       focusKeyword: fm.focusKeyword ?? node.title,
+      related: fm.related.length ? fm.related : autoRelatedIds(category.slug, group.slug, node.slug),
+      products: fm.products.length ? fm.products : autoProductIds,
+      linkAnchors: fm.linkAnchors.length ? fm.linkAnchors : autoLinkAnchors(node),
+      auto: {
+        seoTitle: !fm.seoTitle,
+        description: !fm.description,
+        related: fm.related.length === 0,
+        products: autoProductIds.length > 0,
+        linkAnchors: fm.linkAnchors.length === 0,
+      },
       category,
       group,
       node,

@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const liveGroups = new Set(live.map((p) => `${p.category.slug}/${p.group.slug}`));
 
   return [
-    { url: absoluteUrl("/home"), lastModified: newest, changeFrequency: "daily", priority: 1 },
+    { url: absoluteUrl("/startseite"), lastModified: newest, changeFrequency: "daily", priority: 1 },
     { url: absoluteUrl("/seitenstruktur"), lastModified: newest, changeFrequency: "weekly", priority: 0.5 },
     ...hierarchy
       .filter((c) => liveCategories.has(c.slug))

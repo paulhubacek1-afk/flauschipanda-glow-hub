@@ -39,7 +39,12 @@ export default async function RedaktionPage() {
     <div className="mx-auto max-w-7xl space-y-10 px-4 py-10">
       <header className="space-y-2">
         <Badge variant="warning">Intern · nicht indexiert</Badge>
-        <h1 className="text-3xl font-bold">Redaktions-Cockpit</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-3xl font-bold">Redaktions-Cockpit</h1>
+          <Link href="/redaktion/neu" className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-[var(--glow-sm)]">
+            + Neue Seite erzeugen
+          </Link>
+        </div>
         <p className="text-muted-foreground">
           Stand {formatDate(report.generatedAt)} · {report.totals.error} Fehler · {report.totals.warning} Warnungen ·{" "}
           {report.totals.info} Hinweise

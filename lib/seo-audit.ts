@@ -59,7 +59,7 @@ const STRICT_ESCALATE = new Set([
   "donation-missing-purpose",
 ]);
 
-const STATIC_ROUTES = new Set(["/home", "/seitenstruktur", "/transparenz", "/impressum", "/datenschutz"]);
+const STATIC_ROUTES = new Set(["/startseite", "/seitenstruktur", "/transparenz", "/impressum", "/datenschutz"]);
 
 function addMonths(date: Date, months: number) {
   const d = new Date(date);
@@ -108,6 +108,8 @@ export async function runAudit(options: { strict?: boolean; now?: Date } = {}): 
     if (!donationConfig.purpose) g("warning", "donation-missing-purpose", "Spendenbox: Spendenzweck fehlt (donationConfig.purpose in lib/site.ts).");
   }
 
+  const hierarchyIds = new Set(allPageNodes().map((n) => n.id));
+
   /* ---------------- Verlinkung berechnen ---------------- */
   const validRoutes = new Set<string>([
     ...STATIC_ROUTES,
@@ -126,7 +128,8 @@ export async function runAudit(options: { strict?: boolean; now?: Date } = {}): 
     const manual = extractInternalLinks(p.body)
       .map((href) => linkable.find((x) => x.href === href)?.id)
       .filter((s): s is string => Boolean(s));
-    for (const id of new Set([...manual, ...r.autoLinked, ...p.related])) {
+    const liveRelated = p.related.filter((id) => linkable.some((x) => x.id === id));
+    for (const id of new Set([...manual, ...r.autoLinked, ...liveRelated])) {
       if (id !== p.id) inbound.set(id, (inbound.get(id) ?? 0) + 1);
     }
   }
@@ -139,7 +142,7 @@ export async function runAudit(options: { strict?: boolean; now?: Date } = {}): 
   const seoTitles = new Map<string, number>();
   const keywords = new Map<string, string[]>();
   for (const p of all) {
-    const t = (p.seoTitle ?? p.title).toLocaleLowerCase("de");
+    const t = p.seoTitle.toLocaleLowerCase("de");
     seoTitles.set(t, (seoTitles.get(t) ?? 0) + 1);
     const k = p.focusKeyword.toLocaleLowerCase("de");
     keywords.set(k, [...(keywords.get(k) ?? []), p.id]);
@@ -151,7 +154,7 @@ export async function runAudit(options: { strict?: boolean; now?: Date } = {}): 
     const push = (level: IssueLevel, code: string, message: string) =>
       issues.push({ level: p.status === "published" ? escalate(level, code) : level, code, message });
     const r = rendered.get(p.id)!;
-    const seoTitle = p.seoTitle ?? p.title;
+    const seoTitle = p.seoTitle;
 
     if ((seoTitles.get(seoTitle.toLocaleLowerCase("de")) ?? 0) > 1)
       push("error", "duplicate-title", "SEO-Titel ist doppelt vergeben – Suchmaschinen können die Seiten nicht unterscheiden.");
@@ -189,8 +192,10 @@ export async function runAudit(options: { strict?: boolean; now?: Date } = {}): 
       if (!validRoutes.has(href)) push("error", "broken-internal-link", `Defekter interner Link: ${href}`);
     }
     for (const id of p.related) {
-      if (!all.some((x) => x.id === id)) push("error", "related-missing", `„related“ verweist auf unbekannte Seite: ${id}`);
+      if (!hierarchyIds.has(id)) push("error", "related-missing", `„related“ verweist auf eine Seite, die es in der Hierarchie nicht gibt: ${id}`);
     }
+    if (p.auto.seoTitle) push("info", "auto-seo-title", `SEO-Titel automatisch erzeugt: „${p.seoTitle}“.`);
+    if (p.auto.description) push("info", "auto-description", "Meta-Beschreibung automatisch erzeugt – eine eigene Formulierung wirkt in Suchergebnissen meist besser.");
     if (p.status === "published" && (inbound.get(p.id) ?? 0) === 0)
       push("warning", "orphan", "Verwaiste Seite: Keine andere Seite verlinkt hierher. linkAnchors ergänzen oder manuell verlinken.");
     if (p.linkAnchors.length === 0) push("info", "no-anchors", "Keine linkAnchors – andere Seiten verlinken nur über das focusKeyword automatisch.");

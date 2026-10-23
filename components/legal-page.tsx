@@ -17,7 +17,7 @@ export function LegalPage({
     <div className="mx-auto max-w-3xl space-y-8 px-4 py-10">
       <Breadcrumbs
         items={[
-          { name: "Home", href: "/home" },
+          { name: "Startseite", href: "/startseite" },
           { name: title, href },
         ]}
       />

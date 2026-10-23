@@ -1,11 +1,13 @@
-# 🐼 FlauschiPandas – die Panda-Toolbox
+# 🐼 Panda Toolbox (FlauschiPandas)
+
+Die Panda Toolbox ist als großes Themen- und Communityportal geplant. Sie verbindet Tiere, Zoos, Freizeitparks, KI, Tools, Creator-Wissen, Finanzen und eigene Projekte wie Panda GreenCore in einer gemeinsamen Struktur. Aktuell entsteht das Fundament, auf dem später Inhalte, Tools, Communityfunktionen und Empfehlungen aufgebaut werden.
 
 Next.js (App Router) · React · Tailwind CSS v4 · shadcn/ui · TypeScript
 
 ```bash
 npm install
 cp .env.example .env.local
-npm run dev        # http://localhost:3000 → /home
+npm run dev        # http://localhost:3000 → /startseite
 ```
 
 ## Das Prinzip
@@ -15,7 +17,9 @@ Hauptkategorie  →  Unterthema  →  Landingpage (= eine Suchanfrage)
 /tiere          →  /tiere/hunde →  /tiere/hunde/gesundes-hundefutter
 ```
 
-Die komplette Struktur steht in **einer** Datei: `lib/hierarchy.ts` (13 Kategorien, 84 Unterthemen, 335 Landingpages).
+Die Startseite liegt unter **`/startseite`**. Es gibt keine `.html`-Adressen: `/`, `/home`, `/startseite.html` und jede andere `*.html`-URL werden auf die saubere Adresse ohne Endung umgeleitet.
+
+Die komplette Struktur steht in **einer** Datei: `lib/hierarchy.ts` (15 Kategorien, 96 Unterthemen, 387 Landingpages – Übersicht in `STRUKTUR.md`).
 Daraus entstehen automatisch:
 
 - das Mega-Menü, der Footer und die Breadcrumbs,
@@ -25,6 +29,27 @@ Daraus entstehen automatisch:
 
 Neue Themen ergänzt du dort mit einer Zeile. Für wiederkehrende Strukturen gibt es Vorlagen:
 `pet()` für Haustiere, `wildAnimal()` für Wildtiere, `zoo()` für Zoos und `park()` für Freizeitparks.
+
+## Neue Seite automatisch erzeugen
+
+Titel eingeben – den Rest erledigt die Automatik (`lib/auto.ts`):
+
+```bash
+npm run neu -- "Gesundes Hundefutter"
+```
+
+oder im Browser unter **`/redaktion/neu`** (lokal mit `npm run dev`). Automatisch entstehen:
+
+| Baustein | Woher |
+|---|---|
+| SEO-Titel | Suchbegriff + passender Zusatz je Kategorie, max. 60 Zeichen |
+| Meta-Beschreibung | Suchbegriff + Nutzen je Kategorie, 70–160 Zeichen |
+| Verwandte Seiten | Nachbarseiten im Unterthema + passende Seiten anderer Kategorien |
+| Affiliate-Box | Produkte aus `lib/affiliate.ts`, deren `topics` zum Unterthema passen |
+| Spendenbox | Panda GreenCore, auf jeder Landingpage |
+| Panda-GreenCore-Hinweis | Kurzer Hinweis in der Seitenleiste |
+
+Der Entwurf wird mit `status: draft` angelegt und ist erst nach Text, Faktenprüfung und `status: published` öffentlich. Bestehende Dateien werden nie überschrieben. Fehlen SEO-Titel, Meta-Beschreibung, verwandte Seiten oder Produkte später in einer Datei, ergänzt die Website sie zur Laufzeit automatisch. Das Redaktions-Cockpit weist darauf hin.
 
 ## Eine Landingpage live schalten
 
@@ -40,8 +65,8 @@ Jede Landingpage hat denselben Aufbau:
 
 ```yaml
 ---
-seoTitle: "Gesundes Hundefutter: Woran du gute Qualität erkennst"   # max. 60 Zeichen
-description: "Meta-Beschreibung, 70–160 Zeichen"
+seoTitle: "Gesundes Hundefutter: Woran du gute Qualität erkennst"   # optional – sonst automatisch
+description: "Meta-Beschreibung, 70–160 Zeichen"                     # optional – sonst automatisch
 status: published                 # draft | review | published
 publishedAt: 2026-11-20T08:00:00+01:00   # Zukunft = geplante Veröffentlichung
 focusKeyword: "Gesundes Hundefutter"     # Standard: Titel aus der Hierarchie
@@ -85,6 +110,8 @@ Die mitgelieferten Seiten sind bewusst als „Prüfung ausstehend“ markiert. I
 
 ```
 lib/hierarchy.ts           ★ Die Seiten-Hierarchie (Kategorie → Unterthema → Landingpage)
+lib/auto.ts                Automatik: SEO-Titel, Meta, Verwandte, Affiliate-Auswahl
+lib/generator.ts           Seiten-Generator (npm run neu, /redaktion/neu)
 content/<kat>/<thema>/*.md Inhalte der Landingpages
 app/[kategorie]/…          Kategorie-, Unterthemen- und Landingpage-Routen
 app/seitenstruktur         HTML-Übersicht aller Seiten
@@ -94,7 +121,7 @@ lib/linking.ts             Verlinkungsregeln, Weiterlesen
 lib/seo-audit.ts           SEO- und Qualitätsprüfung
 lib/site.ts                Website- und Spendenbox-Konfiguration
 lib/affiliate.ts           Affiliate-Register
-scripts/                   check-content.ts, export-structure.ts
+scripts/                   check-content.ts, export-structure.ts, new-page.ts
 ```
 
 Später kann `lib/hierarchy.ts` durch eine Datenbank im CMS ersetzt werden. Seiten, Menüs und Prüfungen bleiben dabei unverändert.

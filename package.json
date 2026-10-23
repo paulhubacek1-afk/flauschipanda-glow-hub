@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "check:content": "tsx scripts/check-content.ts",
     "check:release": "tsx scripts/check-content.ts --strict",
-    "struktur": "tsx scripts/export-structure.ts"
+    "struktur": "tsx scripts/export-structure.ts",
+    "neu": "tsx scripts/new-page.ts"
   },
   "engines": {
     "node": ">=20.9.0"

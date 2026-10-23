@@ -12,7 +12,7 @@ export default function NotFound() {
       <p className="text-muted-foreground">Vielleicht ist sie noch in Vorbereitung oder wurde verschoben.</p>
       <div className="flex flex-wrap justify-center gap-3">
         <Button asChild>
-          <Link href="/home">Zur Startseite</Link>
+          <Link href="/startseite">Zur Startseite</Link>
         </Button>
         <Button asChild variant="outline">
           <Link href="/seitenstruktur">Alle Seiten</Link>

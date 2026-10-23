@@ -6,6 +6,7 @@
  * WICHTIG: Die URLs unten sind Platzhalter. Erst echte Partnerlinks eintragen,
  * wenn ein Partnerprogramm abgeschlossen und in Datenschutz/Transparenz genannt ist.
  * Das Prüfskript warnt, solange `placeholder: true` gesetzt ist.
+ * Über `topics` schlägt die Automatik passende Produkte für neue Seiten vor.
  */
 export interface AffiliateProduct {
   id: string;
@@ -15,6 +16,8 @@ export interface AffiliateProduct {
   pitch: string;
   url: string;
   network: string;
+  /** Wo das Produkt automatisch vorgeschlagen wird: "kategorie" oder "kategorie/unterthema" */
+  topics: string[];
   placeholder?: boolean;
 }
 
@@ -26,6 +29,7 @@ export const affiliateProducts: AffiliateProduct[] = [
     pitch: "Weiche, waschbare Tücher in mehreren Farben – so trennst du Lack, Glas und Innenraum sauber.",
     url: "https://www.example.com/partner/mikrofaser-set",
     network: "Platzhalter",
+    topics: ["autos-mobilitaet/pflege", "autos-mobilitaet"],
     placeholder: true,
   },
   {
@@ -35,6 +39,7 @@ export const affiliateProducts: AffiliateProduct[] = [
     pitch: "Klassiker für frostige Morgen: Kratzkante aus Kunststoff, gefütterter Handschuh.",
     url: "https://www.example.com/partner/eiskratzer",
     network: "Platzhalter",
+    topics: ["autos-mobilitaet/pflege"],
     placeholder: true,
   },
   {
@@ -44,6 +49,7 @@ export const affiliateProducts: AffiliateProduct[] = [
     pitch: "Ablesbarer Druck an jeder Tankstelle oder zu Hause – Grundlage für sparsames Fahren.",
     url: "https://www.example.com/partner/reifendruckpruefer",
     network: "Platzhalter",
+    topics: ["autos-mobilitaet/pflege", "autos-mobilitaet/sparen", "autos-mobilitaet"],
     placeholder: true,
   },
   {
@@ -53,6 +59,7 @@ export const affiliateProducts: AffiliateProduct[] = [
     pitch: "Hält das Smartphone im Blickfeld für die Navigation, ohne dass du es in die Hand nimmst.",
     url: "https://www.example.com/partner/handyhalterung",
     network: "Platzhalter",
+    topics: ["autos-mobilitaet/zubehoer", "autos-mobilitaet"],
     placeholder: true,
   },
   {
@@ -62,6 +69,7 @@ export const affiliateProducts: AffiliateProduct[] = [
     pitch: "Kompakte Starthilfe ohne zweites Auto – vor dem Kauf auf Eignung für den eigenen Motor achten.",
     url: "https://www.example.com/partner/starthilfe",
     network: "Platzhalter",
+    topics: ["autos-mobilitaet/zubehoer"],
     placeholder: true,
   },
   {
@@ -71,6 +79,7 @@ export const affiliateProducts: AffiliateProduct[] = [
     pitch: "Krümel und Sand aus Fußraum und Sitzritzen holen, ohne Kabel zur Steckdose.",
     url: "https://www.example.com/partner/akkusauger",
     network: "Platzhalter",
+    topics: ["autos-mobilitaet/pflege", "autos-mobilitaet/zubehoer"],
     placeholder: true,
   },
   {
@@ -80,6 +89,7 @@ export const affiliateProducts: AffiliateProduct[] = [
     pitch: "Wer die Tagesration abwiegt statt zu schätzen, füttert gleichmäßiger und erkennt Veränderungen früher.",
     url: "https://www.example.com/partner/kuechenwaage",
     network: "Platzhalter",
+    topics: ["tiere/hunde", "tiere/katzen"],
     placeholder: true,
   },
   {
@@ -89,6 +99,7 @@ export const affiliateProducts: AffiliateProduct[] = [
     pitch: "Edelstahlnäpfe sind robust und lassen sich gründlich reinigen – sinnvoll vor allem bei Nassfutter.",
     url: "https://www.example.com/partner/edelstahl-napf",
     network: "Platzhalter",
+    topics: ["tiere/hunde", "tiere/katzen", "tiere"],
     placeholder: true,
   },
   {
@@ -98,6 +109,7 @@ export const affiliateProducts: AffiliateProduct[] = [
     pitch: "Hält geöffnetes Trockenfutter trocken und schützt vor Schädlingen – Originalverpackung am besten mit hineinstellen.",
     url: "https://www.example.com/partner/vorratsdose",
     network: "Platzhalter",
+    topics: ["tiere/hunde", "tiere/katzen"],
     placeholder: true,
   },
 ];

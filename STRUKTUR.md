@@ -1,6 +1,6 @@
-# FlauschiPandas – Seiten-Hierarchie
+# Panda Toolbox (FlauschiPandas) – Seiten-Hierarchie
 
-13 Hauptkategorien · 84 Unterthemen · 335 Landingpages · 12 live
+15 Hauptkategorien · 96 Unterthemen · 387 Landingpages · 12 live
 
 Hauptkategorie → Unterthema → Landingpage. ● = live, ○ = geplant. Quelle: `lib/hierarchy.ts` · neu erzeugen mit `npm run struktur`
 
@@ -85,7 +85,6 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 │   ├── ○ Haustier anschaffen  /tiere/tierwissen/haustier-anschaffen
 │   ├── ○ Tierarztkosten  /tiere/tierwissen/tierarztkosten
 │   ├── ○ Tierversicherungen im Vergleich  /tiere/tierwissen/tierversicherungen-im-vergleich
-│   ├── ○ Tiere im Urlaub  /tiere/tierwissen/tiere-im-urlaub
 │   └── ○ Giftige Lebensmittel für Haustiere  /tiere/tierwissen/giftige-lebensmittel-fuer-haustiere
 ├── Tier-Malvorlagen  (/tiere/tier-malvorlagen)
 │   ├── ○ Hunde-Malvorlagen  /tiere/tier-malvorlagen/hunde-malvorlagen
@@ -124,7 +123,6 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 ├── Ausflüge mit Kindern  (/babys-kinder/ausfluege)
 │   ├── ○ Zoos mit Kindern  /babys-kinder/ausfluege/zoos-mit-kindern
 │   ├── ○ Freizeitparks mit Kindern  /babys-kinder/ausfluege/freizeitparks-mit-kindern
-│   ├── ○ Familienurlaub  /babys-kinder/ausfluege/familienurlaub
 │   ├── ○ Ausflugsziele Österreich  /babys-kinder/ausfluege/ausflugsziele-oesterreich
 │   └── ○ Ausflugsziele Deutschland  /babys-kinder/ausfluege/ausflugsziele-deutschland
 └── Kinder & KI  (/babys-kinder/kinder-ki)
@@ -159,7 +157,35 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
     ├── ○ Umzug-Checkliste  /haushalt-wohnen/wohnen/umzug-checkliste
     └── ○ Immobilien-Basics  /haushalt-wohnen/wohnen/immobilien-basics
 
-4 KI-Tools & Prompts  (/ki)
+4 Gesundheit & Wohlbefinden  (/gesundheit-wohlbefinden)
+├── Ernährung  (/gesundheit-wohlbefinden/ernaehrung)
+│   ├── ○ Gesunde Ernährung  /gesundheit-wohlbefinden/ernaehrung/gesunde-ernaehrung
+│   ├── ○ Gesund kochen im Alltag  /gesundheit-wohlbefinden/ernaehrung/gesund-kochen-im-alltag
+│   ├── ○ Genug trinken  /gesundheit-wohlbefinden/ernaehrung/genug-trinken
+│   └── ○ Gesunde Snacks  /gesundheit-wohlbefinden/ernaehrung/gesunde-snacks
+├── Bewegung & Fitness  (/gesundheit-wohlbefinden/bewegung)
+│   ├── ○ Fitness für Einsteiger  /gesundheit-wohlbefinden/bewegung/fitness-fuer-einsteiger
+│   ├── ○ Workouts für zu Hause  /gesundheit-wohlbefinden/bewegung/workouts-fuer-zu-hause
+│   ├── ○ Mehr Bewegung im Alltag  /gesundheit-wohlbefinden/bewegung/mehr-bewegung-im-alltag
+│   └── ○ Wandern & Spazieren  /gesundheit-wohlbefinden/bewegung/wandern-und-spazieren
+├── Schlaf  (/gesundheit-wohlbefinden/schlaf)
+│   ├── ○ Besser schlafen  /gesundheit-wohlbefinden/schlaf/besser-schlafen
+│   ├── ○ Abendroutine  /gesundheit-wohlbefinden/schlaf/abendroutine
+│   └── ○ Schlafzimmer optimieren  /gesundheit-wohlbefinden/schlaf/schlafzimmer-optimieren
+├── Achtsamkeit & Motivation  (/gesundheit-wohlbefinden/achtsamkeit)
+│   ├── ○ Stress reduzieren  /gesundheit-wohlbefinden/achtsamkeit/stress-reduzieren
+│   ├── ○ Achtsamkeit lernen  /gesundheit-wohlbefinden/achtsamkeit/achtsamkeit-lernen
+│   ├── ○ Meditation für Einsteiger  /gesundheit-wohlbefinden/achtsamkeit/meditation-fuer-einsteiger
+│   ├── ○ Positive Routinen  /gesundheit-wohlbefinden/achtsamkeit/positive-routinen
+│   ├── ○ Motivation finden  /gesundheit-wohlbefinden/achtsamkeit/motivation-finden
+│   └── ○ Spiritualität im Alltag  /gesundheit-wohlbefinden/achtsamkeit/spiritualitaet-im-alltag
+└── Gesundheit im Alltag  (/gesundheit-wohlbefinden/alltag)
+    ├── ○ Hausapotheke  /gesundheit-wohlbefinden/alltag/hausapotheke
+    ├── ○ Vorsorge-Checkliste  /gesundheit-wohlbefinden/alltag/vorsorge-checkliste
+    ├── ○ Bildschirmzeit reduzieren  /gesundheit-wohlbefinden/alltag/bildschirmzeit-reduzieren
+    └── ○ Ergonomisch arbeiten  /gesundheit-wohlbefinden/alltag/ergonomisch-arbeiten
+
+5 KI-Tools & Prompts  (/ki)
 ├── ChatGPT  (/ki/chatgpt)
 │   ├── ● ChatGPT Prompts  /ki/chatgpt/prompts
 │   ├── ○ ChatGPT für SEO  /ki/chatgpt/seo
@@ -174,7 +200,6 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 │   ├── ○ Gemini Prompts  /ki/gemini/prompts
 │   └── ○ Gemini im Alltag  /ki/gemini/alltag
 ├── KI-Bildgeneratoren  (/ki/bildgeneratoren)
-│   ├── ○ Bild-Prompts  /ki/bildgeneratoren/bild-prompts
 │   ├── ○ Bildgeneratoren im Vergleich  /ki/bildgeneratoren/bildgeneratoren-im-vergleich
 │   └── ○ Glow-Bilder erstellen  /ki/bildgeneratoren/glow-bilder-erstellen
 ├── KI-Basics  (/ki/ki-basics)
@@ -183,14 +208,15 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 │   ├── ○ KI-Workflows  /ki/ki-basics/ki-workflows
 │   ├── ○ KI-Automatisierung  /ki/ki-basics/ki-automatisierung
 │   └── ○ KI und Datenschutz  /ki/ki-basics/ki-und-datenschutz
-└── Prompt-Sammlungen  (/ki/prompts)
+└── Prompts  (/ki/prompts)
+    ├── ○ Bild-Prompts  /ki/prompts/bild-prompts
     ├── ○ Business-Prompts  /ki/prompts/business-prompts
     ├── ○ Schreib-Prompts  /ki/prompts/schreib-prompts
     ├── ○ Lern-Prompts  /ki/prompts/lern-prompts
     └── ○ Social-Media-Prompts  /ki/prompts/social-media-prompts
 
-5 Creator-Tipps  (/creator)
-├── YouTube-Wachstum  (/creator/youtube)
+6 Creator-Tipps  (/creator)
+├── YouTube  (/creator/youtube)
 │   ├── ○ YouTube-Kanal starten  /creator/youtube/youtube-kanal-starten
 │   ├── ○ Algorithmus-Tipps  /creator/youtube/algorithmus-tipps
 │   ├── ○ Thumbnails gestalten  /creator/youtube/thumbnails-gestalten
@@ -213,20 +239,26 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
     ├── ○ Discord für Creator  /creator/community/discord-fuer-creator
     └── ○ Mit Kommentaren arbeiten  /creator/community/mit-kommentaren-arbeiten
 
-6 Tools & Apps  (/tools-apps)
+7 Tools & Apps  (/tools-apps)
+├── Canva-Alternativen  (/tools-apps/canva-alternativen)
+│   ├── ○ Kostenlose Canva-Alternativen  /tools-apps/canva-alternativen/kostenlose-canva-alternativen
+│   ├── ○ Canva-Alternativen im Vergleich  /tools-apps/canva-alternativen/canva-alternativen-im-vergleich
+│   ├── ○ Design-Tools für Einsteiger  /tools-apps/canva-alternativen/design-tools-fuer-einsteiger
+│   └── ○ Glow-Plugins  /tools-apps/canva-alternativen/glow-plugins
+├── YouTube-Tools  (/tools-apps/youtube-tools)
+│   ├── ○ Beste YouTube-Tools  /tools-apps/youtube-tools/beste-youtube-tools
+│   ├── ○ Thumbnail-Tools  /tools-apps/youtube-tools/thumbnail-tools
+│   └── ○ Tools für YouTube-Shorts  /tools-apps/youtube-tools/tools-fuer-youtube-shorts
+├── Keyword-Tools  (/tools-apps/keyword-tools)
+│   ├── ○ Kostenlose Keyword-Tools  /tools-apps/keyword-tools/kostenlose-keyword-tools
+│   ├── ○ Keyword-Tools im Vergleich  /tools-apps/keyword-tools/keyword-tools-im-vergleich
+│   ├── ○ Keyword-Recherche Anleitung  /tools-apps/keyword-tools/keyword-recherche-anleitung
+│   └── ○ Keyword-Tools für YouTube  /tools-apps/keyword-tools/keyword-tools-fuer-youtube
 ├── Online-Rechner  (/tools-apps/rechner)
 │   ├── ○ Spritkosten-Rechner  /tools-apps/rechner/spritkosten-rechner
 │   ├── ○ Stromkosten-Rechner  /tools-apps/rechner/stromkosten-rechner
 │   ├── ○ Budget-Rechner  /tools-apps/rechner/budget-rechner
 │   └── ○ Prozentrechner  /tools-apps/rechner/prozentrechner
-├── YouTube-Tools  (/tools-apps/youtube-tools)
-│   ├── ○ Beste YouTube-Tools  /tools-apps/youtube-tools/beste-youtube-tools
-│   ├── ○ Thumbnail-Tools  /tools-apps/youtube-tools/thumbnail-tools
-│   └── ○ Keyword-Tools für YouTube  /tools-apps/youtube-tools/keyword-tools-fuer-youtube
-├── Design-Tools  (/tools-apps/design-tools)
-│   ├── ○ Kostenlose Design-Tools  /tools-apps/design-tools/kostenlose-design-tools
-│   ├── ○ Canva-Alternativen  /tools-apps/design-tools/canva-alternativen
-│   └── ○ Glow-Plugins  /tools-apps/design-tools/glow-plugins
 ├── Business-Tools  (/tools-apps/business-tools)
 │   ├── ○ Rechnungs-Tools  /tools-apps/business-tools/rechnungs-tools
 │   ├── ○ Projektmanagement-Tools  /tools-apps/business-tools/projektmanagement-tools
@@ -243,7 +275,7 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
     ├── ○ Kostenlose Bildbearbeitung  /tools-apps/alternativen/kostenlose-bildbearbeitung
     └── ○ Kostenlose Videobearbeitung  /tools-apps/alternativen/kostenlose-videobearbeitung
 
-7 Musik & Entertainment  (/musik-entertainment)
+8 Musik & Entertainment  (/musik-entertainment)
 ├── EDM  (/musik-entertainment/edm)
 │   ├── ○ EDM für Einsteiger  /musik-entertainment/edm/edm-fuer-einsteiger
 │   ├── ○ EDM-Tracks  /musik-entertainment/edm/edm-tracks
@@ -264,7 +296,7 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
     ├── ○ Music-Branding  /musik-entertainment/music-branding/music-branding
     └── ○ Cover-Design  /musik-entertainment/music-branding/cover-design
 
-8 Finanzen & Sparen  (/finanzen-sparen)
+9 Finanzen & Sparen  (/finanzen-sparen)
 ├── Sparen im Alltag  (/finanzen-sparen/sparen)
 │   ├── ○ Spartipps  /finanzen-sparen/sparen/spartipps
 │   ├── ○ Günstig leben  /finanzen-sparen/sparen/guenstig-leben
@@ -287,7 +319,7 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
     ├── ○ Preisvergleich-Tipps  /finanzen-sparen/preisvergleiche/preisvergleich-tipps
     └── ○ Kostenlose Finanz-Tools  /finanzen-sparen/preisvergleiche/kostenlose-finanz-tools
 
-9 Zoos & Tierparks  (/zoos)
+10 Zoos & Aquarien  (/zoos)
 ├── Zoo Berlin  (/zoos/zoo-berlin)
 │   ├── ○ Zoo Berlin Tickets  /zoos/zoo-berlin/tickets
 │   ├── ○ Zoo Berlin Preise  /zoos/zoo-berlin/preise
@@ -321,13 +353,19 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 │   ├── ○ Zoo Zürich Öffnungszeiten  /zoos/zoo-zuerich/oeffnungszeiten
 │   ├── ○ Hotels in der Nähe vom Zoo Zürich  /zoos/zoo-zuerich/hotels
 │   └── ○ Zoo Zürich Tipps  /zoos/zoo-zuerich/tipps
+├── SEA LIFE  (/zoos/sea-life)
+│   ├── ○ SEA LIFE Tickets  /zoos/sea-life/tickets
+│   ├── ○ Hotels in der Nähe von SEA LIFE  /zoos/sea-life/hotels
+│   ├── ○ SEA LIFE Standorte  /zoos/sea-life/standorte
+│   ├── ○ SEA LIFE mit Kindern  /zoos/sea-life/mit-kindern
+│   └── ○ SEA LIFE Tipps  /zoos/sea-life/tipps
 └── Zoo-Ratgeber  (/zoos/ratgeber)
     ├── ○ Zoos mit Pandas in Europa  /zoos/ratgeber/zoos-mit-pandas-in-europa
     ├── ○ Zoo-Jahreskarte  /zoos/ratgeber/zoo-jahreskarte
     ├── ○ Zoobesuch mit Kindern  /zoos/ratgeber/zoobesuch-mit-kindern
     └── ○ Zoo bei Regen  /zoos/ratgeber/zoo-bei-regen
 
-10 Freizeitparks  (/freizeitparks)
+11 Freizeitparks  (/freizeitparks)
 ├── Europa-Park  (/freizeitparks/europa-park)
 │   ├── ○ Europa-Park Tickets  /freizeitparks/europa-park/tickets
 │   ├── ○ Europa-Park Hotels  /freizeitparks/europa-park/hotels
@@ -348,11 +386,13 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
 │   └── ○ Heide Park Tipps  /freizeitparks/heide-park/tipps
 ├── Familypark  (/freizeitparks/familypark)
 │   ├── ○ Familypark Tickets  /freizeitparks/familypark/tickets
+│   ├── ○ Familypark Hotels  /freizeitparks/familypark/hotels
 │   ├── ○ Attraktionen im Familypark  /freizeitparks/familypark/attraktionen
 │   ├── ○ Familypark mit Kindern  /freizeitparks/familypark/mit-kindern
 │   └── ○ Familypark Tipps  /freizeitparks/familypark/tipps
 ├── Wiener Prater  (/freizeitparks/wiener-prater)
 │   ├── ○ Wiener Prater Tickets  /freizeitparks/wiener-prater/tickets
+│   ├── ○ Wiener Prater Hotels  /freizeitparks/wiener-prater/hotels
 │   ├── ○ Attraktionen im Wiener Prater  /freizeitparks/wiener-prater/attraktionen
 │   ├── ○ Wiener Prater mit Kindern  /freizeitparks/wiener-prater/mit-kindern
 │   └── ○ Wiener Prater Tipps  /freizeitparks/wiener-prater/tipps
@@ -362,7 +402,35 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
     ├── ○ Freizeitparks in Österreich  /freizeitparks/ratgeber/freizeitparks-in-oesterreich
     └── ○ Freizeitparks in Deutschland  /freizeitparks/ratgeber/freizeitparks-in-deutschland
 
-11 Autos & Mobilität  (/autos-mobilitaet)
+12 Urlaub & Reisen  (/urlaub-reisen)
+├── Urlaubsziele  (/urlaub-reisen/urlaubsziele)
+│   ├── ○ Urlaub in Österreich  /urlaub-reisen/urlaubsziele/urlaub-in-oesterreich
+│   ├── ○ Urlaub in Deutschland  /urlaub-reisen/urlaubsziele/urlaub-in-deutschland
+│   ├── ○ Urlaub am Meer  /urlaub-reisen/urlaubsziele/urlaub-am-meer
+│   ├── ○ Städtereisen  /urlaub-reisen/urlaubsziele/staedtereisen
+│   └── ○ Urlaub in den Bergen  /urlaub-reisen/urlaubsziele/urlaub-in-den-bergen
+├── Familienurlaub  (/urlaub-reisen/familienurlaub)
+│   ├── ○ Familienurlaub planen  /urlaub-reisen/familienurlaub/familienurlaub-planen
+│   ├── ○ Familienhotels  /urlaub-reisen/familienurlaub/familienhotels
+│   ├── ○ Urlaub mit Baby  /urlaub-reisen/familienurlaub/urlaub-mit-baby
+│   └── ○ Urlaub mit Kleinkind  /urlaub-reisen/familienurlaub/urlaub-mit-kleinkind
+├── Urlaub mit Hund  (/urlaub-reisen/mit-hund)
+│   ├── ○ Urlaub mit Hund planen  /urlaub-reisen/mit-hund/urlaub-mit-hund-planen
+│   ├── ○ Hundefreundliche Hotels  /urlaub-reisen/mit-hund/hundefreundliche-hotels
+│   ├── ○ Reisen mit Haustier  /urlaub-reisen/mit-hund/reisen-mit-haustier
+│   └── ○ Packliste für den Hund  /urlaub-reisen/mit-hund/packliste-fuer-den-hund
+├── Reiseplanung  (/urlaub-reisen/reiseplanung)
+│   ├── ○ Packliste Urlaub  /urlaub-reisen/reiseplanung/packliste-urlaub
+│   ├── ○ Günstig reisen  /urlaub-reisen/reiseplanung/guenstig-reisen
+│   ├── ○ Reiseversicherung  /urlaub-reisen/reiseplanung/reiseversicherung
+│   ├── ○ Roadtrip planen  /urlaub-reisen/reiseplanung/roadtrip-planen
+│   └── ○ Reise-Apps  /urlaub-reisen/reiseplanung/reise-apps
+└── Hotels & Unterkünfte  (/urlaub-reisen/unterkuenfte)
+    ├── ○ Hotel finden  /urlaub-reisen/unterkuenfte/hotel-finden
+    ├── ○ Ferienwohnung oder Hotel  /urlaub-reisen/unterkuenfte/ferienwohnung-oder-hotel
+    └── ○ Camping für Einsteiger  /urlaub-reisen/unterkuenfte/camping-fuer-einsteiger
+
+13 Autos & Mobilität  (/autos-mobilitaet)
 ├── Fahrzeugporträts  (/autos-mobilitaet/fahrzeugportraets)
 │   ├── ○ Modellporträts  /autos-mobilitaet/fahrzeugportraets/modellportraets
 │   ├── ○ Neuvorstellungen  /autos-mobilitaet/fahrzeugportraets/neuvorstellungen
@@ -416,7 +484,7 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
     ├── ○ Branchen-News  /autos-mobilitaet/news/branchen-news
     └── ○ Rückrufe  /autos-mobilitaet/news/rueckrufe
 
-12 Projekte & Community  (/projekte-community)
+14 Projekte & Community  (/projekte-community)
 ├── KiToolsReport  (/projekte-community/kitoolsreport)
 │   ├── ○ Über KiToolsReport  /projekte-community/kitoolsreport/ueber-kitoolsreport
 │   ├── ○ Tool-Reports  /projekte-community/kitoolsreport/tool-reports
@@ -434,7 +502,7 @@ Jede Landingpage: Infotext · FAQ · Vergleich · Affiliate-Box · Spendenbox Pa
     ├── ○ FAQ  /projekte-community/ueber/faq
     └── ○ Kontakt  /projekte-community/ueber/kontakt
 
-13 Panda-Branding  (/panda-branding)
+15 Panda-Branding  (/panda-branding)
 ├── Panda GreenCore  (/panda-branding/greencore)
 │   ├── ○ Was ist Panda GreenCore?  /panda-branding/greencore/was-ist-panda-greencore
 │   ├── ○ Spenden  /panda-branding/greencore/spenden

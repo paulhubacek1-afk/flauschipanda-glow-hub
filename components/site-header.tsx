@@ -52,7 +52,7 @@ export function SiteHeader() {
       </a>
       <div ref={panelRef} className="relative">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
-          <Link href="/home" className="flex items-center gap-2.5" aria-label={`${siteConfig.name} – Startseite`}>
+          <Link href="/startseite" className="flex items-center gap-2.5" aria-label={`${siteConfig.name} – Startseite`}>
             <PandaLogo />
             <span className="font-display text-lg font-semibold tracking-tight">
               Flauschi<span className="text-glow">Pandas</span>
@@ -61,14 +61,14 @@ export function SiteHeader() {
 
           <nav aria-label="Hauptnavigation" className="hidden items-center gap-1 md:flex">
             <Link
-              href="/home"
-              aria-current={pathname === "/home" ? "page" : undefined}
+              href="/startseite"
+              aria-current={pathname === "/startseite" ? "page" : undefined}
               className={cn(
                 "rounded-md px-3 py-2 text-sm text-foreground/75 hover:bg-accent hover:text-accent-foreground",
-                pathname === "/home" && "bg-primary/10 text-primary",
+                pathname === "/startseite" && "bg-primary/10 text-primary",
               )}
             >
-              Home
+              Startseite
             </Link>
             <button
               type="button"
@@ -151,8 +151,8 @@ export function SiteHeader() {
         <nav id="mobile-nav" aria-label="Mobile Navigation" className="max-h-[80vh] overflow-y-auto border-t border-primary/10 px-4 pb-6 md:hidden">
           <ul className="flex flex-col gap-1 pt-2">
             <li>
-              <Link href="/home" className="block rounded-md px-3 py-2.5 hover:bg-accent">
-                Home
+              <Link href="/startseite" className="block rounded-md px-3 py-2.5 hover:bg-accent">
+                Startseite
               </Link>
             </li>
             {hierarchy.map((c) => (

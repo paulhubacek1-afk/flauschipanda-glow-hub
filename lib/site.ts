@@ -5,7 +5,7 @@
  */
 export const siteConfig = {
   name: "FlauschiPandas",
-  tagline: "Die Panda-Toolbox für Alltag, Tiere, Freizeit & KI",
+  tagline: "Die Panda Toolbox – Themen- und Communityportal",
   locale: "de_AT",
   language: "de",
   defaultAuthor: "FlauschiPandas Redaktion",
@@ -35,6 +35,8 @@ export const donationConfig = {
   text: "FlauschiPandas ist kostenlos und ohne Bezahlschranke. Wenn dir diese Seite geholfen hat, kannst du mit einer freiwilligen Spende an Panda GreenCore etwas zurückgeben.",
   /** Wofür Spenden konkret verwendet werden – Pflicht vor dem Livegang. */
   purpose: "",
+  /** Kurzer Hinweis, der automatisch auf jeder Landingpage erscheint. */
+  notice: "Diese Seite ist Teil der Panda Toolbox. Mit Panda GreenCore wächst hier ein eigenes Projekt, das du freiwillig unterstützen kannst.",
   url: process.env.NEXT_PUBLIC_DONATION_URL?.trim() || "",
   aboutHref: "/panda-branding/greencore",
 };
