@@ -1,497 +1,100 @@
-# FlauschiPanda Glow Hub
+# 🐼 FlauschiPandas – die Panda-Toolbox
 
-erstelle mir eine website erstelle mir eine website mit diesen voraussetzungen mit backend wo man alles anpassen kann auch user usw. und deppeneinfach der hauptadmin paul\_hub Lumpazivagabundus2009 kann alles auch files verwalten. Die Seite soll aussehen wie Crackslist nur 100% Moderner based on html without home.html just /home 1. Tiere
-Die stärkste Traffic‑Kategorie überhaupt.
-Hunde
-Katzen
-Pferde
-Hasen / Kaninchen
-Hamster
-Meerschweinchen
-Pandas
-Wölfe
-Füchse
-Tier‑Malvorlagen
+Next.js (App Router) · React · Tailwind CSS v4 · shadcn/ui · TypeScript
 
-2. Babys & Kinder
-
-Perfekt wegen deinem Malbuch + Glow‑Kinderdesigns.
-Baby‑Basics
-Kinder‑Malvorlagen
-Glow‑Kinderdesigns
-Lernkarten
-Bastelideen
-Kinder‑Tiere
-Baby‑Tipps
-Kinder‑KI‑Prompts
-
-3. Haushalt & Wohnen
-
-Jeder braucht das — extrem klickstark.
-Haushaltstipps
-Glow‑Wohnideen
-Deko‑Tipps
-Immobilien‑Basics
-Wohnungssuche
-Ordnung & Putzen
-Sparen im Haushalt
-Glow‑Zimmer
-
-4. KI‑Tools & Prompts
-
-Heutige Zeit → KI ist überall.
-KI‑Basics
-KI‑Prompts
-Tier‑KI‑Prompts
-Kinder‑KI‑Prompts
-KI‑Automatisierung
-KI‑Fehler vermeiden
-KI‑Workflows
-KI‑Tools erklärt
-
-5. Creator‑Tipps
-
-Passt perfekt zu deinem YouTube‑Branding.
-Branding
-Glow‑Design
-Viral‑Shorts
-Storytelling
-Content‑Planung
-Monetarisierung
-Algorithmus‑Tipps
-Community‑Aufbau
-
-1. 
-2. Tools & Apps
-
-Jeder braucht Tools — super für Affiliate.
-YouTube‑Tools
-Design‑Tools
-KI‑Tools
-Business‑Tools
-Social‑Media‑Tools
-Affiliate‑Tools
-Automatisierungs‑Tools
-Glow‑Plugins
-
-7. Musik & Entertainment
-
-Dein Kanal → Branding.
-EDM‑Tracks
-YouTube‑Musik
-Glow‑Music‑Branding
-Playlist‑Tipps
-Creator‑Music
-
-8. Finanzen & Sparen
-
-Heutige Zeit → jeder sucht Spar‑Tipps.
-Sparen im Alltag
-Budget‑Tipps
-Günstig leben
-Finanz‑Basics
-Schulden vermeiden
-Geld verdienen online
-
-9. Projekte & Community
-
-Dein Hub.
-KiToolsReport
-Panda‑Merch
-Blog
-FAQ
-Über mich
-Kontakt
-Discord‑Community
-
-10. Panda‑Branding
-
-Deine Identität.
-Warum Panda?
-Panda‑Glow‑Style
-Panda‑Story
-Panda‑Designs
-Panda‑Wallpaper
-Panda‑KI‑Prompts
-✔ 10 Spalten
-✔ 80+ Themen
-✔ Glow‑Branding
-✔ Tiere + Babys + KI + Creator + Alltag
-✔ Realistisch für heutige Zeit
-✔ Klickstark
-✔Panda‑Stylespirituelle katigorie vlt noch xD/\* ===== Basis Layout & Body ===== \*/
-body {
-margin: 0;
-padding: 0;
-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-background: radial-gradient(circle at top, #00111a 0, #000000 55%);
-color: #ffffff;
-}
-/\* Container optional \*/
-.panda-container {
-max-width: 1100px;
-margin: 0 auto;
-padding: 20px;
-}
-/\* ===== Glow Text & Headings ===== \*/
-.neon-text {
-color: #00ffff;
-text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
-}
-h1, h2, h3 {
-margin: 0 0 10px;
-}
-/\* ===== Hero / Header ===== \*/
-.panda-hero {
-text-align: center;
-padding: 40px 20px;
-background: linear-gradient(135deg, #001f33, #000000);
-box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
-border-bottom: 1px solid rgba(0, 255, 255, 0.3);
-}
-/\* ===== GreenCore Intro ===== \*/
-.panda-greencore-intro {
-margin: 30px 0;
-padding: 20px;
-border-radius: 12px;
-background: rgba(255, 255, 255, 0.03);
-box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
-}
-/\* ===== Spenden‑Box ===== \*/
-.panda-donate-box {
-background: rgba(255, 255, 255, 0.05);
-padding: 25px;
-border-radius: 12px;
-box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
-margin: 30px 0;
-text-align: center;
-}
-.panda-donate-btn {
-display: inline-block;
-margin-top: 15px;
-padding: 12px 24px;
-background: #00ffff55;
-color: #ffffff;
-border-radius: 8px;
-text-decoration: none;
-font-weight: bold;
-box-shadow: 0 0 12px #00ffff;
-transition: 0.2s;
-}
-.panda-donate-btn:hover {
-background: #00ffff99;
-box-shadow: 0 0 20px #00ffff;
-}
-.panda-donate-small {
-margin-top: 10px;
-font-size: 0.85rem;
-color: #cccccc;
-}
-/\* ===== Kategorien‑Grid ===== \*/
-.panda-categories {
-margin: 30px 0;
-}
-.panda-grid {
-display: grid;
-grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-gap: 15px;
-margin-top: 15px;
-}
-.panda-card {
-display: block;
-padding: 14px 16px;
-border-radius: 10px;
-background: rgba(255, 255, 255, 0.04);
-color: #ffffff;
-text-decoration: none;
-text-align: center;
-box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
-transition: 0.2s;
-}
-.panda-card:hover {
-background: rgba(0, 255, 255, 0.15);
-box-shadow: 0 0 22px rgba(0, 255, 255, 0.5);
-}
-/\* ===== Affiliate‑Box ===== \*/
-.panda-affiliate-box {
-background: rgba(255, 255, 255, 0.05);
-padding: 25px;
-border-radius: 12px;
-box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
-margin: 30px 0;
-text-align: center;
-}
-.panda-affiliate-btn {
-display: inline-block;
-margin-top: 15px;
-padding: 12px 24px;
-background: #00ffff55;
-color: #ffffff;
-border-radius: 8px;
-text-decoration: none;
-font-weight: bold;
-box-shadow: 0 0 12px #00ffff;
-transition: 0.2s;
-}
-.panda-affiliate-btn:hover {
-background: #00ffff99;
-box-shadow: 0 0 20px #00ffff;
-}
-/\* ===== Top‑Listen ===== \*/
-.panda-toplist {
-background: rgba(255, 255, 255, 0.03);
-padding: 20px;
-border-radius: 12px;
-box-shadow: 0 0 15px rgba(0, 255, 255, 0.25);
-margin: 25px 0;
-}
-.panda-toplist ul {
-list-style: none;
-padding: 0;
-margin: 10px 0 0;
-}
-.panda-toplist li {
-margin: 6px 0;
-}
-/\* ===== Vergleichstabellen ===== \*/
-.panda-compare {
-width: 100%;
-border-collapse: collapse;
-margin-top: 20px;
-box-shadow: 0 0 15px rgba(0, 255, 255, 0.25);
-}
-.panda-compare th,
-.panda-compare td {
-border: 1px solid #00ffff55;
-padding: 10px;
-color: #ffffff;
-text-align: left;
-background: rgba(0, 10, 20, 0.8);
-}
-.panda-compare th {
-background: rgba(0, 40, 60, 0.9);
-}
-/\* ===== FAQ‑Bereich ===== \*/
-.panda-faq {
-background: rgba(255, 255, 255, 0.03);
-padding: 20px;
-border-radius: 12px;
-box-shadow: 0 0 15px rgba(0, 255, 255, 0.25);
-margin: 25px 0;
-}
-.panda-faq details {
-margin: 8px 0;
-}
-.panda-faq summary {
-cursor: pointer;
-}
-/\* ===== Malvorlagen & Prompts ===== \*/
-.panda-coloring,
-.panda-prompts {
-margin: 30px 0;
-padding: 20px;
-border-radius: 12px;
-background: rgba(255, 255, 255, 0.03);
-box-shadow: 0 0 15px rgba(0, 255, 255, 0.25);
-}
-.panda-prompts ul {
-list-style: none;
-padding: 0;
-margin: 10px 0 0;
-}
-.panda-prompts li {
-margin: 6px 0;
-}
-/\* ===== Footer ===== \*/
-.panda-footer {
-margin-top: 40px;
-padding: 20px;
-text-align: center;
-border-top: 1px solid rgba(0, 255, 255, 0.3);
-background: rgba(0, 0, 0, 0.8);
-font-size: 0.9rem;
-}
-.panda-footer a {
-color: #00ffff;
-text-decoration: none;
-}
-.panda-footer a:hover {
-text-decoration: underline;
-}
-/\* ===== Links allgemein ===== \*/
-a {
-color: #00ffff;
-}
-a:hover {
-color: #7fffff;
-}
-/\* ===== Responsive ===== \*/
-@media (max-width: 600px) {
-.panda-hero {
-padding: 30px 15px;
-}
-.panda-donate-box,
-.panda-affiliate-box,
-.panda-toplist,
-.panda-faq,
-.panda-greencore-intro {
-padding: 18px;
-}
-}.neon-text {
-color: #00ffff;
-text-shadow: 0 0 10px #00ffff;
-}
-.panda-affiliate-box, .panda-toplist, .panda-faq, .panda-donate-box {
-background: rgba(255,255,255,0.05);
-padding: 25px;
-border-radius: 12px;
-box-shadow: 0 0 20px rgba(0,255,255,0.4);
-margin: 30px 0;
-}
-.panda-affiliate-btn, .panda-donate-btn {
-display: inline-block;
-margin-top: 15px;
-padding: 12px 24px;
-background: #00ffff55;
-color: #fff;
-border-radius: 8px;
-text-decoration: none;
-font-weight: bold;
-box-shadow: 0 0 12px #00ffff;
-transition: 0.2s;
-}
-.panda-affiliate-btn:hover, .panda-donate-btn:hover {
-background: #00ffff99;
-box-shadow: 0 0 20px #00ffff;
-}
-.panda-donate-small {
-margin-top: 10px;
-font-size: 0.85rem;
-color: #ccc;
-}
-.panda-compare {
-width: 100%;
-border-collapse: collapse;
-margin-top: 20px;
-}
-.panda-compare th, .panda-compare td {
-border: 1px solid #00ffff55;
-padding: 10px;
-color: #fff;
-}Die Seite ist das Ziel Geld zu verdienen xd body {
-background: #0a0a0a;
-color: #fff;
-font-family: Arial, sans-serif;
-}
-.glow-header {
-text-align: center;
-padding: 25px 10px;
-margin-bottom: 25px;
-}
-.brand {
-display: flex;
-flex-direction: column;
-align-items: center;
-gap: 6px;
-}
-.neon-text {
-color: #fff;
-font-size: 2rem;
-text-shadow: 0 0 10px #00ffff,
-0 0 20px #00ffff,
-0 0 30px #00ffff;
-}
-.brand-sub {
-color: #ccc;
-font-size: 0.9rem;
-letter-spacing: 1px;
-text-shadow: 0 0 5px #00ffff55;
-}
-.glow-nav {
-display: flex;
-flex-wrap: wrap;
-justify-content: center;
-gap: 12px;
-margin-top: 20px;
-}
-.glow-nav a {
-color: #fff;
-padding: 8px 14px;
-border-radius: 6px;
-text-decoration: none;
-font-weight: 600;
-background: rgba(255,255,255,0.05);
-box-shadow: 0 0 10px rgba(0,255,255,0.4);
-transition: 0.2s;
-}
-.glow-nav a:hover {
-background: rgba(0,255,255,0.2);
-box-shadow: 0 0 15px rgba(0,255,255,0.7);
-}
-.glow-grid {
-display: grid;
-grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-gap: 20px;
-padding: 20px;
-}
-.glow-column {
-padding: 20px;
-background: rgba(255,255,255,0.05);
-border-radius: 10px;
-text-align: center;
-box-shadow: 0 0 10px rgba(0,255,255,0.4);
-transition: 0.2s;
-}
-.glow-column:hover {
-background: rgba(0,255,255,0.2);
-box-shadow: 0 0 15px rgba(0,255,255,0.7);
-}
-.glow-pulse {
-animation: pulse 2s infinite;
-}
-@keyframes pulse {
-0% { box-shadow: 0 0 10px rgba(0,255,255,0.4); }
-50% { box-shadow: 0 0 20px rgba(0,255,255,0.8); }
-100% { box-shadow: 0 0 10px rgba(0,255,255,0.4); }
-}
-.glow-list ul {
-list-style: none;
-padding: 0;
-}
-.glow-list li {
-margin: 10px 0;
-}
-.glow-list a {
-color: #00ffff;
-text-decoration: none;
-}
-.glow-content {
-padding: 20px;
-}
-
-1. Das ist die Glow css
-2. 
-
-Globaler panda identity <header class="glow-header">
- <div class="brand"> <h1 class="neon-text">🐼 FlauschiPandas Themenübersicht</h1> <p class="brand-sub">Glow‑Directory • KI‑Tools • Projekte</p> </div> <nav class="glow-nav"> <a href="/index.html">Start</a> <a href="/kitoolsreport/">KiToolsReport</a> <a href="/tiere/">Tiere</a> <a href="/kinder/">Kinder</a> <a href="/zoos/">Zoos</a> <a href="/freizeitparks/">Freizeitparks</a> <a href="/urlaub/">Urlaub</a> <a href="/tools/">Tools</a> <a href="/autos/">Autos</a> <a href="/panda/">Panda‑Branding</a> </nav> </header> ACHTUNG DIE DOMAIN IST NICHT FIX achte darauf das es ein cms ist und man die seite bearbeiten soll leg gleich ein impressum und datenschutzerklärung und cookiebanner an
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/c6b95fb4-0352-53db-a4eb-d7b84422cf81).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+```bash
+npm install
+cp .env.example .env.local
+npm run dev        # http://localhost:3000 → /home
 ```
+
+## Das Prinzip
+
+```
+Hauptkategorie  →  Unterthema  →  Landingpage (= eine Suchanfrage)
+/tiere          →  /tiere/hunde →  /tiere/hunde/gesundes-hundefutter
+```
+
+Die komplette Struktur steht in **einer** Datei: `lib/hierarchy.ts` (13 Kategorien, 84 Unterthemen, 335 Landingpages).
+Daraus entstehen automatisch:
+
+- das Mega-Menü, der Footer und die Breadcrumbs,
+- alle Kategorie- und Unterthemen-Seiten,
+- die Übersicht `/seitenstruktur` (HTML-Sitemap) und `STRUKTUR.md` (`npm run struktur`),
+- Sitemap-Einträge und die interne Verlinkung zwischen Geschwisterseiten.
+
+Neue Themen ergänzt du dort mit einer Zeile. Für wiederkehrende Strukturen gibt es Vorlagen:
+`pet()` für Haustiere, `wildAnimal()` für Wildtiere, `zoo()` für Zoos und `park()` für Freizeitparks.
+
+## Eine Landingpage live schalten
+
+Lege die passende Datei an: `content/<kategorie>/<unterthema>/<seite>.md`. Solange sie fehlt, ist die Seite „geplant“. Sie erscheint dann nur grau als „bald“, ohne Link und nicht in der Sitemap. So entstehen keine leeren Seiten.
+
+Jede Landingpage hat denselben Aufbau:
+
+1. **Infotext** – der Markdown-Text (`##`-Überschriften, keine H1)
+2. **FAQ** – `faq:` (inkl. FAQPage-Schema)
+3. **Vergleich** – `comparison:` (Tabelle)
+4. **Affiliate-Box** – `products:` (IDs aus `lib/affiliate.ts`) bzw. `[Text](aff:id)` im Text
+5. **Spendenbox Panda GreenCore** – automatisch, abschaltbar mit `donation: false`
+
+```yaml
+---
+seoTitle: "Gesundes Hundefutter: Woran du gute Qualität erkennst"   # max. 60 Zeichen
+description: "Meta-Beschreibung, 70–160 Zeichen"
+status: published                 # draft | review | published
+publishedAt: 2026-11-20T08:00:00+01:00   # Zukunft = geplante Veröffentlichung
+focusKeyword: "Gesundes Hundefutter"     # Standard: Titel aus der Hierarchie
+linkAnchors: ["Hundefutter"]       # über diese Begriffe verlinken ANDERE Seiten hierher
+related: [tiere/hunde/welpenfutter]
+products: [kuechenwaage-futter]
+faq: [{ q: "Frage?", a: "Antwort." }]
+comparison:
+  title: "Futterarten im Vergleich"
+  columns: ["Trockenfutter", "Nassfutter"]
+  rows: [{ label: "Wassergehalt", values: ["gering", "hoch"] }]
+sources: [{ title: "Quelle", url: "https://…" }]
+factCheck: { required: true, status: geprüft, reviewedBy: "Name", reviewedAt: 2026-11-18 }
+---
+```
+
+## Automatisch
+
+- **Interne Verlinkung:** Begriffe aus den `linkAnchors` anderer Seiten werden im Infotext verlinkt. Dafür gelten feste Grenzen: max. 1 Link pro Ziel, 1 pro Absatz und 5 pro Seite. Bei Gleichstand gewinnt das gleiche Unterthema. Zusätzlich gibt es eine Seitenleiste mit allen Seiten des Unterthemas und einen „Weiterlesen“-Bereich.
+- **SEO:** Jede Seite bekommt Canonical, Open Graph inkl. generiertem Bild sowie Article-, Breadcrumb- und FAQ-Schema. Dazu kommen Sitemap und robots.txt. Leere Kategorien und Unterthemen sind `noindex`.
+- **Geplante Veröffentlichung:** Die Seiten werden stündlich neu erzeugt (ISR). Der Cronjob `GET /api/revalidate` mit `Authorization: Bearer $CRON_SECRET` ist auf Vercel bereits in `vercel.json` eingetragen.
+- **Prüfung vor jedem Build** (`npm run check:content`):
+  - Länge von Titel und Beschreibung, Suchbegriff, dünner Inhalt
+  - Keyword-Kannibalisierung, defekte Links, verwaiste Seiten
+  - Dateien außerhalb der Hierarchie, fehlerhafte Vergleichstabellen, unbekannte Affiliate-IDs
+  - fehlende Quellen, ausstehende Faktenprüfung, Abdeckung je Kategorie
+- **Redaktions-Cockpit** `/redaktion` (nur lokal oder mit `ENABLE_EDITOR_DASHBOARD=true`): Abdeckung der Hierarchie, Redaktionsplan und Prüfergebnisse.
+
+## Vor dem Livegang
+
+`npm run check:release` blockiert die Veröffentlichung, solange einer dieser Punkte offen ist. Auf Vercel-Produktion passiert das automatisch.
+
+- Faktenprüfungen stehen noch aus.
+- Quellen fehlen.
+- Affiliate-Links sind noch Platzhalter.
+- **Spendenzweck** (`donationConfig.purpose` in `lib/site.ts`) oder **Spendenlink** (`NEXT_PUBLIC_DONATION_URL`) fehlen.
+
+Die mitgelieferten Seiten sind bewusst als „Prüfung ausstehend“ markiert. Ihre Quellen verweisen noch auf Startseiten, z. B. von ADAC, ÖAMTC, BfR oder FEDIAF, und müssen präzisiert werden. Impressum und Datenschutz sind Vorlagen. Bei Spenden bitte klären, welche rechtlichen Anforderungen für Panda GreenCore gelten.
+
+## Struktur
+
+```
+lib/hierarchy.ts           ★ Die Seiten-Hierarchie (Kategorie → Unterthema → Landingpage)
+content/<kat>/<thema>/*.md Inhalte der Landingpages
+app/[kategorie]/…          Kategorie-, Unterthemen- und Landingpage-Routen
+app/seitenstruktur         HTML-Übersicht aller Seiten
+lib/content.ts             Laden, Validierung (zod), Veröffentlichungslogik
+lib/markdown.ts            Markdown → HTML, Auto-Verlinkung, Affiliate-Links
+lib/linking.ts             Verlinkungsregeln, Weiterlesen
+lib/seo-audit.ts           SEO- und Qualitätsprüfung
+lib/site.ts                Website- und Spendenbox-Konfiguration
+lib/affiliate.ts           Affiliate-Register
+scripts/                   check-content.ts, export-structure.ts
+```
+
+Später kann `lib/hierarchy.ts` durch eine Datenbank im CMS ersetzt werden. Seiten, Menüs und Prüfungen bleiben dabei unverändert.

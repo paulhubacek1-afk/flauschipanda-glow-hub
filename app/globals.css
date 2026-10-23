@@ -1,0 +1,276 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   FlauschiPandas – Panda-Glow Design-Tokens (shadcn-kompatibel)
+   Dunkler Grund, Cyan-Neon als Primärfarbe.
+------------------------------------------------------------------- */
+:root {
+  --radius: 0.9rem;
+
+  --background: oklch(0.145 0.022 235);
+  --foreground: oklch(0.955 0.012 215);
+
+  --card: oklch(0.185 0.026 235);
+  --card-foreground: oklch(0.955 0.012 215);
+  --popover: oklch(0.185 0.026 235);
+  --popover-foreground: oklch(0.955 0.012 215);
+
+  --primary: oklch(0.86 0.14 195);
+  --primary-foreground: oklch(0.17 0.03 235);
+  --secondary: oklch(0.24 0.035 230);
+  --secondary-foreground: oklch(0.93 0.02 210);
+  --muted: oklch(0.22 0.026 235);
+  --muted-foreground: oklch(0.74 0.03 220);
+  --accent: oklch(0.27 0.05 210);
+  --accent-foreground: oklch(0.95 0.03 195);
+  --destructive: oklch(0.66 0.2 25);
+  --warning: oklch(0.84 0.15 85);
+  --success: oklch(0.8 0.15 160);
+
+  --border: oklch(0.86 0.14 195 / 0.16);
+  --input: oklch(0.86 0.14 195 / 0.22);
+  --ring: oklch(0.86 0.14 195);
+
+  --glow-sm: 0 0 12px oklch(0.86 0.14 195 / 0.25);
+  --glow-md: 0 0 28px oklch(0.86 0.14 195 / 0.3), 0 0 2px oklch(0.86 0.14 195 / 0.6);
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-grotesk), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 3px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 6rem;
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    background-image:
+      radial-gradient(60rem 30rem at 85% -10%, oklch(0.86 0.14 195 / 0.1), transparent 60%),
+      radial-gradient(50rem 25rem at -10% 20%, oklch(0.6 0.15 250 / 0.1), transparent 60%);
+    background-attachment: fixed;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display tracking-tight;
+  }
+  ::selection {
+    background: oklch(0.86 0.14 195 / 0.3);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ---------------- Glow-Utilities ---------------- */
+@utility text-glow {
+  color: var(--primary);
+  text-shadow:
+    0 0 18px oklch(0.86 0.14 195 / 0.45),
+    0 0 2px oklch(0.86 0.14 195 / 0.6);
+}
+
+@utility glow-border {
+  border: 1px solid oklch(0.86 0.14 195 / 0.35);
+  box-shadow: var(--glow-sm), inset 0 0 0 1px oklch(1 0 0 / 0.02);
+}
+
+@utility glow-hover {
+  transition:
+    box-shadow 200ms ease,
+    border-color 200ms ease,
+    transform 200ms ease;
+  &:hover {
+    border-color: oklch(0.86 0.14 195 / 0.55);
+    box-shadow: var(--glow-md);
+    transform: translateY(-2px);
+  }
+}
+
+@utility glass {
+  background: oklch(0.185 0.026 235 / 0.72);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+@utility bg-grid {
+  background-image:
+    linear-gradient(oklch(0.86 0.14 195 / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.86 0.14 195 / 0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@utility animate-pulse-glow {
+  animation: pulse-glow 3.2s ease-in-out infinite;
+}
+
+/* ---------------- Artikel-Typografie ---------------- */
+.prose-glow {
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  color: oklch(0.9 0.015 215);
+  max-width: 72ch;
+}
+.prose-glow > * + * {
+  margin-top: 1.15em;
+}
+.prose-glow h2 {
+  margin-top: 2.4em;
+  font-size: 1.6rem;
+  line-height: 1.25;
+  font-weight: 650;
+  color: var(--foreground);
+}
+.prose-glow h2::before {
+  content: "";
+  display: block;
+  width: 2.5rem;
+  height: 3px;
+  margin-bottom: 0.7rem;
+  border-radius: 99px;
+  background: var(--primary);
+  box-shadow: var(--glow-sm);
+}
+.prose-glow h3 {
+  margin-top: 1.9em;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+.prose-glow strong {
+  color: var(--foreground);
+  font-weight: 650;
+}
+.prose-glow a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-decoration-color: oklch(0.86 0.14 195 / 0.4);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 150ms;
+}
+.prose-glow a:hover {
+  text-decoration-color: var(--primary);
+}
+.prose-glow a[data-affiliate]::after {
+  content: "*";
+  margin-left: 1px;
+  font-size: 0.8em;
+  vertical-align: super;
+  color: var(--warning);
+}
+.prose-glow ul,
+.prose-glow ol {
+  padding-left: 1.4rem;
+}
+.prose-glow ul {
+  list-style: none;
+}
+.prose-glow ul > li {
+  position: relative;
+}
+.prose-glow ul > li::before {
+  content: "";
+  position: absolute;
+  left: -1.05rem;
+  top: 0.75em;
+  width: 6px;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--primary);
+  box-shadow: var(--glow-sm);
+}
+.prose-glow ol {
+  list-style: decimal;
+}
+.prose-glow ol > li::marker {
+  color: var(--primary);
+  font-weight: 600;
+}
+.prose-glow li + li {
+  margin-top: 0.45em;
+}
+.prose-glow blockquote {
+  border-left: 3px solid var(--primary);
+  padding: 0.6rem 1.1rem;
+  background: oklch(0.86 0.14 195 / 0.06);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: oklch(0.9 0.02 210);
+}
+.prose-glow code {
+  font-size: 0.9em;
+  padding: 0.12em 0.4em;
+  border-radius: 6px;
+  background: var(--muted);
+}
+.prose-glow table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  display: block;
+  overflow-x: auto;
+}
+.prose-glow th,
+.prose-glow td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.8rem;
+  text-align: left;
+  vertical-align: top;
+}
+.prose-glow th {
+  background: oklch(0.86 0.14 195 / 0.08);
+  color: var(--foreground);
+  font-weight: 600;
+}
+.prose-glow hr {
+  border-color: var(--border);
+}

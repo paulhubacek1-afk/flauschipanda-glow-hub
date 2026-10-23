@@ -1,0 +1,100 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+
+import { CategoryIcon } from "@/components/category-icon";
+import { PageCard } from "@/components/page-card";
+import { PageSearch } from "@/components/page-search";
+import { PandaLogo } from "@/components/panda-logo";
+import { Button } from "@/components/ui/button";
+import { getLivePages, toSummary } from "@/lib/content";
+import { categoryPath, hierarchy, hierarchyStats } from "@/lib/hierarchy";
+import { siteConfig } from "@/lib/site";
+
+export const revalidate = 3600;
+
+export const metadata: Metadata = {
+  title: { absolute: `${siteConfig.name} – ${siteConfig.tagline}` },
+  description:
+    "FlauschiPandas ist deine Toolbox: Ratgeber, Vergleiche und Tipps zu Tieren, Familie, Haushalt, KI, Freizeitparks, Zoos, Autos und mehr – ehrlich und transparent.",
+  alternates: { canonical: "/home" },
+};
+
+export default function HomePage() {
+  const live = getLivePages();
+  const stats = hierarchyStats();
+
+  return (
+    <>
+      <section className="relative overflow-hidden border-b border-primary/10">
+        <div className="bg-grid absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]" />
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 py-20 text-center md:py-24">
+          <PandaLogo className="size-16 animate-pulse-glow" />
+          <h1 className="text-4xl font-bold md:text-6xl">
+            Die Panda-<span className="text-glow">Toolbox</span>
+          </h1>
+          <p className="max-w-2xl text-lg text-muted-foreground">
+            {stats.categories} Kategorien, {stats.groups} Unterthemen und eine wachsende Sammlung an Ratgebern, Vergleichen und
+            Werkzeugen – von gesundem Hundefutter bis zu KI-Prompts.
+          </p>
+          <div className="w-full max-w-2xl text-left">
+            <PageSearch pages={live.map(toSummary)} />
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-16" aria-labelledby="kategorien">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <h2 id="kategorien" className="text-2xl font-semibold md:text-3xl">
+            Alle Kategorien
+          </h2>
+          <Link href="/seitenstruktur" className="text-sm text-primary hover:underline">
+            Komplette Seitenstruktur ansehen
+          </Link>
+        </div>
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {hierarchy.map((c) => {
+            const count = live.filter((p) => p.category.slug === c.slug).length;
+            return (
+              <li key={c.slug}>
+                <Link href={categoryPath(c.slug)} className="glow-hover flex h-full flex-col gap-3 rounded-xl border bg-card/60 p-5">
+                  <div className="flex items-center justify-between">
+                    <span className="flex size-11 items-center justify-center rounded-lg bg-primary/10">
+                      <CategoryIcon name={c.icon} className="size-5 text-primary" />
+                    </span>
+                    <span className="font-display text-xs text-primary/70">{String(c.number).padStart(2, "0")}</span>
+                  </div>
+                  <span className="font-display text-lg font-semibold">{c.title}</span>
+                  <span className="line-clamp-2 text-sm text-muted-foreground">{c.description}</span>
+                  <span className="mt-auto pt-1 text-xs text-muted-foreground">
+                    {c.groups.length} Unterthemen · {count > 0 ? `${count} Seiten online` : "im Aufbau"}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      {live.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 pb-8" aria-labelledby="neu">
+          <div className="mb-8 flex items-end justify-between gap-4">
+            <h2 id="neu" className="text-2xl font-semibold md:text-3xl">
+              Neu in der Toolbox
+            </h2>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/seitenstruktur">
+                Alle Seiten <ArrowRight />
+              </Link>
+            </Button>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {live.slice(0, 6).map((p) => (
+              <PageCard key={p.id} page={toSummary(p)} />
+            ))}
+          </div>
+        </section>
+      )}
+    </>
+  );
+}
