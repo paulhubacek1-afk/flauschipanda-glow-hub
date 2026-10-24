@@ -37,7 +37,8 @@ export type IconName =
   | "panda"
   | "heart"
   | "plane"
-  | "monitor";
+  | "monitor"
+  | "atom";
 
 export interface PageNode {
   slug: string;

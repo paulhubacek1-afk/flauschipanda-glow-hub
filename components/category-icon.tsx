@@ -1,4 +1,5 @@
 import {
+  Atom,
   Baby,
   Bot,
   Car,
@@ -38,6 +39,7 @@ const icons: Record<Exclude<IconName, "panda">, LucideIcon> = {
   heart: HeartPulse,
   plane: Plane,
   monitor: Monitor,
+  atom: Atom,
 };
 
 export function CategoryIcon({ name, className }: { name: IconName; className?: string }) {

@@ -876,7 +876,17 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
         : mode;
 
   const look: PandaLook = {
-    hat: tod === "night" ? "night" : catSlug === "urlaub-reisen" ? "sun" : hasItem(bamboo, "hut") ? "bamboo" : null,
+    helmet: catSlug === "wissenschaft-astrologie",
+    hat:
+      catSlug === "wissenschaft-astrologie"
+        ? null
+        : tod === "night"
+          ? "night"
+          : catSlug === "urlaub-reisen"
+            ? "sun"
+            : hasItem(bamboo, "hut")
+              ? "bamboo"
+              : null,
     glasses: catSlug === "ki",
     wrench: catSlug === "autos-mobilitaet" || stage.key === "toolbox" || stage.key === "glow",
     binoculars: catSlug === "zoos",

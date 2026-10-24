@@ -35,7 +35,7 @@ export async function ensureSchema(payload: Payload) {
     payload.logger.warn({ err }, "[schema] Zähler-Tabelle konnte nicht angelegt werden");
   }
   // neue Auswahlwerte für Kategorie-Symbole (Postgres-Enum)
-  for (const value of ["monitor"]) {
+  for (const value of ["monitor", "atom"]) {
     try {
       await drizzle.execute(sql.raw(`ALTER TYPE "enum_categories_icon" ADD VALUE IF NOT EXISTS '${value}'`));
     } catch (err) {

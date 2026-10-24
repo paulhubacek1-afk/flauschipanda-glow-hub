@@ -29,6 +29,8 @@ export interface PandaLook {
   binoculars?: boolean;
   /** PC & Hardware: Headset */
   headset?: boolean;
+  /** Wissenschaft & Astrologie: Astronautenhelm */
+  helmet?: boolean;
   /** Gegenstand Werkzeugkiste (steht neben ihm) */
   toolbox?: boolean;
   /** Pflanze neben ihm, 0 = keine, 0.2–1 = Größe */
@@ -224,6 +226,15 @@ export function PandaFigure({
               <path d="M44 20 Q44 4 60 4 Q76 4 76 20 Z" fill="#f6d87a" stroke="#b8902e" strokeWidth="1.3" />
               <path d="M44.5 16 Q60 20 75.5 16 L76 20 Q60 23 44 20 Z" fill="#ff8fc6" />
               <circle cx="73" cy="15" r="2.6" fill={TEAL} />
+            </g>
+          )}
+          {look.helmet && (
+            <g className="pb-helmet">
+              <circle cx="60" cy="38" r="40" fill={TEAL} fillOpacity="0.1" stroke="#dfe7f5" strokeWidth="3" />
+              <path d="M32 18 Q42 6 58 4" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" opacity="0.75" />
+              <circle cx="88" cy="16" r="2" fill="#fff" opacity="0.8" />
+              <path d="M28 66 Q60 82 92 66" fill="none" stroke="#c9d3e6" strokeWidth="6" strokeLinecap="round" />
+              <circle cx="60" cy="75" r="2.6" fill={PURPLE} />
             </g>
           )}
           {look.hat === "night" && (

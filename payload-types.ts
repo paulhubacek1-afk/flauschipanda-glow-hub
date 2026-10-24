@@ -338,6 +338,7 @@ export interface Category {
         | 'plane'
         | 'car'
         | 'monitor'
+        | 'atom'
         | 'users'
         | 'panda'
       )

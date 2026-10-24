@@ -1495,7 +1495,7 @@ Notruf **112**, Giftnotruf deines Bundeslandes bzw. in Österreich die Vergiftun
   },
   {
     path: "gesundheit-wohlbefinden/alltag/vorsorge-checkliste",
-    description: "Vorsorge-Checkliste für Erwachsene: Gesundheits-Check, Krebsfrüherkennung, Zahnvorsorge und Impfungen – welche Untersuchungen es gibt und wo du dich informierst.",
+    description: "Vorsorge-Checkliste für Erwachsene: Gesundheits-Check, Krebsfrüherkennung, Zahnvorsorge und Impfungen – welche Untersuchungen es gibt.",
     markdown: `Vorsorgeuntersuchungen helfen, Krankheiten früh zu erkennen – oft bevor Beschwerden auftreten. Welche Untersuchungen angeboten und von der Krankenkasse bezahlt werden, hängt von **Alter, Geschlecht und Land** ab.
 
 ## Typische Vorsorgeangebote

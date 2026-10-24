@@ -18,6 +18,7 @@ export const ICON_OPTIONS = [
   { label: "Flugzeug (Urlaub)", value: "plane" },
   { label: "Auto", value: "car" },
   { label: "Monitor (PC & Technik)", value: "monitor" },
+  { label: "Atom (Wissenschaft)", value: "atom" },
   { label: "Personen", value: "users" },
   { label: "Panda", value: "panda" },
 ];

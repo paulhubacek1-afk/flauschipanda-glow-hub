@@ -7,6 +7,7 @@ import { MaintenanceScreen } from "@/components/maintenance-screen";
 import { PreviewBar } from "@/components/preview-bar";
 import { BambooForest } from "@/components/bamboo-forest";
 import { PandaBuddy } from "@/components/panda-buddy";
+import { ScienceSky } from "@/components/science-sky";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -79,6 +80,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </main>
         <SiteFooter nav={nav} />
         <ConsentBanner />
+        <ScienceSky />
         <BambooForest />
         <PandaBuddy nav={nav} />
         <ScrollReveal />

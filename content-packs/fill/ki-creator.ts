@@ -171,7 +171,7 @@ Wie Affiliate-Marketing grundsätzlich funktioniert, erklären wir im Ratgeber �
   },
   {
     path: "ki/claude/prompts",
-    description: "Claude Prompts: Vorlagen für Texte, Analyse, Zusammenfassungen und Code – plus Tipps, wie du mit Kontext, Beispielen und klaren Anweisungen bessere Antworten bekommst.",
+    description: "Claude Prompts: Vorlagen für Texte, Analyse, Zusammenfassungen und Code – plus Tipps für bessere Antworten mit Kontext und klaren Anweisungen.",
     markdown: `**Claude** ist ein KI-Assistent von Anthropic. Wie bei anderen Sprachmodellen gilt: Je klarer dein Prompt, desto besser die Antwort.
 
 ## Grundregeln für gute Prompts
