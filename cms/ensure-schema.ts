@@ -22,4 +22,12 @@ export async function ensureSchema(payload: Payload) {
   } catch (err) {
     payload.logger.error({ err }, "[schema] Wartungsmodus-Spalten konnten nicht ergänzt werden");
   }
+  // neue Auswahlwerte für Kategorie-Symbole (Postgres-Enum)
+  for (const value of ["monitor"]) {
+    try {
+      await drizzle.execute(sql.raw(`ALTER TYPE "enum_categories_icon" ADD VALUE IF NOT EXISTS '${value}'`));
+    } catch (err) {
+      payload.logger.warn({ err }, `[schema] Symbol „${value}“ konnte nicht ergänzt werden`);
+    }
+  }
 }

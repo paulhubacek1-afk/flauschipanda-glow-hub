@@ -17,6 +17,7 @@ export const ICON_OPTIONS = [
   { label: "Riesenrad", value: "ferris" },
   { label: "Flugzeug (Urlaub)", value: "plane" },
   { label: "Auto", value: "car" },
+  { label: "Monitor (PC & Technik)", value: "monitor" },
   { label: "Personen", value: "users" },
   { label: "Panda", value: "panda" },
 ];

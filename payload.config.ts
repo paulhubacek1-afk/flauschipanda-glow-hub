@@ -14,6 +14,7 @@ import { Groups } from "./cms/collections/Groups";
 import { Media } from "./cms/collections/Media";
 import { Pages } from "./cms/collections/Pages";
 import { Users } from "./cms/collections/Users";
+import { applyContentPacks } from "./cms/content-packs";
 import { ensureSchema } from "./cms/ensure-schema";
 import { SiteSettings } from "./cms/globals/SiteSettings";
 
@@ -56,6 +57,8 @@ export default buildConfig({
   // fehlende neue Spalten (z. B. Wartungsmodus) sicher ergänzen
   onInit: async (payload) => {
     await ensureSchema(payload);
+    // Inhaltspakete (z. B. PC & Hardware) in leere Kategorien übernehmen
+    await applyContentPacks(payload);
   },
   // GraphQL wird nicht genutzt → abgeschaltet (weniger Angriffsfläche)
   graphQL: { disable: true },
