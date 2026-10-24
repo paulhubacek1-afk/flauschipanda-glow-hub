@@ -15,6 +15,22 @@ die Live-Seite. Functions, PostgreSQL und Medienspeicher sind in Frankfurt;
 Vercels Standard-Buildinfrastruktur ist für dieses Projekt ausdrücklich erlaubt.
 Geheimnisse bleiben in den Vercel-Umgebungsvariablen und gehören nie ins Repo.
 
+## Google Search Console
+
+1. In der [Search Console](https://search.google.com/search-console) eine Property vom Typ **URL-Präfix** anlegen: `https://flauschigespanda.webdock.dev/`. Eine Domain-Property bräuchte DNS-Zugriff auf `webdock.dev`.
+2. Als Bestätigungsmethode **HTML-Tag** wählen und nur den Wert aus `content="…"` kopieren.
+3. In Vercel unter *Settings → Environment Variables* `GOOGLE_SITE_VERIFICATION` setzen (Production) und neu deployen. Danach in der Search Console auf **Bestätigen** klicken.
+4. Unter *Sitemaps* die Adresse `sitemap.xml` einreichen.
+5. Mit der *URL-Prüfung* die Startseite und die wichtigsten Landingpages prüfen und die Indexierung beantragen.
+
+Bereits technisch geprüft:
+- Die Sitemap enthält alle live geschalteten Seiten. Geplante Seiten und Entwürfe kommen erst nach dem Veröffentlichen dazu.
+- `robots.txt` sperrt nur `/admin` und `/api/`.
+- Kein `noindex` auf öffentlichen Seiten. Ausnahme: Kategorien und Unterthemen ohne Live-Seiten, damit Google keine leeren Seiten findet.
+- Canonical-URLs zeigen auf die echte Domain. Die technischen `*.vercel.app`-Adressen senden `X-Robots-Tag: noindex`.
+
+**Domainwechsel:** Wechselt die Website später auf eine eigene Domain, `NEXT_PUBLIC_SITE_URL` anpassen, die alte Adresse per 301 weiterleiten und in der Search Console die *Adressänderung* melden.
+
 ## Einrichtung
 
 1. **Datenbank anlegen:** Du brauchst eine Postgres-Datenbank, z. B. ein kostenloses Projekt bei Supabase oder Neon. Kopiere die Verbindungs-URL.

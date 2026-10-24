@@ -22,7 +22,15 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // Technische Vercel-Adressen (*.vercel.app) nie indexieren – nur die echte Domain soll bei Google erscheinen
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: ".*\\.vercel\\.app" }],
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+    ];
   },
 };
 
