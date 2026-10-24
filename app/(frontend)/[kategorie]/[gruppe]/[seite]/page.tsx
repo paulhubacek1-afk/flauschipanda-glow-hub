@@ -7,6 +7,7 @@ import { AdSlot } from "@/components/ad-slot";
 import { AffiliateBox, AffiliateDisclosure } from "@/components/affiliate";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ComparisonTable } from "@/components/comparison-table";
+import { Calculators } from "@/components/calculators";
 import { CostCalculator } from "@/components/cost-calculator";
 import { Cover } from "@/components/cover";
 import { DonationBox } from "@/components/donation-box";
@@ -23,6 +24,7 @@ import { getRelatedPages } from "@/lib/linking";
 import { renderPage } from "@/lib/markdown";
 import { articleSchema, faqSchema } from "@/lib/schema";
 import { siteConfig } from "@/lib/site";
+import { widgetsFor } from "@/lib/tools";
 import { formatDate, toIsoDate } from "@/lib/utils";
 
 /**
@@ -75,11 +77,23 @@ export default async function LandingPage({ params }: Props) {
   const hasAffiliate = rendered.affiliateIds.length > 0 || page.products.length > 0;
   const { category, group } = page;
   const groupHref = `/${category.slug}/${group.slug}`;
+  const widgets = widgetsFor(page.href, page.widgets);
+
+  // Für Panda Bambus als Guide: „Das könnte dich auch interessieren“ – verwandte Artikel + Geschwisterseiten
+  const guideLinks: { href: string; title: string }[] = [];
+  for (const p of [
+    ...related,
+    ...live.filter((p) => p.category.slug === category.slug && p.group.slug === group.slug && p.href !== page.href),
+  ]) {
+    if (guideLinks.length >= 5) break;
+    if (!guideLinks.some((l) => l.href === p.href)) guideLinks.push({ href: p.href, title: p.title });
+  }
 
   return (
     <article className="mx-auto max-w-7xl px-4 py-10">
       <JsonLd data={articleSchema(page)} />
       <JsonLd data={faqSchema(page)} />
+      <div hidden data-panda-guide={JSON.stringify({ links: guideLinks })} />
 
       <header className="mb-10 space-y-6">
         {/* Breadcrumb automatisch: Start › Kategorie › Unterthema › Seite */}
@@ -127,7 +141,8 @@ export default async function LandingPage({ params }: Props) {
 
           {/* 1 · Infotext (mit automatischer interner Verlinkung) */}
           <div className="prose-glow" dangerouslySetInnerHTML={{ __html: rendered.html }} />
-          {page.widgets.includes("kostenrechner") && <CostCalculator />}
+          {widgets.includes("kostenrechner") && <CostCalculator />}
+          <Calculators keys={widgets} />
 
           {/* 2 · FAQ */}
           <div data-reveal>

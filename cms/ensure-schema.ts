@@ -22,6 +22,18 @@ export async function ensureSchema(payload: Payload) {
   } catch (err) {
     payload.logger.error({ err }, "[schema] Wartungsmodus-Spalten konnten nicht ergänzt werden");
   }
+  // kleine Zähler außerhalb von Payload (z. B. wie oft die GreenCore-Pflanze gegossen wurde)
+  try {
+    await drizzle.execute(sql`
+      CREATE TABLE IF NOT EXISTS "fp_counters" (
+        "key" varchar(64) PRIMARY KEY,
+        "value" bigint NOT NULL DEFAULT 0,
+        "updated_at" timestamp(3) with time zone NOT NULL DEFAULT now()
+      )
+    `);
+  } catch (err) {
+    payload.logger.warn({ err }, "[schema] Zähler-Tabelle konnte nicht angelegt werden");
+  }
   // neue Auswahlwerte für Kategorie-Symbole (Postgres-Enum)
   for (const value of ["monitor"]) {
     try {

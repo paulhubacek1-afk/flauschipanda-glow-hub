@@ -5,6 +5,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import { ConsentBanner } from "@/components/consent-banner";
 import { MaintenanceScreen } from "@/components/maintenance-screen";
 import { PreviewBar } from "@/components/preview-bar";
+import { BambooForest } from "@/components/bamboo-forest";
 import { PandaBuddy } from "@/components/panda-buddy";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { SiteFooter } from "@/components/site-footer";
@@ -78,6 +79,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </main>
         <SiteFooter nav={nav} />
         <ConsentBanner />
+        <BambooForest />
         <PandaBuddy nav={nav} />
         <ScrollReveal />
       </body>

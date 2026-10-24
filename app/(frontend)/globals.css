@@ -510,6 +510,397 @@ input[type="search"]::-webkit-search-decoration {
   }
 }
 
+/* ---- Requisiten: nur in ihrer Pose sichtbar ---- */
+.pb .pb-book,
+.pb .pb-magnifier,
+.pb .pb-can,
+.pb .pb-eyes-sleepy,
+.pb .pb-side {
+  transition: opacity 250ms ease;
+}
+.pb .pb-book,
+.pb .pb-magnifier,
+.pb .pb-can,
+.pb .pb-eyes-sleepy {
+  opacity: 0;
+}
+.pb .pb-book,
+.pb .pb-magnifier,
+.pb .pb-can,
+.pb .pb-plant {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+/* Zubehör neben dem Panda nur im Sitzen/Lesen/Gießen – unterwegs nimmt er nichts mit */
+.pb-crawl .pb-side,
+.pb-cling .pb-side,
+.pb-perch .pb-side,
+.pb-search .pb-side {
+  opacity: 0;
+}
+.pb-water .pb-toolbox,
+.pb-water .pb-mug,
+.pb-water .pb-lantern {
+  opacity: 0;
+}
+
+/* liest ein Buch */
+.pb-read .pb-bamboo,
+.pb-search .pb-bamboo,
+.pb-water .pb-bamboo {
+  opacity: 0;
+  transform: scale(0.4);
+}
+.pb-read .pb-book {
+  opacity: 1;
+}
+.pb-read .pb-arm-l {
+  transform: rotate(-34deg);
+}
+.pb-read .pb-arm-r {
+  transform: rotate(34deg);
+}
+.pb-read .pb-head {
+  transform: rotate(-2deg) translateY(2px);
+  animation: pb-read-head 6s ease-in-out infinite;
+}
+.pb-read .pb-pupil {
+  transform: translateY(1.4px);
+}
+.pb-read .pb-page {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+  animation: pb-page-flip 7s ease-in-out infinite;
+}
+@keyframes pb-read-head {
+  0%,
+  100% {
+    transform: rotate(-3deg) translateY(2px);
+  }
+  50% {
+    transform: rotate(3deg) translateY(2px);
+  }
+}
+@keyframes pb-page-flip {
+  0%,
+  80% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+  83% {
+    opacity: 1;
+  }
+  92% {
+    transform: scaleX(-1);
+    opacity: 1;
+  }
+  96%,
+  100% {
+    transform: scaleX(-1);
+    opacity: 0;
+  }
+}
+
+/* sucht mit der Lupe */
+.pb-search .pb-magnifier {
+  opacity: 1;
+  animation: pb-search-scan 2.4s ease-in-out infinite;
+}
+.pb-search .pb-arm-r {
+  transform: rotate(-140deg);
+}
+.pb-search .pb-arm-l {
+  transform: rotate(-30deg);
+}
+.pb-search .pb-pupil {
+  transform: translate(1.6px, -1px);
+}
+.pb-search .pb-head {
+  animation: pb-search-head 2.4s ease-in-out infinite;
+}
+@keyframes pb-search-scan {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0);
+  }
+  50% {
+    transform: translate(-4px, 2px) rotate(-6deg);
+  }
+}
+@keyframes pb-search-head {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  50% {
+    transform: rotate(-5deg);
+  }
+}
+
+/* gießt die GreenCore-Pflanze */
+.pb-water .pb-can {
+  opacity: 1;
+  animation: pb-can-tilt 2.6s ease-in-out infinite;
+}
+.pb-water .pb-arm-l {
+  transform: rotate(-38deg);
+}
+.pb-water .pb-arm-r {
+  transform: rotate(18deg);
+}
+.pb-water .pb-drops circle {
+  animation: pb-drop 1.3s linear infinite;
+}
+.pb-water .pb-drops circle:nth-child(2) {
+  animation-delay: 0.43s;
+}
+.pb-water .pb-drops circle:nth-child(3) {
+  animation-delay: 0.86s;
+}
+@keyframes pb-can-tilt {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+@keyframes pb-drop {
+  0% {
+    transform: translateY(-4px);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+}
+.pb .pb-bloom {
+  animation: pb-bloom 3s ease-in-out infinite;
+}
+@keyframes pb-bloom {
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* morgens Kaffee, abends Laterne, nachts müde */
+.pb .pb-steam {
+  animation: pb-steam 2.4s ease-in-out infinite;
+}
+@keyframes pb-steam {
+  0% {
+    transform: translateY(2px);
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(-4px);
+    opacity: 0;
+  }
+}
+.pb .pb-flame {
+  animation: pb-flicker 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 4px #ffe58a);
+}
+@keyframes pb-flicker {
+  50% {
+    opacity: 0.65;
+  }
+}
+.pb-sleepy .pb-eyes {
+  opacity: 0;
+  animation: none;
+}
+.pb-sleepy .pb-eyes-sleepy {
+  opacity: 1;
+}
+.pb-sleepy.pb-sit .pb-bamboo {
+  animation-duration: 3.6s;
+}
+.pb .pb-zzz text {
+  animation: pb-zzz 3s ease-in-out infinite;
+}
+.pb .pb-zzz text:nth-child(2) {
+  animation-delay: 0.8s;
+}
+@keyframes pb-zzz {
+  0% {
+    transform: translate(0, 4px);
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(4px, -6px);
+    opacity: 0;
+  }
+}
+
+/* Stufen */
+.pb-curious .pb-pupil {
+  animation: pb-look 9s ease-in-out infinite;
+}
+@keyframes pb-look {
+  0%,
+  70%,
+  100% {
+    transform: translate(0, 0);
+  }
+  75%,
+  82% {
+    transform: translate(1.5px, -0.8px);
+  }
+  86%,
+  93% {
+    transform: translate(-1.5px, -0.8px);
+  }
+}
+.pb-glowing {
+  animation: pb-aura 3.2s ease-in-out infinite;
+}
+@keyframes pb-aura {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 1.2px oklch(0.97 0.01 300 / 0.9)) drop-shadow(0 0 10px oklch(0.72 0.19 300 / 0.5))
+      drop-shadow(0 0 18px oklch(0.86 0.14 195 / 0.25));
+  }
+  50% {
+    filter: drop-shadow(0 0 1.2px oklch(0.97 0.01 300 / 0.9)) drop-shadow(0 0 14px oklch(0.86 0.14 195 / 0.65))
+      drop-shadow(0 0 26px oklch(0.72 0.19 300 / 0.35));
+  }
+}
+.pb-gold.pb-glowing,
+.pb-gold {
+  filter: drop-shadow(0 0 1.2px #fff6d6) drop-shadow(0 0 12px oklch(0.85 0.15 85 / 0.6));
+}
+.pb .pb-holo {
+  animation: pb-holo 2.2s ease-in-out infinite;
+}
+@keyframes pb-holo {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+/* ---- Spuren, wenn der Panda läuft ---- */
+.panda-trail {
+  position: fixed;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 39;
+  animation: panda-trail 1.4s ease-out forwards;
+}
+.panda-trail-glow {
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  background: oklch(0.86 0.14 195 / 0.7);
+  box-shadow: 0 0 10px oklch(0.86 0.14 195 / 0.8), 0 0 18px oklch(0.72 0.19 300 / 0.5);
+}
+.panda-trail-paw {
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0.55;
+  filter: grayscale(1) brightness(2);
+}
+@keyframes panda-trail {
+  0% {
+    opacity: 0.8;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.4;
+  }
+}
+
+/* „+1 🎋“ über dem Panda */
+.panda-plus {
+  animation: panda-plus 1.6s ease-out forwards;
+}
+@keyframes panda-plus {
+  0% {
+    transform: translate(-50%, 6px);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -26px);
+    opacity: 0;
+  }
+}
+/* Herzchen beim GreenCore-Dankeschön, Funken beim Freischalten */
+.panda-burst span {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  animation: panda-burst 1.8s ease-out forwards;
+}
+@keyframes panda-burst {
+  0% {
+    transform: translate(-50%, 0) scale(0.4);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--dx)), var(--dy)) scale(1);
+    opacity: 0;
+  }
+}
+
+/* ---- Bambuswald im Hintergrund ---- */
+.bamboo-stalk {
+  transform-origin: 50% 100%;
+  animation: bamboo-sway 7s ease-in-out infinite;
+  transition: height 1.2s ease;
+}
+@keyframes bamboo-sway {
+  0%,
+  100% {
+    rotate: -1.2deg;
+  }
+  50% {
+    rotate: 1.2deg;
+  }
+}
+.bamboo-firefly {
+  animation: bamboo-firefly 6s ease-in-out infinite;
+}
+@keyframes bamboo-firefly {
+  0%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate(8px, -14px);
+    opacity: 0.9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pb *,
+  .pb-glowing,
+  .bamboo-stalk,
+  .bamboo-firefly,
+  .panda-burst span {
+    animation: none !important;
+  }
+}
+
 /* Karte, zu der der Panda krabbelt */
 @keyframes panda-highlight {
   0%,

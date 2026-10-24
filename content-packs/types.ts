@@ -32,3 +32,17 @@ export interface ContentPack {
   hue?: number;
   groups: PackGroup[];
 }
+
+/** Inhalt für eine bereits angelegte, aber noch leere Seite (geplanter Entwurf). */
+export interface FillPage {
+  /** kategorie/unterthema/seite */
+  path: string;
+  /** Meta-Beschreibung (70–160 Zeichen) */
+  description: string;
+  markdown: string;
+  faq?: [string, string][];
+  focusKeyword?: string;
+  linkAnchors?: string[];
+  comparison?: PackPage["comparison"];
+  sources?: { title: string; url: string }[];
+}
