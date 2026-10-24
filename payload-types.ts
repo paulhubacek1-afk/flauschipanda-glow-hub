@@ -318,7 +318,10 @@ export interface Category {
    * Leer lassen = automatisch aus dem Namen, z. B. „tiere“
    */
   slug?: string | null;
-  description: string;
+  /**
+   * Optional – leer lassen = automatisch „<Name>: Ratgeber, Vergleiche und Tipps …“
+   */
+  description?: string | null;
   icon?:
     | (
         | 'paw'

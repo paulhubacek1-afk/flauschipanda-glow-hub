@@ -42,7 +42,9 @@ export function SiteHeader({ nav }: { nav: NavLite[] }) {
   const activeCategory = pathname.split("/")[1];
 
   return (
-    <header className="glass sticky top-0 z-40 border-b border-purple/20">
+    <header className="sticky top-0 z-40 border-b border-purple/20">
+      {/* Glas-Hintergrund als eigene Ebene: So funktionieren Menü-Panel und Abdunkelung darunter zuverlässig */}
+      <div aria-hidden="true" className="glass absolute inset-0 -z-10" />
       <a
         href="#inhalt"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground"
@@ -106,44 +108,73 @@ export function SiteHeader({ nav }: { nav: NavLite[] }) {
           </Button>
         </div>
 
-        {/* Mega-Menü Desktop */}
+        {/* Mega-Menü Desktop – deckender Hintergrund, damit nichts von der Seite durchscheint */}
         {megaOpen && (
-          <div id="mega-menu" className="glass absolute inset-x-0 top-full hidden max-h-[75vh] overflow-y-auto border-b border-primary/15 shadow-[var(--glow-md)] md:block">
-            <div className="mx-auto grid max-w-7xl gap-x-6 gap-y-7 px-4 py-8 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {nav.map((c) => (
-                <div key={c.slug} className="space-y-2">
-                  <Link
-                    href={`/${c.slug}`}
-                    className={cn(
-                      "flex items-center gap-2 font-display text-sm font-semibold hover:text-primary",
-                      activeCategory === c.slug && "text-primary",
+          <div
+            id="mega-menu"
+            className="absolute inset-x-0 top-full z-50 hidden max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain border-b border-purple/25 bg-card shadow-[0_24px_48px_-12px_oklch(0_0_0/0.6),var(--glow-md)] md:block"
+          >
+            <div className="mx-auto max-w-7xl px-4 py-8">
+              <div className="mb-6 flex items-center justify-between gap-4 border-b border-border pb-4">
+                <p className="font-display text-sm font-semibold text-muted-foreground">Alle Kategorien</p>
+                <Link href="/seitenstruktur" onClick={() => setMegaOpen(false)} className="text-sm text-primary hover:text-purple">
+                  Komplette Seitenstruktur →
+                </Link>
+              </div>
+              <div className="grid grid-cols-3 gap-x-8 gap-y-8 lg:grid-cols-4 xl:grid-cols-5">
+                {nav.map((c) => (
+                  <div key={c.slug} className="min-w-0 space-y-2">
+                    <Link
+                      href={`/${c.slug}`}
+                      onClick={() => setMegaOpen(false)}
+                      className={cn(
+                        "flex min-w-0 items-start gap-2 font-display text-sm font-semibold leading-snug hover:text-primary",
+                        activeCategory === c.slug && "text-primary",
+                      )}
+                    >
+                      <CategoryIcon name={c.icon} className="mt-0.5 size-4 shrink-0 text-primary" />
+                      <span className="min-w-0 break-words">{c.title}</span>
+                    </Link>
+                    {c.groups.length > 0 ? (
+                      <ul className="space-y-1.5 border-l border-purple/25 pl-3 text-sm">
+                        {c.groups.slice(0, 5).map((g) => (
+                          <li key={g.slug} className="min-w-0">
+                            <Link
+                              href={`/${c.slug}/${g.slug}`}
+                              onClick={() => setMegaOpen(false)}
+                              className="block truncate text-muted-foreground hover:text-primary"
+                              title={g.title}
+                            >
+                              {g.title}
+                            </Link>
+                          </li>
+                        ))}
+                        {c.groups.length > 5 && (
+                          <li>
+                            <Link href={`/${c.slug}`} onClick={() => setMegaOpen(false)} className="text-xs text-purple hover:text-primary">
+                              + {c.groups.length - 5} weitere
+                            </Link>
+                          </li>
+                        )}
+                      </ul>
+                    ) : (
+                      <p className="border-l border-purple/25 pl-3 text-xs text-muted-foreground/70">Unterthemen folgen</p>
                     )}
-                  >
-                    <CategoryIcon name={c.icon} className="size-4 text-primary" />
-                    {c.title}
-                  </Link>
-                  <ul className="space-y-1 border-l border-primary/15 pl-3 text-sm">
-                    {c.groups.slice(0, 5).map((g) => (
-                      <li key={g.slug}>
-                        <Link href={`/${c.slug}/${g.slug}`} className="text-muted-foreground hover:text-primary">
-                          {g.title}
-                        </Link>
-                      </li>
-                    ))}
-                    {c.groups.length > 5 && (
-                      <li>
-                        <Link href={`/${c.slug}`} className="text-xs text-primary/80 hover:text-primary">
-                          + {c.groups.length - 5} weitere
-                        </Link>
-                      </li>
-                    )}
-                  </ul>
-                </div>
-              ))}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
       </div>
+
+      {megaOpen && (
+        <div
+          aria-hidden="true"
+          className="fixed inset-x-0 bottom-0 top-16 z-30 hidden bg-background/70 md:block"
+          onClick={() => setMegaOpen(false)}
+        />
+      )}
 
       {/* Mobile Navigation */}
       {mobileOpen && (

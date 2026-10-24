@@ -111,6 +111,7 @@ export const Pages: CollectionConfig = {
     useAsTitle: "title",
     defaultColumns: ["title", "pageType", "path", "_status", "updatedAt"],
     listSearchableFields: ["title", "path"],
+    pagination: { defaultLimit: 50, limits: [25, 50, 100, 200] },
     group: "Inhalte",
     description: "Titel eingeben und Unterthema wählen – URL, Breadcrumb, SEO, Links und GreenCore-Box entstehen automatisch.",
     preview: (doc) => (doc?.path ? `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}${doc.path}` : null),

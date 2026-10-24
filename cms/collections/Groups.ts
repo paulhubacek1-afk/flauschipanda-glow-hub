@@ -1,7 +1,7 @@
 import type { CollectionConfig } from "payload";
 
 import { anyone, isEditorOrAdmin } from "../access";
-import { autoSlug, revalidateAfterChange, revalidateAfterDelete } from "../hooks";
+import { appendOrder, autoSlug, cascadePaths, revalidateAfterChange, revalidateAfterDelete } from "../hooks";
 
 /** Unterthemen – zweite Ebene, z. B. /tiere/hunde */
 export const Groups: CollectionConfig = {
@@ -13,11 +13,14 @@ export const Groups: CollectionConfig = {
     group: "Struktur",
     listSearchableFields: ["title", "path"],
     description: "Unterthemen innerhalb einer Kategorie, z. B. Hunde, Zoo Berlin oder ChatGPT.",
+    // Alle Unterthemen auf einen Blick statt nur 10 pro Seite
+    pagination: { defaultLimit: 100, limits: [25, 50, 100, 200] },
   },
   defaultSort: "order",
   access: { read: anyone, create: isEditorOrAdmin, update: isEditorOrAdmin, delete: isEditorOrAdmin },
   hooks: {
     beforeChange: [
+      appendOrder("groups", "category"),
       // URL automatisch: /kategorie/unterthema
       async ({ data, req, originalDoc }) => {
         const categoryId = data.category ?? originalDoc?.category;
@@ -30,7 +33,8 @@ export const Groups: CollectionConfig = {
         return data;
       },
     ],
-    afterChange: [revalidateAfterChange],
+    // URL geändert (neuer URL-Teil oder andere Kategorie) → URLs aller Seiten darunter anpassen
+    afterChange: [cascadePaths("pages", "group", "path"), revalidateAfterChange],
     afterDelete: [revalidateAfterDelete],
   },
   fields: [
@@ -53,6 +57,11 @@ export const Groups: CollectionConfig = {
       index: true,
       admin: { position: "sidebar", readOnly: true, description: "Wird automatisch erzeugt" },
     },
-    { name: "order", label: "Reihenfolge", type: "number", defaultValue: 100, admin: { position: "sidebar" } },
+    {
+      name: "order",
+      label: "Reihenfolge",
+      type: "number",
+      admin: { position: "sidebar", description: "Leer lassen = automatisch ans Ende der Kategorie" },
+    },
   ],
 };

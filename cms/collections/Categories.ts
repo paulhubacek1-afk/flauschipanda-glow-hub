@@ -1,7 +1,7 @@
 import type { CollectionConfig } from "payload";
 
 import { anyone, isEditorOrAdmin } from "../access";
-import { autoSlug, revalidateAfterChange, revalidateAfterDelete } from "../hooks";
+import { appendOrder, autoSlug, cascadePaths, revalidateAfterChange, revalidateAfterDelete } from "../hooks";
 
 export const ICON_OPTIONS = [
   { label: "Pfote (Tiere)", value: "paw" },
@@ -29,11 +29,19 @@ export const Categories: CollectionConfig = {
     useAsTitle: "title",
     defaultColumns: ["title", "slug", "order"],
     group: "Struktur",
-    description: "Hauptkategorien der Panda Toolbox. Reihenfolge = Nummerierung im Menü.",
+    description:
+      "Hauptkategorien der Panda Toolbox. Neue Kategorien erscheinen sofort auf der Website (am Ende der Liste) – danach Unterthemen unter „Struktur → Unterthemen“ anlegen.",
+    // Alle Kategorien auf einen Blick statt nur 10 pro Seite
+    pagination: { defaultLimit: 100, limits: [25, 50, 100] },
   },
   defaultSort: "order",
   access: { read: anyone, create: isEditorOrAdmin, update: isEditorOrAdmin, delete: isEditorOrAdmin },
-  hooks: { afterChange: [revalidateAfterChange], afterDelete: [revalidateAfterDelete] },
+  hooks: {
+    beforeChange: [appendOrder("categories")],
+    // URL-Teil geändert → URLs aller Unterthemen (und damit aller Seiten) anpassen
+    afterChange: [cascadePaths("groups", "category", "slug"), revalidateAfterChange],
+    afterDelete: [revalidateAfterDelete],
+  },
   fields: [
     { name: "title", label: "Name", type: "text", required: true },
     {
@@ -45,7 +53,22 @@ export const Categories: CollectionConfig = {
       admin: { position: "sidebar", description: "Leer lassen = automatisch aus dem Namen, z. B. „tiere“" },
       hooks: { beforeValidate: [autoSlug("title")] },
     },
-    { name: "description", label: "Beschreibung", type: "textarea", required: true },
+    {
+      name: "description",
+      label: "Beschreibung",
+      type: "textarea",
+      admin: { description: "Optional – leer lassen = automatisch „<Name>: Ratgeber, Vergleiche und Tipps …“" },
+      hooks: {
+        // Leere Beschreibung automatisch füllen. Die Datenbank-Spalte bleibt Pflicht (keine Migration nötig).
+        beforeValidate: [
+          ({ value, data, originalDoc }) => {
+            if (typeof value === "string" && value.trim()) return value;
+            const title = (data?.title ?? originalDoc?.title ?? "").trim();
+            return title ? `${title}: Ratgeber, Vergleiche und Tipps – verständlich und ehrlich erklärt.` : value;
+          },
+        ],
+      },
+    },
     { name: "icon", label: "Symbol", type: "select", options: ICON_OPTIONS, defaultValue: "paw", admin: { position: "sidebar" } },
     {
       name: "hue",
@@ -56,6 +79,11 @@ export const Categories: CollectionConfig = {
       defaultValue: 195,
       admin: { position: "sidebar", description: "Farbe der automatisch erzeugten Titelbilder" },
     },
-    { name: "order", label: "Reihenfolge", type: "number", defaultValue: 100, admin: { position: "sidebar" } },
+    {
+      name: "order",
+      label: "Reihenfolge",
+      type: "number",
+      admin: { position: "sidebar", description: "Leer lassen = automatisch ans Ende. Kleinere Zahl = weiter vorne." },
+    },
   ],
 };

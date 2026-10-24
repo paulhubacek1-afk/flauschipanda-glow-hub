@@ -75,6 +75,18 @@ export default async function CategoryPage({ params }: Props) {
         <h2 id="unterthemen" className="mb-6 text-2xl font-semibold">
           Unterthemen
         </h2>
+        {category.groups.length === 0 && (
+          <div className="rounded-xl border border-dashed border-purple/30 p-10 text-center">
+            <p className="font-medium">Diese Kategorie ist ganz neu – die ersten Unterthemen entstehen gerade.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Schau dich solange in den{" "}
+              <Link href="/seitenstruktur" className="text-primary underline underline-offset-2 hover:text-purple">
+                anderen Kategorien
+              </Link>{" "}
+              um.
+            </p>
+          </div>
+        )}
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {category.groups.map((g) => {
             const count = g.pages.filter((p) => p.live).length;

@@ -76,7 +76,8 @@ export default async function StartPage() {
                   <span className="font-display text-lg font-semibold">{c.title}</span>
                   <span className="line-clamp-2 text-sm text-muted-foreground">{c.description}</span>
                   <span className="mt-auto pt-1 text-xs text-muted-foreground">
-                    {c.groups.length} Unterthemen · {count > 0 ? `${count} Seiten online` : "im Aufbau"}
+                    {c.groups.length === 0 ? "Neu · Unterthemen folgen" : `${c.groups.length} ${c.groups.length === 1 ? "Unterthema" : "Unterthemen"}`} ·{" "}
+                    {count > 0 ? `${count} ${count === 1 ? "Seite" : "Seiten"} online` : "im Aufbau"}
                   </span>
                 </Link>
               </li>

@@ -156,8 +156,8 @@ export const getNavigation = cache(async (): Promise<NavCategory[]> => {
   const payload = await getPayloadClient();
   const now = Date.now();
   const [cats, groups, pages] = await Promise.all([
-    payload.find({ collection: "categories", limit: 200, depth: 0, sort: "order", pagination: false }),
-    payload.find({ collection: "groups", limit: 2000, depth: 0, sort: "order", pagination: false }),
+    payload.find({ collection: "categories", limit: 200, depth: 0, sort: ["order", "createdAt"], pagination: false }),
+    payload.find({ collection: "groups", limit: 2000, depth: 0, sort: ["order", "createdAt"], pagination: false }),
     payload.find({
       collection: "pages",
       limit: 10000,
@@ -179,7 +179,7 @@ export const getNavigation = cache(async (): Promise<NavCategory[]> => {
     number: i + 1,
     slug: c.slug,
     title: c.title,
-    description: c.description ?? "",
+    description: c.description?.trim() || `${c.title}: Ratgeber, Vergleiche und Tipps – verständlich und ehrlich erklärt.`,
     icon: (c.icon ?? "paw") as IconName,
     hue: typeof c.hue === "number" ? c.hue : 195,
     groups: (groups.docs as Doc[])
