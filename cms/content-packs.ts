@@ -19,7 +19,7 @@ type Doc = Record<string, any>;
 const context = { skipChecks: true, skipRevalidate: true };
 
 async function find(payload: Payload, collection: "categories" | "groups" | "pages", where: Doc, limit = 1) {
-  return payload.find({ collection, where, limit, depth: 0, joins: false, overrideAccess: true, draft: true });
+  return payload.find({ collection, where, limit, depth: 0, overrideAccess: true, draft: true });
 }
 
 function pageData(p: PackPage, groupId: number | string) {
@@ -355,7 +355,6 @@ async function updateDonateLinks(payload: Payload): Promise<number> {
     draft: true,
     limit: 100,
     depth: 0,
-    joins: false,
     overrideAccess: true,
   });
   let changes = 0;
