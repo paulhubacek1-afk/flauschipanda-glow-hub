@@ -73,7 +73,7 @@ async function applyPack(payload: Payload, pack: ContentPack): Promise<number> {
       await payload.update({
         collection: "categories",
         id: cat.id,
-        data: { icon: pack.icon, ...(pack.hue != null && (cat.hue ?? 195) === 195 ? { hue: pack.hue } : {}) } as Doc,
+        data: { icon: pack.icon, ...(pack.hue != null && (cat.hue ?? 195) === 195 ? { hue: pack.hue } : {}) } as never,
         overrideAccess: true,
         context,
       });
@@ -91,7 +91,7 @@ async function applyPack(payload: Payload, pack: ContentPack): Promise<number> {
       try {
         group = (await payload.create({
           collection: "groups",
-          data: { title: g.title, slug: g.slug, category: cat.id, description: g.description, order: (gi + 1) * 10 } as Doc,
+          data: { title: g.title, slug: g.slug, category: cat.id, description: g.description, order: (gi + 1) * 10 } as never,
           overrideAccess: true,
           context,
         })) as Doc;
@@ -115,7 +115,7 @@ async function applyPack(payload: Payload, pack: ContentPack): Promise<number> {
       try {
         const exists = (await find(payload, "pages", { path: { equals: pagePath } })).docs.length > 0;
         if (exists) continue;
-        await payload.create({ collection: "pages", data: pageData(p, group.id) as Doc, overrideAccess: true, context });
+        await payload.create({ collection: "pages", data: pageData(p, group.id) as never, overrideAccess: true, context });
         changes++;
       } catch (err) {
         payload.logger.warn({ err }, `[inhalte] Seite ${pagePath} konnte nicht angelegt werden`);
