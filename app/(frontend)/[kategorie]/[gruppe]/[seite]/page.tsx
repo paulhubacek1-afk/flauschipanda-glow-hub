@@ -13,7 +13,7 @@ import { CostCalculator } from "@/components/cost-calculator";
 import { Cover } from "@/components/cover";
 import { DonationBox } from "@/components/donation-box";
 import { Faq } from "@/components/faq";
-import { GreenCoreNotice } from "@/components/greencore-notice";
+import { GreenTechNotice } from "@/components/greencore-notice";
 import { JsonLd } from "@/components/json-ld";
 import { PageCard } from "@/components/page-card";
 import { PageList } from "@/components/page-list";
@@ -30,9 +30,9 @@ import { formatDate, toIsoDate } from "@/lib/utils";
 
 /**
  * Landingpage-Vorlage – für jede Seite gleich aufgebaut:
- *   Infotext → FAQ → Vergleich → Affiliate-Bereich (nur Money Pages) → Panda-GreenCore-Box → Quellen
+ *   Infotext → FAQ → Vergleich → Affiliate-Bereich (nur Money Pages) → Panda-GreenTech-Box → Quellen
  * Automatisch: URL, Breadcrumb, SEO-Titel, Meta-Beschreibung, interne Verlinkung,
- * Geschwisterseiten, verwandte Artikel und GreenCore-Hinweis.
+ * Geschwisterseiten, verwandte Artikel und GreenTech-Hinweis.
  */
 export const revalidate = 3600;
 
@@ -178,7 +178,7 @@ export default async function LandingPage({ params }: Props) {
           {/* 4 · Affiliate-Bereich – Money Pages automatisch, andere Seiten mit selbst gewählten Produkten */}
           <AffiliateBox products={page.products} />
 
-          {/* 5 · Panda-GreenCore-Box */}
+          {/* 5 · Panda-GreenTech-Box */}
           {page.donation && (
             <div data-reveal>
               <DonationBox greencore={settings.greencore} />
@@ -201,7 +201,7 @@ export default async function LandingPage({ params }: Props) {
               </p>
               <PageList categorySlug={category.slug} groupSlug={group.slug} pages={siblings} currentSlug={page.slug} dense />
             </nav>
-            {page.donation && <GreenCoreNotice greencore={settings.greencore} />}
+            {page.donation && <GreenTechNotice greencore={settings.greencore} />}
           </div>
         </aside>
       </div>
@@ -211,7 +211,7 @@ export default async function LandingPage({ params }: Props) {
         <p className="mb-2 px-2.5 text-sm font-semibold">Mehr zu {group.title}</p>
         <PageList categorySlug={category.slug} groupSlug={group.slug} pages={siblings} currentSlug={page.slug} dense />
       </nav>
-      {page.donation && <GreenCoreNotice greencore={settings.greencore} className="mt-6 lg:hidden" />}
+      {page.donation && <GreenTechNotice greencore={settings.greencore} className="mt-6 lg:hidden" />}
 
       {/* Verwandte Artikel – automatisch */}
       {related.length > 0 && (

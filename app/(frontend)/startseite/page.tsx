@@ -40,7 +40,7 @@ export default async function StartPage() {
           </h1>
           <p className="max-w-2xl animate-fade-up text-lg text-muted-foreground [animation-delay:280ms]">
             Ein großes Themen- und Communityportal: Tiere, Zoos, Freizeitparks, KI, Tools, Creator-Wissen, Finanzen und eigene
-            Projekte wie Panda GreenCore – vereint in einer gemeinsamen Struktur.
+            Projekte wie Panda GreenTech – vereint in einer gemeinsamen Struktur.
           </p>
           <p className="max-w-2xl animate-fade-up text-sm text-muted-foreground/80 [animation-delay:380ms]">
             Aktuell entsteht das Fundament: {stats.categories} Kategorien und {stats.groups} Unterthemen, auf denen nach und nach

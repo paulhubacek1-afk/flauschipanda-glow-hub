@@ -3,7 +3,7 @@ import type { GlobalConfig } from "payload";
 import { anyone, isAdmin, isMaintenanceOwner } from "../access";
 import { revalidateGlobal } from "../hooks";
 
-/** Zentrale Einstellungen – u. a. die Panda-GreenCore-Box, die auf jeder Landingpage erscheint. */
+/** Zentrale Einstellungen – u. a. die Panda-GreenTech-Box, die auf jeder Landingpage erscheint. */
 export const SiteSettings: GlobalConfig = {
   slug: "site-settings",
   label: "Website-Einstellungen",
@@ -57,18 +57,18 @@ export const SiteSettings: GlobalConfig = {
     { name: "tagline", label: "Untertitel", type: "text", defaultValue: "Themen- und Communityportal" },
     {
       name: "greencore",
-      label: "Panda GreenCore",
+      label: "Panda GreenTech",
       type: "group",
       admin: { description: "Spendenbox und Hinweis erscheinen automatisch auf jeder Landingpage." },
       fields: [
-        { name: "name", label: "Name", type: "text", defaultValue: "Panda GreenCore" },
-        { name: "headline", label: "Überschrift der Box", type: "text", defaultValue: "Unterstütze Panda GreenCore" },
+        { name: "name", label: "Name", type: "text", defaultValue: "Panda GreenTech" },
+        { name: "headline", label: "Überschrift der Box", type: "text", defaultValue: "Unterstütze Panda GreenTech" },
         {
           name: "text",
           label: "Text der Box",
           type: "textarea",
           defaultValue:
-            "Die Panda Toolbox ist kostenlos und ohne Bezahlschranke. Wenn dir diese Seite geholfen hat, kannst du mit einer freiwilligen Spende an Panda GreenCore etwas zurückgeben.",
+            "Die Panda Toolbox ist kostenlos und ohne Bezahlschranke. Wenn dir diese Seite geholfen hat, kannst du mit einer freiwilligen Spende an Panda GreenTech etwas zurückgeben.",
         },
         {
           name: "purpose",
@@ -82,9 +82,9 @@ export const SiteSettings: GlobalConfig = {
           label: "Kurzer Hinweis (Seitenleiste)",
           type: "textarea",
           defaultValue:
-            "Diese Seite ist Teil der Panda Toolbox. Mit Panda GreenCore wächst hier ein eigenes Projekt, das du freiwillig unterstützen kannst.",
+            "Diese Seite ist Teil der Panda Toolbox. Mit Panda GreenTech wächst hier ein eigenes Projekt, das du freiwillig unterstützen kannst.",
         },
-        { name: "aboutHref", label: "Link „Mehr erfahren“", type: "text", defaultValue: "/panda-branding/greencore" },
+        { name: "aboutHref", label: "Link „Mehr erfahren“", type: "text", defaultValue: "/panda-branding/greentech" },
       ],
     },
   ],

@@ -31,9 +31,9 @@ import { PandaFigure, type PandaLook, type PandaPose } from "./panda-figure";
  * Bambus, der Panda-Buddy
  * -----------------------
  * - sitzt unten rechts und knabbert Bambus; beim Lesen eines Artikels liest er ein Buch,
- *   bei offener Suche holt er die Lupe heraus, auf GreenCore-Seiten gießt er die Pflanze
+ *   bei offener Suche holt er die Lupe heraus, auf GreenTech-Seiten gießt er die Pflanze
  * - sammelt Bambus, während du die Website nutzt → wächst (Kleiner → Neugieriger → Toolbox → Glow Panda)
- *   und schaltet Gegenstände frei (Bambushut, Werkzeugkiste, GreenCore Pflanze, Goldener Panda)
+ *   und schaltet Gegenstände frei (Bambushut, Werkzeugkiste, GreenTech Pflanze, Goldener Panda)
  * - passt sich der Kategorie an (KI-Brille, Sonnenhut, Fernglas …) und der Tageszeit (Kaffee, Laterne, Schlafmütze)
  * - als Guide: schlägt beim Lesen passende Artikel vor, „Wusstest du schon?“ alle paar Seiten
  * - krabbelt zu Karten, die zu deinen Interessen passen (Elemente mit `data-panda-topic`), mit dezenter Leuchtspur
@@ -83,7 +83,7 @@ interface GuideLink {
 const SPEED = 190; // px pro Sekunde beim Krabbeln
 const FIRST_IDEA_MS = 7000;
 const IDEA_INTERVAL_MS = 30000;
-const THANKS_AFTER_S = 240; // GreenCore-Dankeschön nach 4 Minuten aktiver Zeit
+const THANKS_AFTER_S = 240; // GreenTech-Dankeschön nach 4 Minuten aktiver Zeit
 const SAYING_EVERY = 4; // „Wusstest du schon?“ auf jeder 4. Seite
 
 /* Bambus pro Besuch und Seite – Schutz vor endlosem Sammeln auf derselben Seite */
@@ -115,7 +115,7 @@ function greeting() {
 }
 
 const isArticle = (pathname: string) => pathname.split("/").filter(Boolean).length === 3;
-const isGreencore = (pathname: string) => pathname.startsWith("/panda-branding/greencore");
+const isGreencore = (pathname: string) => pathname.startsWith("/panda-branding/greentech");
 const todayKey = () => new Date().toISOString().slice(0, 10);
 const plantFromCount = (n: number) => Math.max(0.25, Math.min(1, 0.25 + Math.log10(n + 1) / 4));
 const pick = <T,>(arr: T[]): T | undefined => arr[Math.floor(Math.random() * arr.length)];
@@ -647,7 +647,7 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
     };
   }, [pathname, ready, consent, earn, sayIfFree]);
 
-  // Aktive Zeit: Bambus pro Minute (max. 3 je Seite) und GreenCore-Dankeschön nach 4 Minuten
+  // Aktive Zeit: Bambus pro Minute (max. 3 je Seite) und GreenTech-Dankeschön nach 4 Minuten
   useEffect(() => {
     if (!ready || !consent) return;
     const mark = () => (lastInput.current = Date.now());
@@ -667,8 +667,8 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
         const ok = sayIfFree(
           {
             title: "Danke! 💚",
-            text: "Danke, dass du Panda GreenCore unterstützt – einfach, indem du hier bist und liest.",
-            link: { href: "/panda-branding/greencore", label: "Was ist Panda GreenCore?" },
+            text: "Danke, dass du Panda GreenTech unterstützt – einfach, indem du hier bist und liest.",
+            link: { href: "/panda-branding/greentech", label: "Was ist Panda GreenTech?" },
           },
           8000,
         );
@@ -698,7 +698,7 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
     };
   }, []);
 
-  // GreenCore-Seiten: Besuch zählen, Pflanze wächst mit allen Besuchen
+  // GreenTech-Seiten: Besuch zählen, Pflanze wächst mit allen Besuchen
   useEffect(() => {
     if (!onGreencore || !ready || !consent) return;
     let cancelled = false;
@@ -717,7 +717,7 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
             () =>
               sayIfFree(
                 {
-                  title: "Ich gieße die GreenCore-Pflanze 💧",
+                  title: "Ich gieße die GreenTech-Pflanze 💧",
                   text: n > 1 ? `Schon ${n.toLocaleString("de-AT")}-mal wurde sie von Besuchern gegossen – je mehr Leute lesen, desto größer wird sie!` : "Je mehr Leute hier lesen, desto größer wird sie!",
                 },
                 9000,

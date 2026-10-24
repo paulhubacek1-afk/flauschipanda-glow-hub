@@ -55,7 +55,26 @@ function pageData(p: PackPage, groupId: number | string) {
 }
 
 async function applyPack(payload: Payload, pack: ContentPack): Promise<number> {
-  const cat = (await find(payload, "categories", { slug: { equals: pack.categorySlug } })).docs[0] as Doc | undefined;
+  let cat = (await find(payload, "categories", { slug: { equals: pack.categorySlug } })).docs[0] as Doc | undefined;
+  if (!cat && pack.createCategory) {
+    // Kategorie gibt es noch nicht → einmalig anlegen (danach im Admin frei änderbar)
+    try {
+      cat = (await payload.create({
+        collection: "categories",
+        overrideAccess: true,
+        context,
+        data: {
+          title: pack.createCategory.title,
+          slug: pack.categorySlug,
+          description: pack.createCategory.description,
+          icon: pack.icon ?? "paw",
+          hue: pack.hue ?? 195,
+        } as never,
+      })) as Doc;
+    } catch {
+      cat = (await find(payload, "categories", { slug: { equals: pack.categorySlug } })).docs[0] as Doc | undefined;
+    }
+  }
   if (!cat) return 0;
 
   const existingGroups = (await find(payload, "groups", { category: { equals: cat.id } }, 200)).docs as Doc[];
@@ -276,13 +295,60 @@ async function ensureAffiliateSlots(payload: Payload): Promise<number> {
   return changes;
 }
 
+/* ------------------------------------------------------------------ */
+/* Umbenennung: Panda GreenCore → Panda GreenTech (einmalig)            */
+/* ------------------------------------------------------------------ */
+
+export const GREENTECH_DONATE_URL = "https://www.gofundme.com/f/panda-greentech-nachhaltige-energie-fur-die-zukunft";
+const swap = (v: unknown) => (typeof v === "string" ? v.replace(/GreenCore/g, "GreenTech").replace(/\/panda-branding\/greencore/g, "/panda-branding/greentech") : v);
+
+async function renameGreenTech(payload: Payload): Promise<number> {
+  let changes = 0;
+  // Unterthema /panda-branding/greencore → /panda-branding/greentech (Seiten-URLs ziehen automatisch mit)
+  const group = (await find(payload, "groups", { path: { equals: "/panda-branding/greencore" } })).docs[0] as Doc | undefined;
+  if (group) {
+    await payload.update({ collection: "groups", id: group.id, overrideAccess: true, context, data: { title: swap(group.title), slug: "greentech", description: swap(group.description) } as never });
+    changes++;
+  }
+  // Seitentitel/-adressen mit „GreenCore“
+  const pages = (await payload.find({ collection: "pages", where: { title: { like: "GreenCore" } }, draft: true, limit: 50, depth: 0, overrideAccess: true })).docs as Doc[];
+  for (const p of pages) {
+    await payload.update({
+      collection: "pages",
+      id: p.id,
+      overrideAccess: true,
+      context,
+      draft: p._status !== "published",
+      data: { title: swap(p.title), label: swap(p.label), slug: String(p.slug).replace(/greencore/g, "greentech") } as never,
+    });
+    changes++;
+  }
+  // Kategorie-Beschreibung
+  const cat = (await find(payload, "categories", { slug: { equals: "panda-branding" } })).docs[0] as Doc | undefined;
+  if (cat && /GreenCore/.test(String(cat.description ?? ""))) {
+    await payload.update({ collection: "categories", id: cat.id, overrideAccess: true, context, data: { description: swap(cat.description) } as never });
+    changes++;
+  }
+  // Website-Einstellungen: Texte umbenennen, Spendenlink und Zweck setzen, falls noch leer
+  const settings = (await payload.findGlobal({ slug: "site-settings", depth: 0, overrideAccess: true })) as Doc;
+  const g = (settings.greencore ?? {}) as Doc;
+  const next: Doc = {};
+  for (const k of ["name", "headline", "text", "notice", "aboutHref", "purpose"]) if (typeof g[k] === "string" && swap(g[k]) !== g[k]) next[k] = swap(g[k]);
+  if (!g.url) next.url = GREENTECH_DONATE_URL;
+  if (!g.purpose)
+    next.purpose =
+      "Material, Bauteile, Prototypen, Tests und Werkzeug für die Entwicklung umweltfreundlicher Energie-Ideen wie Panda HomeCore.";
+  if (Object.keys(next).length) {
+    await payload.updateGlobal({ slug: "site-settings", overrideAccess: true, context, data: { greencore: { ...g, ...next } } as never });
+    changes++;
+  }
+  return changes;
+}
+
 export async function applyContentPacks(payload: Payload) {
   if (process.env.CONTENT_PACKS === "off") return;
   let total = 0;
-  for (const [name, step] of [
-    ["Seiten befüllen", fillEmptyPages],
-    ["Partnerlink-Plätze", ensureAffiliateSlots],
-  ] as const) {
+  const run = async (name: string, step: (p: Payload) => Promise<number>) => {
     try {
       const n = await step(payload);
       if (n) payload.logger.info(`[inhalte] ${name}: ${n} Einträge`);
@@ -290,7 +356,8 @@ export async function applyContentPacks(payload: Payload) {
     } catch (err) {
       payload.logger.error({ err }, `[inhalte] ${name} fehlgeschlagen`);
     }
-  }
+  };
+  await run("GreenTech-Umbenennung", renameGreenTech);
   for (const pack of contentPacks) {
     try {
       const n = await applyPack(payload, pack);
@@ -300,6 +367,8 @@ export async function applyContentPacks(payload: Payload) {
       payload.logger.error({ err }, `[inhalte] Paket ${pack.id} fehlgeschlagen`);
     }
   }
+  await run("Seiten befüllen", fillEmptyPages);
+  await run("Partnerlink-Plätze", ensureAffiliateSlots);
   if (total > 0) {
     try {
       const { revalidatePath } = await import("next/cache");

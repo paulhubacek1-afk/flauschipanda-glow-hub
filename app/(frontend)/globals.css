@@ -637,7 +637,7 @@ input[type="search"]::-webkit-search-decoration {
   }
 }
 
-/* gießt die GreenCore-Pflanze */
+/* gießt die GreenTech-Pflanze */
 .pb-water .pb-can {
   opacity: 1;
   animation: pb-can-tilt 2.6s ease-in-out infinite;
@@ -840,7 +840,7 @@ input[type="search"]::-webkit-search-decoration {
     opacity: 0;
   }
 }
-/* Herzchen beim GreenCore-Dankeschön, Funken beim Freischalten */
+/* Herzchen beim GreenTech-Dankeschön, Funken beim Freischalten */
 .panda-burst span {
   position: absolute;
   left: 50%;

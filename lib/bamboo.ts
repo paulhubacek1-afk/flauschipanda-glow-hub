@@ -25,7 +25,7 @@ export type StageKey = (typeof STAGES)[number]["key"];
 export const ITEMS = [
   { at: 50, key: "hut", name: "Bambushut", emoji: "👒" },
   { at: 100, key: "werkzeug", name: "Werkzeugkiste", emoji: "🧰" },
-  { at: 200, key: "pflanze", name: "GreenCore Pflanze", emoji: "🌱" },
+  { at: 200, key: "pflanze", name: "GreenTech Pflanze", emoji: "🌱" },
   { at: 500, key: "gold", name: "Goldener Panda", emoji: "✨" },
 ] as const;
 export type ItemKey = (typeof ITEMS)[number]["key"];
@@ -55,7 +55,7 @@ export interface BambooState {
   count: number;
   /** ausgeschaltete Gegenstände (Besucher kann sie in der Sammlung abwählen) */
   off: ItemKey[];
-  /** Datum (JJJJ-MM-TT) des letzten GreenCore-Dankeschöns – höchstens einmal am Tag */
+  /** Datum (JJJJ-MM-TT) des letzten GreenTech-Dankeschöns – höchstens einmal am Tag */
   thanked?: string;
   /** Seitenaufrufe insgesamt – für „Wusstest du schon?“ alle paar Seiten */
   views: number;

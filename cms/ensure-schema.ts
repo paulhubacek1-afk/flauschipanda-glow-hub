@@ -22,7 +22,7 @@ export async function ensureSchema(payload: Payload) {
   } catch (err) {
     payload.logger.error({ err }, "[schema] Wartungsmodus-Spalten konnten nicht ergänzt werden");
   }
-  // kleine Zähler außerhalb von Payload (z. B. wie oft die GreenCore-Pflanze gegossen wurde)
+  // kleine Zähler außerhalb von Payload (z. B. wie oft die GreenTech-Pflanze gegossen wurde)
   try {
     await drizzle.execute(sql`
       CREATE TABLE IF NOT EXISTS "fp_counters" (

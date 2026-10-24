@@ -35,6 +35,10 @@ const nextConfig: NextConfig = {
     return [
       { source: "/", destination: "/startseite", permanent: true },
       { source: "/home", destination: "/startseite", permanent: true },
+      // Panda GreenCore heißt jetzt Panda GreenTech – alte Adressen weiterleiten
+      { source: "/panda-branding/greencore/was-ist-panda-greencore", destination: "/panda-branding/greentech/was-ist-panda-greentech", permanent: true },
+      { source: "/panda-branding/greencore/:path*", destination: "/panda-branding/greentech/:path*", permanent: true },
+      { source: "/panda-branding/greencore", destination: "/panda-branding/greentech", permanent: true },
       { source: "/startseite.html", destination: "/startseite", permanent: true },
       { source: "/index.html", destination: "/startseite", permanent: true },
       // Jede andere .html-Adresse auf die saubere URL ohne Endung umleiten

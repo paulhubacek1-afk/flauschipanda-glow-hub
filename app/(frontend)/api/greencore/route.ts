@@ -3,7 +3,7 @@ import { sql } from "@payloadcms/db-postgres";
 import { getPayload } from "payload";
 
 /**
- * Wie oft die GreenCore-Pflanze schon „gegossen“ wurde (= Besuche auf GreenCore-Seiten).
+ * Wie oft die GreenTech-Pflanze schon „gegossen“ wurde (= Besuche auf GreenTech-Seiten).
  * Je mehr Leute lesen, desto größer wird die Pflanze, die der Panda gießt.
  *
  *   GET  → { count }   (kurz zwischengespeichert)

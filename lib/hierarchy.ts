@@ -470,11 +470,11 @@ const categories: Omit<CategoryNode, "number">[] = [
   {
     slug: "panda-branding",
     title: "Panda-Branding",
-    description: "Panda GreenCore, die Panda-Story, Designs, Wallpaper und digitale Produkte.",
+    description: "Panda GreenTech, die Panda-Story, Designs, Wallpaper und digitale Produkte.",
     icon: "panda",
     hue: 185,
     groups: [
-      group("Panda GreenCore", ["Was ist Panda GreenCore?", "Spenden", "Projekte"], { slug: "greencore" }),
+      group("Panda GreenTech", ["Was ist Panda GreenTech?", "Spenden", "Projekte"], { slug: "greentech" }),
       group("Panda-Story", ["Warum Panda?", "Die Panda-Story", "Panda-Glow-Style"]),
       group("Panda-Designs", ["Panda-Wallpaper", "Panda-Designs", "Panda-Malvorlagen", "Panda-KI-Prompts"]),
       group("Downloads", ["Digitale Produkte", "Kostenlose Downloads"]),

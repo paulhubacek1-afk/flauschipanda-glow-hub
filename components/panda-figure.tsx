@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
  *  cling  – hält sich mit beiden Pfoten an der Maus fest und baumelt
  *  read   – sitzt und liest ein Buch (beim Lesen eines Artikels)
  *  search – hält eine Lupe hoch (wenn die Suche offen ist)
- *  water  – gießt die GreenCore-Pflanze (auf GreenCore-Seiten)
+ *  water  – gießt die GreenTech-Pflanze (auf GreenTech-Seiten)
  *
  * Aussehen (look): Hüte, Brille, Zubehör, Gegenstände aus der Bambus-Sammlung, Tageszeit.
  */
@@ -261,7 +261,7 @@ export function PandaFigure({
           <path d="M85 35 q3 -3 7 -2" stroke="#fff" strokeWidth="1.4" fill="none" strokeLinecap="round" />
         </g>
 
-        {/* Gießkanne (GreenCore-Panda) */}
+        {/* Gießkanne (GreenTech-Panda) */}
         <g className="pb-can">
           <path d="M62 80 h17 v12 q0 3 -3 3 h-11 q-3 0 -3 -3 z" fill={TEAL} stroke={INK} strokeWidth="1.3" />
           <path d="M79 84 L98 72" stroke={INK} strokeWidth="2.4" strokeLinecap="round" />

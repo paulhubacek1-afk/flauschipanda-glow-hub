@@ -30,6 +30,8 @@ export interface ContentPack {
   /** optional: Symbol der Kategorie setzen, wenn noch das Standard-Symbol eingestellt ist */
   icon?: string;
   hue?: number;
+  /** optional: Kategorie anlegen, falls es sie noch nicht gibt */
+  createCategory?: { title: string; description: string };
   groups: PackGroup[];
 }
 

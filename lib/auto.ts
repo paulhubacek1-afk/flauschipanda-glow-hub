@@ -5,7 +5,7 @@
  *
  *  Eingabe im Admin:  "Gesundes Hundefutter" (Unterthema: Hunde)
  *  Automatisch:       URL · Breadcrumb · interne Links · SEO-Titel · Meta-Beschreibung ·
- *                     verwandte Artikel · GreenCore-Box · Affiliate-Bereich (nur Money Pages)
+ *                     verwandte Artikel · GreenTech-Box · Affiliate-Bereich (nur Money Pages)
  *
  * SEO-Titel und Meta-Beschreibung werden bei jedem Seitenaufruf neu berechnet, solange die
  * Felder im Admin leer sind – so bleibt z. B. die Jahreszahl immer aktuell.

@@ -34,11 +34,11 @@ export default function TransparenzPage() {
         geladen, wenn du in den Cookie-Einstellungen der Kategorie „Werbung“ zugestimmt hast.
       </p>
 
-      <h2 id="spenden">Spenden an Panda GreenCore</h2>
+      <h2 id="spenden">Spenden an Panda GreenTech</h2>
       <p>
-        Auf vielen Seiten findest du die Spendenbox von Panda GreenCore. Spenden sind freiwillig und haben keinen
+        Auf vielen Seiten findest du die Spendenbox von Panda GreenTech. Spenden sind freiwillig und haben keinen
         Einfluss auf unsere Inhalte oder Empfehlungen. Wofür Spenden verwendet werden, beschreiben wir direkt in der
-        Spendenbox und auf der Seite zu Panda GreenCore.
+        Spendenbox und auf der Seite zu Panda GreenTech.
       </p>
 
       <h2 id="faktenpruefung">Faktenprüfung</h2>

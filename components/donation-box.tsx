@@ -6,7 +6,7 @@ import type { SiteSettingsData } from "@/lib/cms";
 import { PandaLogo } from "./panda-logo";
 import { Button } from "./ui/button";
 
-/** Panda-GreenCore-Box – erscheint automatisch auf jeder Landingpage. Texte im Admin unter „Website-Einstellungen“. */
+/** Panda-GreenTech-Box – erscheint automatisch auf jeder Landingpage. Texte im Admin unter „Website-Einstellungen“. */
 export function DonationBox({ greencore }: { greencore: SiteSettingsData["greencore"] }) {
   const { headline, text, purpose, url, aboutHref, name } = greencore;
   return (

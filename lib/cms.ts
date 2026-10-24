@@ -246,13 +246,13 @@ export const getSettings = cache(async (): Promise<SiteSettingsData> => {
     siteName: s.siteName || "Panda Toolbox",
     tagline: s.tagline || "Die Panda Toolbox – Themen- und Communityportal",
     greencore: {
-      name: g.name || "Panda GreenCore",
-      headline: g.headline || "Unterstütze Panda GreenCore",
-      text: g.text || "Wenn dir diese Seite geholfen hat, kannst du Panda GreenCore freiwillig unterstützen.",
+      name: g.name || "Panda GreenTech",
+      headline: g.headline || "Unterstütze Panda GreenTech",
+      text: g.text || "Wenn dir diese Seite geholfen hat, kannst du Panda GreenTech freiwillig unterstützen.",
       purpose: g.purpose || "",
       url: g.url || "",
       notice: g.notice || "Diese Seite ist Teil der Panda Toolbox.",
-      aboutHref: g.aboutHref || "/panda-branding/greencore",
+      aboutHref: g.aboutHref || "/panda-branding/greentech",
     },
   };
 });

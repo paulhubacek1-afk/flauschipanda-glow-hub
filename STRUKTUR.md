@@ -503,10 +503,10 @@ Startstruktur für den CMS-Import (`npm run seed`). Danach wird alles im Admin u
     └── ○ Kontakt  /projekte-community/ueber/kontakt
 
 15 Panda-Branding  (/panda-branding)
-├── Panda GreenCore  (/panda-branding/greencore)
-│   ├── ○ Was ist Panda GreenCore?  /panda-branding/greencore/was-ist-panda-greencore
-│   ├── ○ Spenden  /panda-branding/greencore/spenden
-│   └── ○ Projekte  /panda-branding/greencore/projekte
+├── Panda GreenTech  (/panda-branding/greentech)
+│   ├── ○ Was ist Panda GreenTech?  /panda-branding/greentech/was-ist-panda-greentech
+│   ├── ○ Spenden  /panda-branding/greentech/spenden
+│   └── ○ Projekte  /panda-branding/greentech/projekte
 ├── Panda-Story  (/panda-branding/panda-story)
 │   ├── ○ Warum Panda?  /panda-branding/panda-story/warum-panda
 │   ├── ○ Die Panda-Story  /panda-branding/panda-story/die-panda-story

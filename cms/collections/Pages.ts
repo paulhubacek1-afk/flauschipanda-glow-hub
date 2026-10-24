@@ -20,7 +20,7 @@ import { lexicalToPlainText } from "../lexical-text";
  *
  * Im Admin genügt: Titel eingeben (z. B. „Gesundes Hundefutter“) + Unterthema wählen.
  * Automatisch entstehen: URL, Breadcrumb, interne Links, SEO-Titel, Meta-Beschreibung,
- * verwandte Artikel, Panda-GreenCore-Box und – bei Money Pages – der Affiliate-Bereich.
+ * verwandte Artikel, Panda-GreenTech-Box und – bei Money Pages – der Affiliate-Bereich.
  * Das Feld „Automatik-Vorschau“ zeigt nach dem Speichern, was erzeugt wurde.
  */
 
@@ -82,7 +82,7 @@ const computeAutomation: CollectionBeforeChangeHook = async ({ data, req, origin
     `Interne Links (Unterthema): ${siblings.docs.map((d) => `${d.title}${d._status === "published" ? "" : " (geplant)"}`).join(" · ") || "–"}`,
     `Auto-Verlinkung von anderen Seiten über: ${anchors.join(", ")}`,
     `Verwandte Artikel: ${(merged.related as unknown[] | undefined)?.length ? "manuell gewählt" : "automatisch (Unterthema & Kategorie)"}`,
-    `Panda-GreenCore-Box: ${merged.donation === false ? "aus" : "an"}`,
+    `Panda-GreenTech-Box: ${merged.donation === false ? "aus" : "an"}`,
     `Affiliate-Bereich: ${pageType === "money" ? ((merged.products as unknown[] | undefined)?.length ? "manuell gewählte Produkte" : "automatisch passende Produkte") : "aus (nur Money Pages)"}`,
   ];
 
@@ -113,7 +113,7 @@ export const Pages: CollectionConfig = {
     listSearchableFields: ["title", "path"],
     pagination: { defaultLimit: 50, limits: [25, 50, 100, 200] },
     group: "Inhalte",
-    description: "Titel eingeben und Unterthema wählen – URL, Breadcrumb, SEO, Links und GreenCore-Box entstehen automatisch.",
+    description: "Titel eingeben und Unterthema wählen – URL, Breadcrumb, SEO, Links und GreenTech-Box entstehen automatisch.",
     // „Vorschau“-Knopf im Admin: öffnet die Seite – auch Entwürfe – im Team-Vorschaumodus
     preview: (doc) => (doc?.path ? `/api/vorschau?zu=${encodeURIComponent(String(doc.path))}` : null),
   },
@@ -297,7 +297,7 @@ export const Pages: CollectionConfig = {
               defaultValue: true,
               admin: { condition: (data) => data?.pageType === "money" },
             },
-            { name: "donation", label: "Panda-GreenCore-Box anzeigen", type: "checkbox", defaultValue: true },
+            { name: "donation", label: "Panda-GreenTech-Box anzeigen", type: "checkbox", defaultValue: true },
           ],
         },
         {

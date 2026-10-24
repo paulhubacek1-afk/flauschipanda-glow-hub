@@ -142,7 +142,7 @@ export interface UserAuthOperations {
       };
 }
 /**
- * Titel eingeben und Unterthema wählen – URL, Breadcrumb, SEO, Links und GreenCore-Box entstehen automatisch.
+ * Titel eingeben und Unterthema wählen – URL, Breadcrumb, SEO, Links und GreenTech-Box entstehen automatisch.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".

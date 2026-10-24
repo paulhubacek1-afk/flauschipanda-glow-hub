@@ -1,6 +1,6 @@
 # 🐼 Panda Toolbox (FlauschiPandas)
 
-Die Panda Toolbox ist als großes Themen- und Communityportal geplant. Sie verbindet Tiere, Zoos, Freizeitparks, KI, Tools, Creator-Wissen, Finanzen und eigene Projekte wie Panda GreenCore in einer gemeinsamen Struktur. Aktuell entsteht das Fundament, auf dem später Inhalte, Tools, Communityfunktionen und Empfehlungen aufgebaut werden.
+Die Panda Toolbox ist als großes Themen- und Communityportal geplant. Sie verbindet Tiere, Zoos, Freizeitparks, KI, Tools, Creator-Wissen, Finanzen und eigene Projekte wie Panda GreenTech in einer gemeinsamen Struktur. Aktuell entsteht das Fundament, auf dem später Inhalte, Tools, Communityfunktionen und Empfehlungen aufgebaut werden.
 
 **Technik:** Next.js · React · Tailwind CSS v4 · shadcn/ui · **Payload CMS** (Backend unter `/admin`) · Postgres
 
@@ -113,7 +113,7 @@ Im Admin unter **Seiten → Neu**:
 | SEO-Titel | Gesundes Hundefutter 2026 – Tipps & Vergleich (Jahr bleibt automatisch aktuell) |
 | Meta-Beschreibung | Gesundes Hundefutter: Worauf du achten solltest, ehrlicher Vergleich … |
 | Verwandte Artikel | aus Unterthema und Kategorie; Traffic Pages verweisen bevorzugt auf Money Pages |
-| Panda-GreenCore-Box | „Unterstütze Panda GreenCore“ + kurzer Hinweis in der Seitenleiste |
+| Panda-GreenTech-Box | „Unterstütze Panda GreenTech“ + kurzer Hinweis in der Seitenleiste |
 | Affiliate-Bereich | nur bei **Money Page = Ja**, mit passenden Produkten aus „Affiliate-Produkte → Passt zu“ |
 
 Nach dem Speichern zeigt der Tab **„SEO & Verlinkung → Automatik-Vorschau“**, was erzeugt wurde, und gibt Hinweise wie „Keine FAQ“ oder „Faktenprüfung ausstehend“. SEO-Felder, die du selbst ausfüllst, haben Vorrang vor der Automatik.
@@ -127,7 +127,7 @@ Nach dem Speichern zeigt der Tab **„SEO & Verlinkung → Automatik-Vorschau“
 | **Affiliate-Produkte** | Partnerlinks, Zuordnung zu Kategorien/Unterthemen, Platzhalter werden nie öffentlich gezeigt |
 | **Medien** | Bilder und PDFs (kein SVG) |
 | **Benutzer** | Rollen: Admin · Redakteur · Autor (nur Entwürfe) · Nutzer (kein Backend) |
-| **Website-Einstellungen** | Name, Untertitel, Panda-GreenCore-Texte, Spendenzweck und -link |
+| **Website-Einstellungen** | Name, Untertitel, Panda-GreenTech-Texte, Spendenzweck und -link |
 
 Jede Änderung im Backend ist sofort auf der Website sichtbar.
 
@@ -140,7 +140,7 @@ Jede Änderung im Backend ist sofort auf der Website sichtbar.
 
 ## Vor dem Livegang
 
-- Im Admin unter **Website-Einstellungen**: Spendenzweck und Spendenlink für Panda GreenCore eintragen.
+- Im Admin unter **Website-Einstellungen**: Spendenzweck und Spendenlink für Panda GreenTech eintragen.
 - Faktenprüfung der importierten Seiten durchgehen (Quellen auf konkrete Unterseiten präzisieren).
 - Impressum und Datenschutz (`app/(frontend)/impressum`, `…/datenschutz`) mit echten Angaben füllen. Datenbank und Hosting dort nennen.
 - Auf Vercel einen Speicher-Adapter für Medien ergänzen (z. B. `@payloadcms/storage-vercel-blob`), weil das Dateisystem dort nicht dauerhaft ist.
@@ -151,7 +151,7 @@ Jede Änderung im Backend ist sofort auf der Website sichtbar.
 ```
 payload.config.ts            Backend-Konfiguration
 cms/collections/             Seiten, Unterthemen, Kategorien, Affiliates, Medien, Benutzer
-cms/globals/SiteSettings.ts  Website-Einstellungen inkl. Panda GreenCore
+cms/globals/SiteSettings.ts  Website-Einstellungen inkl. Panda GreenTech
 app/(payload)/               Admin (/admin) und API (/api)
 app/(frontend)/              Website: /startseite, /[kategorie]/[unterthema]/[seite], /seitenstruktur
 lib/cms.ts                   Datenzugriff der Website auf das CMS

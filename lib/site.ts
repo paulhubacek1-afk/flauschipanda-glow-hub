@@ -25,19 +25,19 @@ export function absoluteUrl(path: string) {
 }
 
 /**
- * Startwerte für die Panda-GreenCore-Box beim Erstimport (npm run seed).
+ * Startwerte für die Panda-GreenTech-Box beim Erstimport (npm run seed).
  * Danach werden Texte, Zweck und Spendenlink im Admin unter „Website-Einstellungen“ gepflegt.
  */
 export const donationConfig = {
-  name: "Panda GreenCore",
-  headline: "Unterstütze Panda GreenCore",
-  text: "Die Panda Toolbox ist kostenlos und ohne Bezahlschranke. Wenn dir diese Seite geholfen hat, kannst du mit einer freiwilligen Spende an Panda GreenCore etwas zurückgeben.",
+  name: "Panda GreenTech",
+  headline: "Unterstütze Panda GreenTech",
+  text: "Die Panda Toolbox ist kostenlos und ohne Bezahlschranke. Wenn dir diese Seite geholfen hat, kannst du mit einer freiwilligen Spende an Panda GreenTech etwas zurückgeben.",
   /** Wofür Spenden konkret verwendet werden – Pflicht vor dem Livegang. */
   purpose: "",
   /** Kurzer Hinweis, der automatisch auf jeder Landingpage erscheint. */
-  notice: "Diese Seite ist Teil der Panda Toolbox. Mit Panda GreenCore wächst hier ein eigenes Projekt, das du freiwillig unterstützen kannst.",
+  notice: "Diese Seite ist Teil der Panda Toolbox. Mit Panda GreenTech wächst hier ein eigenes Projekt, das du freiwillig unterstützen kannst.",
   url: "",
-  aboutHref: "/panda-branding/greencore",
+  aboutHref: "/panda-branding/greentech",
 };
 
 export const legalNav = [

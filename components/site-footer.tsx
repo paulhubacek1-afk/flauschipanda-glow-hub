@@ -64,6 +64,11 @@ export function SiteFooter({ nav }: { nav: NavLite[] }) {
       </div>
       <div className="border-t border-primary/10 py-5 text-center text-xs text-muted-foreground">
         © {new Date().getFullYear()} {siteConfig.name}
+        <span className="mx-2 opacity-50" aria-hidden="true">·</span>
+        <span>
+          powered by <span className="font-medium text-foreground/80">Designix</span> &amp;{" "}
+          <span className="font-medium text-foreground/80">WebDock</span>
+        </span>
       </div>
     </footer>
   );
