@@ -5,6 +5,7 @@ import { haushaltGesundheit } from "./haushalt-gesundheit";
 import { kiCreator } from "./ki-creator";
 import { tiereHaustiere } from "./tiere-haustiere";
 import { tiereWildtiere } from "./tiere-wildtiere";
+import { urlaubAutosMisc } from "./urlaub-autos-misc";
 import { toolsMusikFinanzen } from "./tools-musik-finanzen";
 import { zoosFreizeitparks } from "./zoos-freizeitparks";
 
@@ -18,4 +19,5 @@ export const fillPages: FillPage[] = [
   ...kiCreator,
   ...toolsMusikFinanzen,
   ...zoosFreizeitparks,
+  ...urlaubAutosMisc,
 ];
