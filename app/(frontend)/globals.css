@@ -321,6 +321,203 @@
   }
 }
 
+/* ---------------- Panda-Figur (components/panda-figure.tsx) ---------------- */
+.pb {
+  overflow: visible;
+  transition: transform 200ms ease;
+  /* heller Rand + Leuchten, damit die schwarzen Teile auf dunklem Hintergrund sichtbar bleiben */
+  filter: drop-shadow(0 0 1.2px oklch(0.97 0.01 300 / 0.9)) drop-shadow(0 0 10px oklch(0.72 0.19 300 / 0.45));
+}
+.pb .pb-arm,
+.pb .pb-leg {
+  transform-box: fill-box;
+  transform-origin: 50% 10%;
+  transition: transform 350ms cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.pb .pb-head {
+  transform-box: fill-box;
+  transform-origin: 50% 92%;
+  transition: transform 350ms ease;
+}
+.pb .pb-bamboo {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  transition:
+    transform 400ms cubic-bezier(0.3, 1.3, 0.5, 1),
+    opacity 250ms ease;
+}
+.pb .pb-shadow {
+  transition: opacity 250ms ease;
+}
+.pb .pb-eyes {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: pb-blink 5s infinite;
+}
+@keyframes pb-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+/* sitzt und knabbert */
+.pb-sit .pb-arm-l {
+  transform: rotate(-40deg);
+}
+.pb-sit .pb-arm-r {
+  transform: rotate(40deg);
+}
+.pb-sit .pb-bamboo {
+  animation: pb-chew 1.8s ease-in-out infinite;
+}
+.pb-sit .pb-head {
+  animation: pb-nibble 1.8s ease-in-out infinite;
+}
+@keyframes pb-chew {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  35% {
+    transform: translateY(-5px) rotate(-5deg);
+  }
+  55% {
+    transform: translateY(-3px) rotate(3deg);
+  }
+}
+@keyframes pb-nibble {
+  0%,
+  100% {
+    transform: rotate(0) translateY(0);
+  }
+  40% {
+    transform: rotate(-3deg) translateY(1px);
+  }
+  60% {
+    transform: rotate(2deg) translateY(1px);
+  }
+}
+
+/* tapst los – Bambus quer im Maul */
+.pb-crawl .pb-bob {
+  animation: pb-bob 0.42s ease-in-out infinite;
+}
+.pb-crawl .pb-bamboo {
+  transform: translate(6px, -27px) rotate(84deg);
+}
+.pb-crawl .pb-leg-l,
+.pb-crawl .pb-arm-r {
+  animation: pb-step 0.42s ease-in-out infinite;
+}
+.pb-crawl .pb-leg-r,
+.pb-crawl .pb-arm-l {
+  animation: pb-step 0.42s ease-in-out infinite reverse;
+}
+@keyframes pb-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(2deg);
+  }
+}
+@keyframes pb-step {
+  0%,
+  100% {
+    transform: rotate(-22deg);
+  }
+  50% {
+    transform: rotate(22deg);
+  }
+}
+
+/* sitzt auf einer Karte und winkt */
+.pb-perch .pb-arm-l {
+  transform: rotate(-40deg);
+}
+.pb-perch .pb-bamboo {
+  transform: translate(-3px, 0) rotate(-14deg);
+}
+.pb-perch .pb-arm-r {
+  animation: pb-wave 0.9s ease-in-out infinite;
+}
+.pb-perch .pb-head {
+  transform: rotate(6deg);
+}
+@keyframes pb-wave {
+  0%,
+  100% {
+    transform: rotate(-150deg);
+  }
+  50% {
+    transform: rotate(-118deg);
+  }
+}
+
+/* hält sich an der Maus fest und baumelt – Arme hinter dem Kopf, Pfoten oben */
+.pb .pb-arm-back {
+  opacity: 0;
+}
+.pb-cling .pb-arm-l,
+.pb-cling .pb-arm-r {
+  opacity: 0;
+}
+.pb-cling .pb-arm-back {
+  opacity: 1;
+}
+.pb-cling .pb-arm-back-l {
+  transform: rotate(-164deg) scaleY(2.75);
+}
+.pb-cling .pb-arm-back-r {
+  transform: rotate(164deg) scaleY(2.75);
+}
+.pb-cling .pb-bamboo,
+.pb-cling .pb-shadow {
+  opacity: 0;
+}
+.pb-cling .pb-bamboo {
+  transform: scale(0.4);
+}
+.pb-cling .pb-leg-l {
+  animation: pb-dangle 1.3s ease-in-out infinite;
+}
+.pb-cling .pb-leg-r {
+  animation: pb-dangle 1.3s ease-in-out infinite reverse;
+}
+.pb-cling .pb-head {
+  transform: translateY(3px);
+}
+@keyframes pb-dangle {
+  0%,
+  100% {
+    transform: rotate(-12deg);
+  }
+  50% {
+    transform: rotate(12deg);
+  }
+}
+
+/* Karte, zu der der Panda krabbelt */
+@keyframes panda-highlight {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px oklch(0.72 0.19 300 / 0.9), 0 0 24px oklch(0.72 0.19 300 / 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 2px oklch(0.86 0.14 195 / 0.9), 0 0 32px oklch(0.86 0.14 195 / 0.4);
+  }
+}
+.panda-highlight {
+  border-radius: var(--radius-xl);
+  animation: panda-highlight 1.6s ease-in-out infinite;
+}
+
 /* ---------------- Artikel-Typografie ---------------- */
 .prose-glow {
   font-size: 1.0625rem;

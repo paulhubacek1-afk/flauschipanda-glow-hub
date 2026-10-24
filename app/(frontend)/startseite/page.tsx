@@ -65,7 +65,7 @@ export default async function StartPage() {
           {nav.map((c, i) => {
             const count = live.filter((p) => p.category.slug === c.slug).length;
             return (
-              <li key={c.slug} data-reveal data-reveal-delay={(i % 4) * 70}>
+              <li key={c.slug} data-reveal data-reveal-delay={(i % 4) * 70} data-panda-topic={c.slug} data-panda-label={c.title} data-panda-href={`/${c.slug}`}>
                 <Link href={`/${c.slug}`} className="group glow-hover shine flex h-full flex-col gap-3 rounded-xl border bg-card/60 p-5">
                   <div className="flex items-center justify-between">
                     <span className="flex size-11 items-center justify-center rounded-lg bg-gradient-to-br from-primary/15 to-purple/20">

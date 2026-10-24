@@ -1,43 +1,56 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MessageCircle, Sparkles, X } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 
 import type { NavLite } from "@/lib/cms";
 import { useConsent } from "@/lib/consent";
 import { cn } from "@/lib/utils";
 
-import buddy from "@/public/panda-buddy.png";
+import { PandaFigure, type PandaPose } from "./panda-figure";
 
 /**
- * Panda-Buddy: ein kleiner Panda unten rechts, der Besucher begrüßt und passende Tipps zur
- * aktuellen Seite gibt. Kein Tracking, keine KI – die Texte stehen unten in `buildMessages`.
+ * Bambus, der Panda-Buddy
+ * -----------------------
+ * - sitzt unten rechts und knabbert Bambus
+ * - krabbelt von selbst zu Karten, die zu deinen Interessen passen (Elemente mit `data-panda-topic`)
+ *   und zeigt sie dir – nur zu Karten, die gerade sichtbar sind; er scrollt nie selbst
+ * - auf Wunsch hält er sich an der Maus fest und baumelt mit (Desktop) – Esc lässt los
+ * - Tipp auf den Panda: Tipps zur aktuellen Seite und Aktionen
  *
- * - erscheint erst, nachdem die Cookie-Entscheidung getroffen wurde (keine Überlagerung mit dem Banner)
- * - per Klick auf den Panda: nächster Tipp · „X“ blendet die Sprechblase aus
- * - „Panda ausblenden“ wird im Browser gemerkt (nur eine Einstellung, keine personenbezogenen Daten)
+ * Interessen = welche Kategorien du dir angesehen hast. Das bleibt im Browser:
+ * ohne Einwilligung nur für diesen Besuch (im Arbeitsspeicher), mit Einwilligung in
+ * „Statistik“ oder „Werbung“ auch für spätere Besuche (localStorage). Nichts wird übertragen.
  */
 
-const STORAGE_KEY = "fp-buddy";
+const HIDE_KEY = "fp-buddy";
+const INTEREST_KEY = "fp-interests";
 export const SHOW_BUDDY_EVENT = "fp-buddy-show";
 
 /** Panda wieder einblenden (z. B. über den Link im Footer). */
 export function showPandaBuddy() {
   try {
-    window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem(HIDE_KEY);
   } catch {
     /* ignorieren */
   }
   window.dispatchEvent(new Event(SHOW_BUDDY_EVENT));
 }
 
-interface Message {
+/** sit = in der Ecke · pause = bleibt stehen, wo er gerade ist (Menü offen) */
+type Mode = "sit" | "pause" | "crawl" | "perch" | "cling" | "return";
+
+interface Bubble {
   text: string;
   link?: { href: string; label: string };
+  actions?: boolean;
 }
+
+const SPEED = 190; // px pro Sekunde beim Krabbeln
+const FIRST_IDEA_MS = 7000;
+const IDEA_INTERVAL_MS = 30000;
 
 function greeting() {
   const h = new Date().getHours();
@@ -48,200 +61,548 @@ function greeting() {
   return "Späte Runde? Ich leiste dir Gesellschaft. 🌙";
 }
 
-function buildMessages(pathname: string, nav: NavLite[]): Message[] {
+function pageTips(pathname: string, nav: NavLite[]): Bubble[] {
   const [catSlug, groupSlug, pageSlug] = pathname.split("/").filter(Boolean);
   const category = nav.find((c) => c.slug === catSlug);
   const group = category?.groups.find((g) => g.slug === groupSlug);
-  const random = nav.length ? nav[Math.floor(Math.random() * nav.length)] : undefined;
-
-  if (pathname === "/startseite" || pathname === "/") {
+  if (pathname === "/startseite") {
     return [
-      { text: `${greeting()} Ich bin Flauschi, dein Panda in der Panda Toolbox.` },
-      { text: "Wonach suchst du? Tipp oben einfach ein Stichwort ins Suchfeld – z. B. „Hundefutter“ oder „Prompts“." },
-      ...(random ? [{ text: `Heute empfehle ich dir: ${random.title}.`, link: { href: `/${random.slug}`, label: `Zu ${random.title}` } }] : []),
-      { text: "Alle Themen auf einen Blick findest du in der Seitenstruktur.", link: { href: "/seitenstruktur", label: "Seitenstruktur öffnen" } },
+      { text: `${greeting()} Ich bin Bambus, dein Panda in der Panda Toolbox. Tipp mich an, wenn du Hilfe brauchst!` },
+      { text: "Wonach suchst du? Tipp oben ein Stichwort ins Suchfeld – z. B. „Hundefutter“ oder „Prompts“." },
+      { text: "Alle Themen auf einen Blick findest du in der Seitenstruktur.", link: { href: "/seitenstruktur", label: "Seitenstruktur" } },
     ];
-  }
-  if (pathname === "/seitenstruktur") {
-    return [
-      { text: "Hier siehst du alles, was es gibt – und was gerade entsteht. Graue Themen kommen bald! 🎋" },
-      { text: "Oben kannst du direkt zu einer Kategorie springen." },
-    ];
-  }
-  if (pathname.startsWith("/transparenz")) {
-    return [{ text: "Ehrlich währt am längsten: Hier steht, wie wir Werbung und Affiliate-Links kennzeichnen. 💚" }];
   }
   if (category && group && pageSlug) {
     return [
-      { text: "Psst … rechts im Inhaltsverzeichnis kannst du direkt zu jedem Abschnitt springen." },
-      { text: "Ganz unten findest du häufige Fragen – vielleicht ist deine schon beantwortet!" },
-      { text: `Mehr zu ${group.title} gibt es in der Liste neben dem Text.`, link: { href: `/${category.slug}/${group.slug}`, label: `Alles zu ${group.title}` } },
-      { text: "Hat dir die Seite geholfen? Mit Panda GreenCore kannst du etwas zurückgeben. 💚" },
+      { text: "Psst … im Inhaltsverzeichnis kannst du direkt zu jedem Abschnitt springen." },
+      { text: "Weiter unten warten häufige Fragen – vielleicht ist deine schon beantwortet!" },
+      { text: `Mehr zu ${group.title} gibt es hier:`, link: { href: `/${category.slug}/${group.slug}`, label: `Alles zu ${group.title}` } },
     ];
   }
-  if (category && group) {
-    return [
-      { text: `Willkommen bei ${group.title}! Rechts siehst du alle Themen, die hier geplant sind.` },
-      { text: `Noch mehr findest du in ${category.title}.`, link: { href: `/${category.slug}`, label: `Zu ${category.title}` } },
-    ];
-  }
-  if (category) {
-    const first = category.groups[0];
-    return [
-      { text: `Du bist bei ${category.title}. Such dir unten ein Unterthema aus!` },
-      ...(first ? [{ text: `Wie wär's mit ${first.title}?`, link: { href: `/${category.slug}/${first.slug}`, label: first.title } }] : []),
-    ];
-  }
+  if (category && group) return [{ text: `Willkommen bei ${group.title}! In der Liste siehst du alle Themen, die hier geplant sind.` }];
+  if (category) return [{ text: `Du bist bei ${category.title}. Such dir ein Unterthema aus – ich helfe dir gern!` }];
   return [{ text: `${greeting()} Brauchst du Hilfe? Auf der Startseite kannst du alles durchsuchen.`, link: { href: "/startseite", label: "Zur Startseite" } }];
 }
+
+function readInterests(): Record<string, number> {
+  try {
+    return JSON.parse(window.localStorage.getItem(INTEREST_KEY) ?? "{}") as Record<string, number>;
+  } catch {
+    return {};
+  }
+}
+
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
 export function PandaBuddy({ nav }: { nav: NavLite[] }) {
   const pathname = usePathname();
   const { consent, ready } = useConsent();
-  const [hidden, setHidden] = useState(true); // erst nach dem Laden zeigen (kein Aufblitzen)
-  const [bubbleOpen, setBubbleOpen] = useState(false);
-  const [index, setIndex] = useState(0);
-  const [typed, setTyped] = useState("");
-  const [wiggle, setWiggle] = useState(false);
-  const firstVisit = useRef(true);
+  const remember = Boolean(consent?.statistics || consent?.marketing);
 
-  const messages = useMemo(() => buildMessages(pathname, nav), [pathname, nav]);
-  const message = messages[index % messages.length];
+  const [hidden, setHidden] = useState(true);
+  const [mode, setModeState] = useState<Mode>("sit");
+  const [facing, setFacing] = useState<1 | -1>(-1);
+  const [bubble, setBubble] = useState<Bubble | null>(null);
+  const [tipIndex, setTipIndex] = useState(0);
+  const [bubbleLeft, setBubbleLeft] = useState(false);
+  const [bubbleBelow, setBubbleBelow] = useState(false);
+  const [size, setSize] = useState(88);
+  const [canCling, setCanCling] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
-  // gemerkte Einstellung laden
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const modeRef = useRef<Mode>("sit");
+  const pos = useRef({ x: -999, y: -999 });
+  const vel = useRef({ x: 0, y: 0 });
+  const rot = useRef(0);
+  const cursor = useRef({ x: 0, y: 0 });
+  const lastMove = useRef(0);
+  const targetEl = useRef<HTMLElement | null>(null);
+  const raf = useRef<number | null>(null);
+  const lastT = useRef(0);
+  const lastIdea = useRef(0);
+  const quiet = useRef(false);
+  const shown = useRef(new Set<string>());
+  const interests = useRef<Record<string, number>>({});
+  const bubbleTimer = useRef<number | null>(null);
+
+  const tips = useMemo(() => pageTips(pathname, nav), [pathname, nav]);
+  const titleOf = useCallback((slug: string) => nav.find((c) => c.slug === slug)?.title, [nav]);
+
+  /* ---------------- Grundgerüst ---------------- */
+
+  const home = useCallback(() => {
+    const margin = window.innerWidth < 640 ? 10 : 18;
+    return { x: window.innerWidth - size - margin, y: window.innerHeight - size - margin };
+  }, [size]);
+
+  const apply = useCallback(() => {
+    const w = wrapRef.current;
+    if (w) w.style.transform = `translate3d(${Math.round(pos.current.x)}px, ${Math.round(pos.current.y)}px, 0)`;
+    const i = innerRef.current;
+    if (i) i.style.transform = `rotate(${rot.current.toFixed(2)}deg)`;
+  }, []);
+
+  const clearHighlight = () => {
+    targetEl.current?.classList.remove("panda-highlight");
+  };
+
+  const say = useCallback((b: Bubble | null, autoCloseMs?: number) => {
+    if (bubbleTimer.current) window.clearTimeout(bubbleTimer.current);
+    setBubbleLeft(pos.current.x > window.innerWidth / 2);
+    setBubbleBelow(pos.current.y < 240);
+    setBubble(b);
+    if (b && autoCloseMs) {
+      bubbleTimer.current = window.setTimeout(() => {
+        setBubble(null);
+        if (modeRef.current === "perch" || modeRef.current === "pause") setMode("return");
+        else clearHighlight();
+      }, autoCloseMs);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* ---------------- Bewegung ---------------- */
+
+  const perchPoint = useCallback(
+    (el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      return {
+        x: clamp(r.left + r.width * 0.72 - size / 2, 6, window.innerWidth - size - 6),
+        y: clamp(r.top - size * 0.8, 4, window.innerHeight - size - 4),
+        visible: r.bottom > 40 && r.top < window.innerHeight - 40,
+      };
+    },
+    [size],
+  );
+
+  const step = useCallback(
+    (t: number) => {
+      const dt = Math.min(0.05, (t - (lastT.current || t)) / 1000);
+      lastT.current = t;
+      const m = modeRef.current;
+
+      if (m === "crawl" || m === "return") {
+        const el = targetEl.current;
+        if (m === "crawl" && el && !perchPoint(el).visible) {
+          setMode("return");
+        } else {
+          const dest = m === "crawl" && el ? perchPoint(el) : home();
+          const dx = dest.x - pos.current.x;
+          const dy = dest.y - pos.current.y;
+          const dist = Math.hypot(dx, dy);
+          if (Math.abs(dx) > 2) setFacing(dx > 0 ? 1 : -1);
+          if (dist < 4) {
+            pos.current = { x: dest.x, y: dest.y };
+            rot.current = 0;
+            if (m === "crawl" && el) arrive(el);
+            else setMode("sit");
+          } else {
+            const s = Math.min(dist, SPEED * dt);
+            pos.current.x += (dx / dist) * s;
+            pos.current.y += (dy / dist) * s;
+            rot.current = 0;
+          }
+        }
+      } else if (m === "perch") {
+        const el = targetEl.current;
+        if (!el) setMode("return");
+        else {
+          const p = perchPoint(el);
+          if (!p.visible) {
+            say(null);
+            setMode("return");
+          } else pos.current = { x: p.x, y: p.y };
+        }
+      } else if (m === "cling" && Date.now() - lastMove.current > 25000) {
+        // Maus lange nicht bewegt → loslassen und zurück in die Ecke
+        rot.current = 0;
+        setMode("return");
+      } else if (m === "cling") {
+        // Feder: Pfoten folgen dem Mauszeiger, der Körper schaukelt mit
+        const tx = cursor.current.x - size / 2;
+        const ty = cursor.current.y - size * 0.04;
+        vel.current.x = (vel.current.x + (tx - pos.current.x) * 0.16) * 0.74;
+        vel.current.y = (vel.current.y + (ty - pos.current.y) * 0.16) * 0.74;
+        pos.current.x += vel.current.x;
+        pos.current.y += vel.current.y;
+        const targetRot = clamp(-vel.current.x * 2.2, -38, 38);
+        rot.current += (targetRot - rot.current) * 0.18;
+      }
+
+      apply();
+      const still = modeRef.current === "sit" || modeRef.current === "pause";
+      if (!still) raf.current = requestAnimationFrame(step);
+      else raf.current = null;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [apply, home, perchPoint, say, size],
+  );
+
+  const setMode = useCallback(
+    (m: Mode) => {
+      modeRef.current = m;
+      setModeState(m);
+      if (m !== "perch" && m !== "crawl" && m !== "pause") clearHighlight();
+      if (m === "sit") {
+        rot.current = 0;
+        apply();
+      }
+      if (m !== "sit" && m !== "pause" && raf.current == null) {
+        lastT.current = 0;
+        raf.current = requestAnimationFrame(step);
+      }
+    },
+    [apply, step],
+  );
+
+  /* ---------------- Interessante Themen finden ---------------- */
+
+  const findIdea = useCallback(() => {
+    const currentCat = pathname.split("/")[1];
+    const candidates = Array.from(document.querySelectorAll<HTMLElement>("[data-panda-topic]")).filter((el) => {
+      const r = el.getBoundingClientRect();
+      const href = el.dataset.pandaHref ?? "";
+      return r.width > 60 && r.top > 70 && r.bottom < window.innerHeight - 20 && href !== pathname && !shown.current.has(href);
+    });
+    if (!candidates.length) return null;
+    const scored = candidates.map((el) => {
+      const topic = el.dataset.pandaTopic ?? "";
+      const interest = interests.current[topic] ?? 0;
+      // Was dich schon interessiert hat, zählt am meisten – das aktuelle Thema etwas weniger
+      const score = interest * 3 - (topic === currentCat ? 1 : 0) + Math.random() * 1.5;
+      return { el, topic, interest, score };
+    });
+    scored.sort((a, b) => b.score - a.score);
+    return scored[0];
+  }, [pathname]);
+
+  const arrive = (el: HTMLElement) => {
+    if (!reducedMotion) setMode("perch");
+    el.classList.add("panda-highlight");
+    const topic = el.dataset.pandaTopic ?? "";
+    const label = el.dataset.pandaLabel ?? "dieses Thema";
+    const href = el.dataset.pandaHref;
+    const interest = interests.current[topic] ?? 0;
+    const catTitle = titleOf(topic);
+    const text =
+      interest > 0 && catTitle
+        ? `Weil du dich für ${catTitle} interessierst: Das hier könnte dir gefallen!`
+        : ["Psst … das hier könnte spannend für dich sein!", "Schau mal, was ich gefunden habe! 🎋", "Hier gibt's was Interessantes!"][
+            Math.floor(Math.random() * 3)
+          ];
+    say({ text, link: href ? { href, label } : undefined }, 11000);
+  };
+
+  const goToIdea = useCallback(
+    (manual = false) => {
+      const idea = findIdea();
+      lastIdea.current = Date.now();
+      if (!idea) {
+        if (manual) say({ text: "Scroll ein bisschen weiter – dann such ich dir etwas Spannendes! 🐾" }, 5000);
+        return;
+      }
+      const href = idea.el.dataset.pandaHref ?? "";
+      shown.current.add(href);
+      clearHighlight();
+      targetEl.current = idea.el;
+      say(null);
+      if (reducedMotion) {
+        arrive(idea.el);
+        return;
+      }
+      setMode("crawl");
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [findIdea, reducedMotion, say, setMode],
+  );
+
+  /* ---------------- Festhalten an der Maus ---------------- */
+
+  const startCling = () => {
+    say({ text: "Huiii! Ich halt mich fest! 🐼 (Esc = loslassen)" }, 3500);
+    vel.current = { x: 0, y: 0 };
+    lastMove.current = Date.now();
+    setMode("cling");
+  };
+
+  const drop = useCallback(() => {
+    if (modeRef.current !== "cling") return;
+    rot.current = 0;
+    setMode("return");
+  }, [setMode]);
+
+  /* ---------------- Effekte ---------------- */
+
+  // Start: gemerkte Einstellungen, Größe, Fähigkeiten
   useEffect(() => {
     let off = false;
     try {
-      off = window.localStorage.getItem(STORAGE_KEY) === "off";
-    } catch {
-      /* Speicher blockiert – Panda trotzdem zeigen */
-    }
-    setHidden(off);
-    const show = () => {
-      setHidden(false);
-      setBubbleOpen(true);
-    };
-    window.addEventListener(SHOW_BUDDY_EVENT, show);
-    return () => window.removeEventListener(SHOW_BUDDY_EVENT, show);
-  }, []);
-
-  // Bei Seitenwechsel: von vorn beginnen und kurz „hallo“ sagen
-  useEffect(() => {
-    setIndex(0);
-    const t = window.setTimeout(
-      () => {
-        setBubbleOpen(true);
-        setWiggle(true);
-        window.setTimeout(() => setWiggle(false), 900);
-      },
-      firstVisit.current ? 2500 : 900,
-    );
-    firstVisit.current = false;
-    return () => window.clearTimeout(t);
-  }, [pathname]);
-
-  // Schreibmaschinen-Effekt (bei „weniger Bewegung“ sofort ganzer Text)
-  useEffect(() => {
-    if (!bubbleOpen || !message) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      setTyped(message.text);
-      return;
-    }
-    setTyped("");
-    let i = 0;
-    const id = window.setInterval(() => {
-      i += 2;
-      setTyped(message.text.slice(0, i));
-      if (i >= message.text.length) window.clearInterval(id);
-    }, 22);
-    return () => window.clearInterval(id);
-  }, [bubbleOpen, message]);
-
-  const next = useCallback(() => {
-    setWiggle(true);
-    window.setTimeout(() => setWiggle(false), 900);
-    if (!bubbleOpen) setBubbleOpen(true);
-    else setIndex((i) => (i + 1) % messages.length);
-  }, [bubbleOpen, messages.length]);
-
-  const hideForever = () => {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, "off");
+      off = window.localStorage.getItem(HIDE_KEY) === "off";
     } catch {
       /* ignorieren */
     }
+    setHidden(off);
+    const mqFine = window.matchMedia("(pointer: fine)");
+    const mqMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => {
+      setSize(window.innerWidth < 640 ? 68 : 88);
+      setCanCling(mqFine.matches && !mqMotion.matches);
+      setReducedMotion(mqMotion.matches);
+    };
+    update();
+    window.addEventListener("resize", update);
+    const show = () => {
+      setHidden(false);
+      quiet.current = false;
+    };
+    window.addEventListener(SHOW_BUDDY_EVENT, show);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener(SHOW_BUDDY_EVENT, show);
+    };
+  }, []);
+
+  // Interessen laden (nur mit Einwilligung gespeichert)
+  useEffect(() => {
+    if (!remember) return;
+    const stored = readInterests();
+    for (const [k, v] of Object.entries(stored)) interests.current[k] = Math.max(interests.current[k] ?? 0, v);
+  }, [remember]);
+
+  // Seitenwechsel: Interesse zählen, Panda heimschicken, kurz begrüßen
+  useEffect(() => {
+    const cat = pathname.split("/")[1];
+    if (nav.some((c) => c.slug === cat)) {
+      interests.current[cat] = (interests.current[cat] ?? 0) + 1;
+      if (remember) {
+        try {
+          window.localStorage.setItem(INTEREST_KEY, JSON.stringify(interests.current));
+        } catch {
+          /* ignorieren */
+        }
+      }
+    }
+    setTipIndex(0);
+    if (modeRef.current === "perch" || modeRef.current === "crawl") {
+      say(null);
+      setMode("return");
+    }
+    lastIdea.current = Date.now() - IDEA_INTERVAL_MS + FIRST_IDEA_MS;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
+  // An Startposition setzen, sobald sichtbar
+  useEffect(() => {
+    if (hidden || !ready || !consent) return;
+    if (modeRef.current === "sit") {
+      pos.current = home();
+      apply();
+    }
+    const t = window.setTimeout(() => say({ text: pageTips(pathname, nav)[0].text }, 6000), 1800);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hidden, ready, consent, size]);
+
+  // Bei Größenänderung zurück in die Ecke
+  useEffect(() => {
+    const onResize = () => {
+      if (modeRef.current === "sit") {
+        pos.current = home();
+        apply();
+      }
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [home, apply]);
+
+  // Von selbst Ideen zeigen – nur wenn der Besucher gerade nicht scrollt
+  useEffect(() => {
+    if (hidden || !ready || !consent) return;
+    let idle: number | null = null;
+    const schedule = () => {
+      if (idle) window.clearTimeout(idle);
+      idle = window.setTimeout(() => {
+        if (quiet.current || modeRef.current !== "sit" || document.hidden) return;
+        if (Date.now() - lastIdea.current < IDEA_INTERVAL_MS) return schedule();
+        goToIdea(false);
+      }, 3200);
+    };
+    schedule();
+    window.addEventListener("scroll", schedule, { passive: true });
+    const interval = window.setInterval(schedule, 8000);
+    return () => {
+      if (idle) window.clearTimeout(idle);
+      window.clearInterval(interval);
+      window.removeEventListener("scroll", schedule);
+    };
+  }, [hidden, ready, consent, goToIdea]);
+
+  // Maus verfolgen (für das Festhalten)
+  useEffect(() => {
+    const move = (e: PointerEvent) => {
+      cursor.current = { x: e.clientX, y: e.clientY };
+      lastMove.current = Date.now();
+    };
+    const key = (e: KeyboardEvent) => {
+      if (e.key === "Escape") drop();
+    };
+    const leave = (e: PointerEvent) => {
+      if (!e.relatedTarget) drop();
+    };
+    window.addEventListener("pointermove", move, { passive: true });
+    window.addEventListener("keydown", key);
+    document.addEventListener("pointerout", leave);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("keydown", key);
+      document.removeEventListener("pointerout", leave);
+    };
+  }, [drop]);
+
+  // Aufräumen
+  useEffect(
+    () => () => {
+      if (raf.current) cancelAnimationFrame(raf.current);
+      clearHighlight();
+    },
+    [],
+  );
+
+  /* ---------------- Aktionen ---------------- */
+
+  const showTip = () => {
+    const tip = tips[tipIndex % tips.length];
+    setTipIndex((i) => i + 1);
+    // unterwegs oder auf einer Karte: genau dort stehen bleiben, solange das Menü offen ist
+    if (["crawl", "return", "perch"].includes(modeRef.current)) {
+      rot.current = 0;
+      setMode("pause");
+    }
+    say({ ...tip, actions: true });
+  };
+
+  const closeBubble = () => {
+    say(null);
+    if (modeRef.current === "perch" || modeRef.current === "pause") setMode("return");
+  };
+
+  const onPandaClick = () => {
+    if (modeRef.current === "cling") return drop();
+    if (bubble?.actions) return closeBubble(); // zweites Antippen schließt das Menü
+    showTip();
+  };
+
+  const hideForever = () => {
+    try {
+      window.localStorage.setItem(HIDE_KEY, "off");
+    } catch {
+      /* ignorieren */
+    }
+    say(null);
+    clearHighlight();
+    modeRef.current = "sit";
+    setModeState("sit");
     setHidden(true);
   };
 
   // Solange das Cookie-Banner offen ist, bleibt der Panda weg (keine Überlagerung)
-  if (hidden || !ready || !consent || !message) return null;
+  if (hidden || !ready || !consent) return null;
 
-  const done = typed.length >= message.text.length;
+  const pose: PandaPose = mode === "return" ? "crawl" : mode === "pause" ? "sit" : mode;
 
   return (
-    <div className="pointer-events-none fixed bottom-3 right-3 z-40 flex max-w-[calc(100vw-1.5rem)] items-end gap-2 sm:bottom-5 sm:right-5">
-      {bubbleOpen && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="animate-bubble-in pointer-events-auto relative mb-10 w-64 rounded-2xl rounded-br-sm border border-purple/30 bg-card p-4 pr-8 text-sm shadow-[0_16px_40px_-12px_oklch(0_0_0/0.6),var(--glow-sm)] sm:w-72"
-        >
-          <button
-            type="button"
-            onClick={() => setBubbleOpen(false)}
-            className="absolute right-2 top-2 rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-            aria-label="Sprechblase schließen"
+    <div
+      ref={wrapRef}
+      className={cn("fixed left-0 top-0 z-40 will-change-transform", mode === "cling" && "pointer-events-none")}
+      style={{ width: size, height: size, transform: `translate3d(${pos.current.x}px, ${pos.current.y}px, 0)` }}
+    >
+      <div ref={innerRef} className="relative h-full w-full" style={{ transformOrigin: "50% 4%" }}>
+        {bubble && mode !== "cling" && (
+          <div
+            role="status"
+            aria-live="polite"
+            className={cn(
+              "animate-bubble-in pointer-events-auto absolute w-64 rounded-2xl border border-purple/30 bg-card p-4 pr-8 text-sm shadow-[0_16px_40px_-12px_oklch(0_0_0/0.6),var(--glow-sm)] sm:w-72",
+              bubbleBelow ? "top-[92%]" : "bottom-[92%]",
+              bubbleLeft ? "right-2" : "left-2",
+              bubbleBelow ? (bubbleLeft ? "rounded-tr-sm" : "rounded-tl-sm") : bubbleLeft ? "rounded-br-sm" : "rounded-bl-sm",
+            )}
           >
-            <X className="size-3.5" />
-          </button>
-          <p className="mb-1 flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-purple">
-            <Sparkles className="size-3" aria-hidden="true" /> Flauschi
-          </p>
-          <p className="min-h-10 leading-relaxed text-foreground/90">
-            {typed}
-            {!done && <span className="animate-caret ml-0.5 inline-block h-3.5 w-[2px] translate-y-0.5 bg-primary" aria-hidden="true" />}
-          </p>
-          <div className={cn("mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 transition-opacity", done ? "opacity-100" : "opacity-0")}>
-            {message.link && (
-              <Link href={message.link.href} className="text-sm font-medium text-primary hover:text-purple">
-                {message.link.label} →
+            <button
+              type="button"
+              onClick={closeBubble}
+              className="absolute right-2 top-2 rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+              aria-label="Sprechblase schließen"
+            >
+              <X className="size-3.5" />
+            </button>
+            <p className="mb-1 flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-purple">
+              <Sparkles className="size-3" aria-hidden="true" /> Bambus
+            </p>
+            <p className="leading-relaxed text-foreground/90">{bubble.text}</p>
+            {bubble.link && (
+              <Link
+                href={bubble.link.href}
+                onClick={() => say(null)}
+                className="mt-2 inline-block text-sm font-medium text-primary hover:text-purple"
+              >
+                {bubble.link.label} →
               </Link>
             )}
-            {messages.length > 1 && (
-              <button type="button" onClick={next} className="text-xs text-muted-foreground hover:text-foreground">
-                Noch ein Tipp
-              </button>
+            {bubble.actions && (
+              <div className="mt-3 flex flex-col gap-1.5 border-t border-border pt-3 text-left text-[13px]">
+                <button type="button" onClick={() => goToIdea(true)} className="rounded-md px-2 py-1 text-left hover:bg-accent">
+                  ✨ Zeig mir was Spannendes
+                </button>
+                {canCling && (
+                  <button type="button" onClick={startCling} className="rounded-md px-2 py-1 text-left hover:bg-accent">
+                    🐾 Halt dich an meiner Maus fest
+                  </button>
+                )}
+                {tips.length > 1 && (
+                  <button type="button" onClick={showTip} className="rounded-md px-2 py-1 text-left hover:bg-accent">
+                    💬 Noch ein Tipp
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    quiet.current = true;
+                    if (modeRef.current === "pause") setMode("return");
+                    say({ text: "Mmmh, Bambus … 🎋 Ich bleib hier sitzen. Tipp mich an, wenn du mich brauchst!" }, 4000);
+                  }}
+                  className="rounded-md px-2 py-1 text-left hover:bg-accent"
+                >
+                  🎋 Iss in Ruhe deinen Bambus
+                </button>
+                <button type="button" onClick={hideForever} className="rounded-md px-2 py-1 text-left text-muted-foreground hover:bg-accent">
+                  Panda ausblenden
+                </button>
+              </div>
             )}
-            <button type="button" onClick={hideForever} className="ml-auto text-[11px] text-muted-foreground/70 hover:text-foreground">
-              Panda ausblenden
-            </button>
           </div>
+        )}
+
+        <button
+          type="button"
+          onClick={onPandaClick}
+          aria-label={mode === "cling" ? "Panda loslassen" : "Panda Bambus: Tipps und Aktionen"}
+          className={cn(
+            "relative block h-full w-full rounded-full outline-none focus-visible:ring-[3px] focus-visible:ring-ring/60",
+            mode === "cling" ? "pointer-events-none" : "pointer-events-auto",
+          )}
+        >
+          <PandaFigure pose={pose} facing={facing} className="h-full w-full" />
+        </button>
+      </div>
+      {/* Hinweis beim Festhalten – außerhalb des schaukelnden Teils, damit er ruhig bleibt */}
+      {bubble && mode === "cling" && (
+        <div className="absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded-full bg-card px-3 py-1 text-xs shadow-[var(--glow-sm)]">
+          Esc = loslassen
         </div>
       )}
-
-      <button
-        type="button"
-        onClick={next}
-        aria-label={bubbleOpen ? "Nächster Tipp vom Panda" : "Panda Flauschi ansprechen"}
-        className="animate-buddy-in pointer-events-auto group relative shrink-0 rounded-full outline-none focus-visible:ring-[3px] focus-visible:ring-ring/60"
-      >
-        <span className="absolute inset-1 -z-10 rounded-full bg-gradient-to-br from-primary/40 to-purple/50 blur-xl animate-pulse-glow" aria-hidden="true" />
-        <Image
-          src={buddy}
-          alt=""
-          sizes="96px"
-          className={cn(
-            "size-20 animate-float object-contain drop-shadow-[0_6px_14px_oklch(0_0_0/0.5)] transition-transform group-hover:scale-110 sm:size-24",
-            wiggle && "animate-wiggle",
-          )}
-        />
-        {!bubbleOpen && (
-          <span className="absolute -left-1 top-1 flex size-7 items-center justify-center rounded-full bg-purple text-purple-foreground shadow-[var(--glow-sm)]">
-            <MessageCircle className="size-4" aria-hidden="true" />
-          </span>
-        )}
-      </button>
     </div>
   );
 }

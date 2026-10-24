@@ -94,6 +94,9 @@ export default async function CategoryPage({ params }: Props) {
               <section
                 key={g.slug}
                 data-reveal
+                data-panda-topic={category.slug}
+                data-panda-label={g.title}
+                data-panda-href={`${path}/${g.slug}`}
                 aria-labelledby={`g-${g.slug}`}
                 className="glow-hover flex flex-col rounded-xl border bg-card/60 p-5"
               >

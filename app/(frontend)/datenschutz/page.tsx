@@ -24,6 +24,16 @@ export default function DatenschutzPage() {
         Footer ändern.
       </p>
 
+      <h2 id="panda">Panda-Buddy „Bambus“</h2>
+      <p>
+        Der kleine Panda schlägt dir Themen vor, die zu den Kategorien passen, die du dir angesehen hast. Diese
+        Interessen werden ausschließlich in deinem Browser verarbeitet und nie an uns übertragen. Ohne Einwilligung
+        gelten sie nur für den aktuellen Besuch. Hast du in den Datenschutz-Einstellungen „Statistik“ oder „Werbung“
+        zugestimmt, werden sie zusätzlich im Local Storage (Schlüssel „fp-interests“) gespeichert, damit der Panda dich
+        beim nächsten Besuch wiedererkennt. Blendest du den Panda aus, wird nur diese Einstellung gespeichert
+        („fp-buddy“). Beides kannst du jederzeit über die Browser-Einstellungen löschen.
+      </p>
+
       <h2 id="dienste">Optionale Dienste</h2>
       <p>[Erst ausfüllen, wenn Statistik- oder Werbedienste eingebunden werden: Anbieter, Zweck, Daten, Drittlandübermittlung.]</p>
 
