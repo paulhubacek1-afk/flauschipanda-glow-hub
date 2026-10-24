@@ -49,6 +49,8 @@ export default buildConfig({
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
     meta: { titleSuffix: " · Panda Toolbox" },
+    // Dashboard: zuletzt bearbeitete Kategorien/Unterthemen/Seiten mit „Ansehen“-Link
+    components: { afterDashboard: ["/components/admin/recent-on-site#RecentOnSite"] },
   },
   i18n: { fallbackLanguage: "de", supportedLanguages: { de } },
   collections: [Pages, Groups, Categories, Affiliates, Media, Users],

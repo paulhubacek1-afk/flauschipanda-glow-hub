@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
 import { CalendarDays, Clock, RefreshCw } from "lucide-react";
 
@@ -19,7 +20,7 @@ import { PageList } from "@/components/page-list";
 import { SourcesBox } from "@/components/sources-box";
 import { TableOfContents } from "@/components/table-of-contents";
 import { Badge } from "@/components/ui/badge";
-import { getAffiliateLookup, getGroup, getLivePage, getLivePages, getSettings, lastModified, toSummary } from "@/lib/cms";
+import { getAffiliateLookup, getDraftPage, getGroup, getLivePage, getLivePages, getSettings, lastModified, toSummary } from "@/lib/cms";
 import { getRelatedPages } from "@/lib/linking";
 import { renderPage } from "@/lib/markdown";
 import { articleSchema, faqSchema } from "@/lib/schema";
@@ -37,16 +38,28 @@ export const revalidate = 3600;
 
 type Props = { params: Promise<{ kategorie: string; gruppe: string; seite: string }> };
 
+/** Öffentliche Seite – oder im Team-Vorschaumodus auch Entwürfe (z. B. direkt aus dem Admin „Vorschau“). */
+async function loadPage(kategorie: string, gruppe: string, seite: string) {
+  const live = await getLivePage(kategorie, gruppe, seite);
+  const draft = await draftMode();
+  if (draft.isEnabled) {
+    const preview = await getDraftPage(kategorie, gruppe, seite);
+    if (preview) return { page: preview, isDraft: preview.isDraft, preview: true };
+  }
+  return live ? { page: live, isDraft: false, preview: false } : undefined;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { kategorie, gruppe, seite } = await params;
-  const page = await getLivePage(kategorie, gruppe, seite);
-  if (!page) return {};
+  const loaded = await loadPage(kategorie, gruppe, seite);
+  if (!loaded) return {};
+  const { page } = loaded;
   return {
     title: { absolute: page.seoTitle },
     description: page.description,
     keywords: [page.focusKeyword, ...page.keywords],
     alternates: { canonical: page.href },
-    robots: page.noindex ? { index: false, follow: true } : undefined,
+    robots: page.noindex || loaded.preview ? { index: false, follow: true } : undefined,
     authors: [{ name: page.author ?? siteConfig.defaultAuthor }],
     openGraph: {
       type: "article",
@@ -62,8 +75,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function LandingPage({ params }: Props) {
   const { kategorie, gruppe, seite } = await params;
-  const page = await getLivePage(kategorie, gruppe, seite);
-  if (!page) notFound();
+  const loaded = await loadPage(kategorie, gruppe, seite);
+  if (!loaded) notFound();
+  const { page, isDraft } = loaded;
 
   const [live, settings, lookup, found] = await Promise.all([
     getLivePages(),
@@ -95,6 +109,11 @@ export default async function LandingPage({ params }: Props) {
       <JsonLd data={faqSchema(page)} />
       <div hidden data-panda-guide={JSON.stringify({ links: guideLinks })} />
 
+      {isDraft && (
+        <p role="status" className="mb-6 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm">
+          👀 <strong>Vorschau:</strong> Diese Seite ist noch nicht veröffentlicht (Entwurf oder geplanter Termin). Nur angemeldete Teammitglieder sehen sie.
+        </p>
+      )}
       <header className="mb-10 space-y-6">
         {/* Breadcrumb automatisch: Start › Kategorie › Unterthema › Seite */}
         <Breadcrumbs

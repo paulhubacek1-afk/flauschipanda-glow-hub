@@ -28,6 +28,11 @@ export const Categories: CollectionConfig = {
   labels: { singular: "Kategorie", plural: "Kategorien" },
   admin: {
     useAsTitle: "title",
+    // „Vorschau“-Knopf: direkt aus dem Admin auf der Website ansehen (Team-Vorschaumodus)
+    preview: (doc) => {
+      const path = doc?.slug ? `/${String(doc.slug)}` : null;
+      return path ? `/api/vorschau?zu=${encodeURIComponent(path)}` : null;
+    },
     defaultColumns: ["title", "slug", "order"],
     group: "Struktur",
     description:

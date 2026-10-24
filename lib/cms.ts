@@ -416,6 +416,29 @@ export async function getLivePage(category: string, group: string, slug: string)
   return (await getLivePages()).find((p) => p.id === `${category}/${group}/${slug}`);
 }
 
+/**
+ * Team-Vorschau: neueste Fassung einer Seite, auch wenn sie noch ein Entwurf ist.
+ * Wird nur im Vorschaumodus (draftMode, nur für angemeldete Teammitglieder) aufgerufen.
+ */
+export async function getDraftPage(category: string, group: string, slug: string): Promise<(Page & { isDraft: boolean }) | undefined> {
+  const payload = await getPayloadClient();
+  const res = await payload.find({
+    collection: "pages",
+    where: { path: { equals: `/${category}/${group}/${slug}` } },
+    draft: true,
+    limit: 1,
+    depth: 0,
+    pagination: false,
+    overrideAccess: true,
+  });
+  const doc = res.docs[0] as Doc | undefined;
+  if (!doc) return undefined;
+  const [page] = await mapPages([doc]);
+  if (!page) return undefined;
+  const live = doc._status === "published" && (!doc.publishedAt || new Date(doc.publishedAt).getTime() <= Date.now());
+  return { ...page, related: [], isDraft: !live };
+}
+
 export async function getLivePagesInCategory(category: string) {
   return (await getLivePages()).filter((p) => p.category.slug === category);
 }

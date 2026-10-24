@@ -9,6 +9,11 @@ export const Groups: CollectionConfig = {
   labels: { singular: "Unterthema", plural: "Unterthemen" },
   admin: {
     useAsTitle: "title",
+    // „Vorschau“-Knopf: direkt aus dem Admin auf der Website ansehen (Team-Vorschaumodus)
+    preview: (doc) => {
+      const path = doc?.path ? String(doc.path) : null;
+      return path ? `/api/vorschau?zu=${encodeURIComponent(path)}` : null;
+    },
     defaultColumns: ["title", "category", "path", "order"],
     group: "Struktur",
     listSearchableFields: ["title", "path"],
