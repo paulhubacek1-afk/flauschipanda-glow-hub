@@ -4,10 +4,10 @@ import { ArrowRight } from "lucide-react";
 
 import { CategoryIcon } from "@/components/category-icon";
 import { PageCard } from "@/components/page-card";
-import { PageSearch } from "@/components/page-search";
+import { SiteSearch } from "@/components/site-search";
 import { PandaLogo } from "@/components/panda-logo";
 import { Button } from "@/components/ui/button";
-import { getLivePages, getNavigation, navStats, toSummary } from "@/lib/cms";
+import { getLivePages, getNavigation, getSearchItems, navStats, toSummary } from "@/lib/cms";
 import { siteConfig } from "@/lib/site";
 
 export const revalidate = 3600;
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default async function StartPage() {
-  const [nav, live] = await Promise.all([getNavigation(), getLivePages()]);
+  const [nav, live, searchItems] = await Promise.all([getNavigation(), getLivePages(), getSearchItems()]);
   const stats = navStats(nav);
 
   return (
@@ -47,7 +47,7 @@ export default async function StartPage() {
             Inhalte, Tools, Communityfunktionen und Empfehlungen wachsen.
           </p>
           <div className="w-full max-w-2xl animate-fade-up text-left [animation-delay:480ms]">
-            <PageSearch pages={live.map(toSummary)} />
+            <SiteSearch items={searchItems} />
           </div>
         </div>
       </section>

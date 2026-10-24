@@ -820,6 +820,15 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface SiteSetting {
   id: number;
+  /**
+   * Zeigt allen Besuchern einen Wartungsscreen. Nur paul_hub kann ihn ein- und ausschalten.
+   */
+  maintenance?: {
+    enabled?: boolean | null;
+    title?: string | null;
+    message?: string | null;
+    until?: string | null;
+  };
   siteName?: string | null;
   tagline?: string | null;
   /**
@@ -848,6 +857,14 @@ export interface SiteSetting {
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
+  maintenance?:
+    | T
+    | {
+        enabled?: T;
+        title?: T;
+        message?: T;
+        until?: T;
+      };
   siteName?: T;
   tagline?: T;
   greencore?:

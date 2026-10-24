@@ -127,7 +127,16 @@ export interface PageSummary {
   publishedAt: string;
 }
 
+export interface MaintenanceData {
+  enabled: boolean;
+  title: string;
+  message: string;
+  /** ISO-Zeitpunkt „voraussichtlich bis“ */
+  until?: string;
+}
+
 export interface SiteSettingsData {
+  maintenance: MaintenanceData;
   siteName: string;
   tagline: string;
   greencore: { name: string; headline: string; text: string; purpose: string; url: string; notice: string; aboutHref: string };
@@ -226,7 +235,14 @@ export const getSettings = cache(async (): Promise<SiteSettingsData> => {
   const payload = await getPayloadClient();
   const s = (await payload.findGlobal({ slug: "site-settings", depth: 0 })) as Doc;
   const g = (s.greencore ?? {}) as Doc;
+  const m = (s.maintenance ?? {}) as Doc;
   return {
+    maintenance: {
+      enabled: m.enabled === true,
+      title: m.title || "Wir schrauben gerade an der Panda Toolbox",
+      message: m.message || "Gleich sind wir wieder für dich da – danke für deine Geduld! 🐼",
+      until: m.until || undefined,
+    },
     siteName: s.siteName || "Panda Toolbox",
     tagline: s.tagline || "Die Panda Toolbox – Themen- und Communityportal",
     greencore: {
@@ -428,4 +444,49 @@ export function toSummary(p: Page): PageSummary {
 
 export function lastModified(p: Page) {
   return p.updatedAt ?? p.publishedAt;
+}
+
+/* ------------------------------------------------------------------ */
+/* Suche                                                               */
+/* ------------------------------------------------------------------ */
+
+/** Suchindex: live geschaltete Seiten + alle Unterthemen und Kategorien. */
+export async function getSearchItems(): Promise<import("./search").SearchItem[]> {
+  const [nav, live] = await Promise.all([getNavigation(), getLivePages()]);
+  return [
+    ...live.map((p) => ({
+      kind: "seite" as const,
+      title: p.title,
+      context: `${p.category.title} › ${p.group.title}`,
+      description: p.description,
+      href: p.href,
+      extra: [p.focusKeyword, p.label, ...p.linkAnchors].join(" "),
+    })),
+    ...nav.flatMap((c) =>
+      c.groups.map((g) => ({
+        kind: "unterthema" as const,
+        title: g.title,
+        context: c.title,
+        description: g.description,
+        href: `/${c.slug}/${g.slug}`,
+        // geplante Seiten als Suchbegriffe, damit z. B. „Welpenfutter“ zum Unterthema Hunde führt
+        extra: g.pages.map((pg) => pg.title).join(" "),
+      })),
+    ),
+    ...nav.map((c) => ({
+      kind: "kategorie" as const,
+      title: c.title,
+      context: "Kategorie",
+      description: c.description,
+      href: `/${c.slug}`,
+      extra: c.groups.map((g) => g.title).join(" "),
+    })),
+  ];
+}
+
+/** Wartung aktiv? Endet automatisch, wenn „voraussichtlich bis“ in der Vergangenheit liegt. */
+export function isMaintenanceActive(m: MaintenanceData, now = new Date()) {
+  if (!m.enabled) return false;
+  if (m.until && new Date(m.until).getTime() < now.getTime()) return false;
+  return true;
 }

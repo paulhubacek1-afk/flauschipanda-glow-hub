@@ -31,6 +31,48 @@ Bereits technisch geprüft:
 
 **Domainwechsel:** Wechselt die Website später auf eine eigene Domain, `NEXT_PUBLIC_SITE_URL` anpassen, die alte Adresse per 301 weiterleiten und in der Search Console die *Adressänderung* melden.
 
+## Wartungsmodus
+
+Im Admin unter **Verwaltung → Website-Einstellungen → 🛠️ Wartungsmodus**. Nur **paul_hub** kann ihn ein- und ausschalten; für alle anderen sind die Felder gesperrt. Weitere Berechtigte kannst du über die Umgebungsvariable `MAINTENANCE_ADMINS` eintragen.
+
+- **Aktiv:** Alle Besucher sehen den Wartungsscreen mit Bambus, deiner Überschrift und Nachricht. Suchmaschinen bekommen in dieser Zeit `noindex`.
+- **Voraussichtlich bis:** Optional. Besucher sehen einen Countdown. Danach endet die Wartung automatisch, spätestens nach einer Stunde.
+- **Team-Vorschau:** Angemeldete Teammitglieder sehen auf dem Wartungsscreen „Seite trotzdem ansehen“ und können die echte Seite prüfen, mit einer gelben Hinweisleiste.
+- **Automatisch:** Fällt etwas technisch aus, z. B. wenn die Datenbank kurz nicht erreichbar ist, erscheint statt einer Fehlerseite automatisch ein freundlicher Pausen-Screen mit „Nochmal versuchen“.
+
+## Sicherheit
+
+Eingebaut:
+
+- **Login:**
+  - 5 Fehlversuche führen zu 15 Minuten Kontosperre.
+  - Zusätzlich gilt ein Limit pro IP-Adresse auf Login, Passwort-Reset und Registrierung (`proxy.ts`).
+  - Sitzungen laufen nach 8 Stunden ab.
+  - Das Cookie ist `Secure` und `SameSite=Lax`.
+- **Passwörter:** mindestens 12 Zeichen und drei von vier Zeichenarten.
+- **CSRF:** Angemeldete Anfragen werden nur von der eigenen Domain angenommen.
+- **Zugriffsrechte:**
+  - Benutzerdaten sind nie öffentlich.
+  - Autoren können nichts veröffentlichen.
+  - Nur Admins verwalten Benutzer und Einstellungen.
+- **Eingeschleuster Code (XSS):**
+  - Links im Text werden auf `http(s)`, `mailto`, `tel` und interne Pfade beschränkt, `javascript:` und Ähnliches wird entfernt.
+  - Rohes HTML aus Markdown wird nicht übernommen.
+  - Suchbegriffe werden nie als HTML ausgegeben.
+- **Uploads:** nur Bilder und PDF, kein SVG, höchstens 10 MB.
+- **Header:**
+  - HSTS
+  - Content-Security-Policy, die das Einbetten durch fremde Seiten, Plugins und fremde Formularziele verbietet
+  - `nosniff`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`
+  - `/admin` und `/api` haben `noindex`.
+- **Weniger Angriffsfläche:** GraphQL ist abgeschaltet. Der Cron-Endpunkt prüft sein Geheimnis zeitkonstant. Es werden keine Fehlerdetails an Besucher ausgegeben.
+
+Empfohlen zusätzlich, nur im Vercel-Dashboard möglich:
+
+- Unter *Firewall* die **Attack Challenge Mode** bei Angriffen aktivieren.
+- Eine **Rate-Limit-Regel** für `/api/users/login` anlegen.
+- Für alle Teammitglieder lange, einzigartige Passwörter verwenden, idealerweise aus einem Passwort-Manager. Den Vercel- und GitHub-Zugang mit Zwei-Faktor-Anmeldung schützen.
+
 ## Einrichtung
 
 1. **Datenbank anlegen:** Du brauchst eine Postgres-Datenbank, z. B. ein kostenloses Projekt bei Supabase oder Neon. Kopiere die Verbindungs-URL.

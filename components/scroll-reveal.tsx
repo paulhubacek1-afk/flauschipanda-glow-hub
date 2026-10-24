@@ -32,18 +32,34 @@ export function ScrollReveal() {
       { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
     );
 
-    // kurz warten, bis die neue Seite gerendert ist
-    const raf = requestAnimationFrame(() => {
+    const scan = () => {
       document.querySelectorAll<HTMLElement>("[data-reveal]:not(.is-revealed)").forEach((el) => {
         // Was schon im Bild ist, sofort zeigen
         const rect = el.getBoundingClientRect();
         if (rect.top < window.innerHeight * 0.92) el.classList.add("is-revealed");
         else observer.observe(el);
       });
+    };
+
+    // kurz warten, bis die neue Seite gerendert ist
+    const raf = requestAnimationFrame(scan);
+
+    // Später eingefügte Elemente (Suchtreffer, nachgeladene Inhalte) ebenfalls erfassen –
+    // sonst blieben sie unsichtbar.
+    let pending = 0;
+    const mutations = new MutationObserver(() => {
+      if (pending) return;
+      pending = requestAnimationFrame(() => {
+        pending = 0;
+        scan();
+      });
     });
+    mutations.observe(document.body, { childList: true, subtree: true });
 
     return () => {
       cancelAnimationFrame(raf);
+      if (pending) cancelAnimationFrame(pending);
+      mutations.disconnect();
       observer.disconnect();
     };
   }, [pathname]);

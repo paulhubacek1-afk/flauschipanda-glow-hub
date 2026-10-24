@@ -91,6 +91,8 @@ const rehypeLinks: Plugin<[LinkOptions], HastRoot> = (opts) => (tree) => {
       }
       return;
     }
+    // Sicherheit: nur bekannte, harmlose Link-Arten zulassen (kein javascript:, data:, vbscript: …)
+    if (!/^(https?:\/\/|mailto:|tel:|\/(?!\/)|#)/i.test(href)) return unwrap() ? [SKIP, index!] : undefined;
     if (/^https?:\/\//.test(href)) {
       node.properties = { ...node.properties, rel: ["noopener", "noreferrer"], target: "_blank" };
       return;

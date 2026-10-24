@@ -1,12 +1,15 @@
 import type { Metadata, Viewport } from "next";
+import { draftMode } from "next/headers";
 import { Inter, Space_Grotesk } from "next/font/google";
 
 import { ConsentBanner } from "@/components/consent-banner";
+import { MaintenanceScreen } from "@/components/maintenance-screen";
+import { PreviewBar } from "@/components/preview-bar";
 import { PandaBuddy } from "@/components/panda-buddy";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { getNavigation, toNavLite } from "@/lib/cms";
+import { getNavigation, getSettings, isMaintenanceActive, toNavLite } from "@/lib/cms";
 import { getSiteUrl, siteConfig } from "@/lib/site";
 
 import "./globals.css";
@@ -14,7 +17,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-grotesk", display: "swap" });
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   metadataBase: getSiteUrl(),
   title: {
     default: `${siteConfig.name} – ${siteConfig.tagline}`,
@@ -36,16 +39,39 @@ export const metadata: Metadata = {
   },
 };
 
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings();
+  // Während der Wartung: nichts indexieren (Google soll den Wartungsscreen nicht speichern)
+  if (isMaintenanceActive(settings.maintenance)) return { ...baseMetadata, robots: { index: false, follow: false } };
+  return baseMetadata;
+}
+
 export const viewport: Viewport = {
   themeColor: "#120f24",
   colorScheme: "dark",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const nav = toNavLite(await getNavigation());
+  const [navigation, settings, draft] = await Promise.all([getNavigation(), getSettings(), draftMode()]);
+  const nav = toNavLite(navigation);
+  const maintenance = isMaintenanceActive(settings.maintenance);
+
+  // Wartungsmodus: alle Besucher sehen nur den Wartungsscreen.
+  // Teammitglieder können über /api/vorschau trotzdem die echte Seite ansehen.
+  if (maintenance && !draft.isEnabled) {
+    return (
+      <html lang="de" className={`${inter.variable} ${grotesk.variable}`}>
+        <body>
+          <MaintenanceScreen title={settings.maintenance.title} message={settings.maintenance.message} until={settings.maintenance.until} />
+        </body>
+      </html>
+    );
+  }
+
   return (
     <html lang="de" className={`${inter.variable} ${grotesk.variable}`}>
       <body className="flex min-h-dvh flex-col">
+        {draft.isEnabled && <PreviewBar maintenance={maintenance} />}
         <SiteHeader nav={nav} />
         <main id="inhalt" className="flex-1">
           {children}

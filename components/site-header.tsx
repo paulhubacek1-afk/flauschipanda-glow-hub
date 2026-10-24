@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, LayoutGrid, Menu, X } from "lucide-react";
+import { ChevronDown, LayoutGrid, Menu, Search, X } from "lucide-react";
 
 import type { NavLite } from "@/lib/cms";
 import { cn } from "@/lib/utils";
@@ -93,12 +93,28 @@ export function SiteHeader({ nav }: { nav: NavLite[] }) {
             >
               Alle Seiten
             </Link>
+            <Link
+              href="/suche"
+              aria-label="Suche"
+              title="Suche"
+              className={cn(
+                "rounded-md p-2 text-foreground/75 hover:bg-accent hover:text-accent-foreground",
+                pathname === "/suche" && "bg-primary/10 text-primary",
+              )}
+            >
+              <Search className="size-4" aria-hidden="true" />
+            </Link>
           </nav>
 
+          <div className="flex items-center gap-1 md:hidden">
+          <Button asChild variant="ghost" size="icon" aria-label="Suche">
+            <Link href="/suche">
+              <Search />
+            </Link>
+          </Button>
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
             aria-label={mobileOpen ? "Menü schließen" : "Menü öffnen"}
@@ -106,6 +122,7 @@ export function SiteHeader({ nav }: { nav: NavLite[] }) {
           >
             {mobileOpen ? <X /> : <Menu />}
           </Button>
+          </div>
         </div>
 
         {/* Mega-Menü Desktop – deckender Hintergrund, damit nichts von der Seite durchscheint */}

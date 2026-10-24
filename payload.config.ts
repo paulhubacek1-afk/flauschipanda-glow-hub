@@ -14,6 +14,7 @@ import { Groups } from "./cms/collections/Groups";
 import { Media } from "./cms/collections/Media";
 import { Pages } from "./cms/collections/Pages";
 import { Users } from "./cms/collections/Users";
+import { ensureSchema } from "./cms/ensure-schema";
 import { SiteSettings } from "./cms/globals/SiteSettings";
 
 const filename = fileURLToPath(import.meta.url);
@@ -22,6 +23,21 @@ const dirname = path.dirname(filename);
 if (!process.env.PAYLOAD_SECRET) {
   console.warn("[payload] PAYLOAD_SECRET fehlt – bitte in .env setzen.");
 }
+
+/**
+ * Erlaubte Herkünfte für angemeldete Anfragen (Schutz vor CSRF): nur die eigene Domain
+ * und die Vercel-Adressen dieses Projekts. Anfragen von fremden Seiten werden nicht mit
+ * dem Login-Cookie ausgeführt.
+ */
+const trustedOrigins = [
+  process.env.NEXT_PUBLIC_SITE_URL,
+  process.env.VERCEL_PROJECT_PRODUCTION_URL && `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`,
+  process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}`,
+  process.env.VERCEL_BRANCH_URL && `https://${process.env.VERCEL_BRANCH_URL}`,
+  process.env.NODE_ENV !== "production" && "http://localhost:3000",
+]
+  .filter((o): o is string => Boolean(o))
+  .map((o) => o.replace(/\/$/, ""));
 
 /**
  * Panda Toolbox – Backend & CMS (Payload)
@@ -36,6 +52,15 @@ export default buildConfig({
   i18n: { fallbackLanguage: "de", supportedLanguages: { de } },
   collections: [Pages, Groups, Categories, Affiliates, Media, Users],
   globals: [SiteSettings],
+  csrf: trustedOrigins,
+  // fehlende neue Spalten (z. B. Wartungsmodus) sicher ergänzen
+  onInit: async (payload) => {
+    await ensureSchema(payload);
+  },
+  // GraphQL wird nicht genutzt → abgeschaltet (weniger Angriffsfläche)
+  graphQL: { disable: true },
+  // Uploads: höchstens 10 MB, eine Datei pro Anfrage
+  upload: { limits: { fileSize: 10_000_000, files: 1 } },
   plugins: [vercelBlobStorage({ collections: { media: true }, token: process.env.BLOB_READ_WRITE_TOKEN })],
   // Links im Texteditor: extern, auf andere Seiten oder direkt auf ein Affiliate-Produkt
   editor: lexicalEditor({

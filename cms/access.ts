@@ -32,3 +32,19 @@ export const publishedOrTeam: Access = ({ req }) => {
 };
 
 export const anyone: Access = () => true;
+
+/**
+ * Wartungsmodus: nur bestimmte Administratoren dürfen ihn schalten – standardmäßig paul_hub.
+ * Weitere Benutzernamen können über MAINTENANCE_ADMINS (kommagetrennt) erlaubt werden.
+ */
+export function maintenanceOwners() {
+  return (process.env.MAINTENANCE_ADMINS || "paul_hub")
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+export const isMaintenanceOwner: FieldAccess = ({ req }) => {
+  const user = req.user as { role?: string; username?: string | null } | null | undefined;
+  return user?.role === "admin" && maintenanceOwners().includes(String(user.username ?? "").toLowerCase());
+};

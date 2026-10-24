@@ -1,0 +1,25 @@
+import { sql } from "@payloadcms/db-postgres";
+import type { Payload } from "payload";
+
+/**
+ * Ergänzt neue Datenbank-Spalten, die nach dem ersten Einrichten dazugekommen sind.
+ *
+ * Die Produktionsdatenbank übernimmt Schemaänderungen nicht automatisch. Statt riskanter
+ * Migrationen wird hier beim Start nur HINZUGEFÜGT, was fehlt („IF NOT EXISTS“) –
+ * es wird nie etwas gelöscht oder verändert. Mehrfaches Ausführen ist gefahrlos.
+ */
+export async function ensureSchema(payload: Payload) {
+  const drizzle = (payload.db as unknown as { drizzle?: { execute: (q: unknown) => Promise<unknown> } }).drizzle;
+  if (!drizzle) return;
+  try {
+    await drizzle.execute(sql`
+      ALTER TABLE IF EXISTS "site_settings"
+        ADD COLUMN IF NOT EXISTS "maintenance_enabled" boolean DEFAULT false,
+        ADD COLUMN IF NOT EXISTS "maintenance_title" varchar,
+        ADD COLUMN IF NOT EXISTS "maintenance_message" varchar,
+        ADD COLUMN IF NOT EXISTS "maintenance_until" timestamp(3) with time zone
+    `);
+  } catch (err) {
+    payload.logger.error({ err }, "[schema] Wartungsmodus-Spalten konnten nicht ergänzt werden");
+  }
+}

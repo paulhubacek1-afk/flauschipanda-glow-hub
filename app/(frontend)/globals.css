@@ -111,6 +111,13 @@
   }
 }
 
+/* Eingebautes „x“ in Suchfeldern ausblenden – wir haben einen eigenen Löschen-Knopf */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 /* ---------------- Glow-Utilities ---------------- */
 /* Verlaufsschrift Türkis → Lila mit Leuchten */
 @utility text-glow {
