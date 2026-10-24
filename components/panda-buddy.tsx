@@ -25,7 +25,9 @@ import { PandaFigure, type PandaPose } from "./panda-figure";
  * „Statistik“ oder „Werbung“ auch für spätere Besuche (localStorage). Nichts wird übertragen.
  */
 
-const HIDE_KEY = "fp-buddy";
+/** Eigene Einstellung für Bambus – die alte „ausblenden“-Einstellung des Vorgängers gilt nicht mehr. */
+const HIDE_KEY = "fp-bambus-mini";
+const OLD_HIDE_KEY = "fp-buddy";
 const INTEREST_KEY = "fp-interests";
 export const SHOW_BUDDY_EVENT = "fp-buddy-show";
 
@@ -99,7 +101,9 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
   const { consent, ready } = useConsent();
   const remember = Boolean(consent?.statistics || consent?.marketing);
 
-  const [hidden, setHidden] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  /** verkleinert = nur ein kleiner Panda-Knopf in der Ecke, mit dem man Bambus zurückholt */
+  const [hidden, setHidden] = useState(false);
   const [mode, setModeState] = useState<Mode>("sit");
   const [facing, setFacing] = useState<1 | -1>(-1);
   const [bubble, setBubble] = useState<Bubble | null>(null);
@@ -340,10 +344,12 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
     let off = false;
     try {
       off = window.localStorage.getItem(HIDE_KEY) === "off";
+      window.localStorage.removeItem(OLD_HIDE_KEY); // Einstellung des alten Pandas aufräumen
     } catch {
       /* ignorieren */
     }
     setHidden(off);
+    setMounted(true);
     const mqFine = window.matchMedia("(pointer: fine)");
     const mqMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const update = () => {
@@ -508,7 +514,22 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
   };
 
   // Solange das Cookie-Banner offen ist, bleibt der Panda weg (keine Überlagerung)
-  if (hidden || !ready || !consent) return null;
+  if (!mounted || !ready || !consent) return null;
+
+  // Verkleinert: kleiner Knopf in der Ecke – ein Klick holt Bambus zurück
+  if (hidden) {
+    return (
+      <button
+        type="button"
+        onClick={showPandaBuddy}
+        title="Bambus zurückholen"
+        aria-label="Panda Bambus zurückholen"
+        className="animate-buddy-in fixed bottom-3 right-3 z-40 flex size-12 items-center justify-center rounded-full border border-purple/40 bg-card shadow-[var(--glow-sm)] transition-transform hover:scale-110 sm:bottom-5 sm:right-5"
+      >
+        <PandaFigure pose="sit" className="size-10" />
+      </button>
+    );
+  }
 
   const pose: PandaPose = mode === "return" ? "crawl" : mode === "pause" ? "sit" : mode;
 
@@ -578,7 +599,7 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
                   🎋 Iss in Ruhe deinen Bambus
                 </button>
                 <button type="button" onClick={hideForever} className="rounded-md px-2 py-1 text-left text-muted-foreground hover:bg-accent">
-                  Panda ausblenden
+                  Panda verkleinern
                 </button>
               </div>
             )}

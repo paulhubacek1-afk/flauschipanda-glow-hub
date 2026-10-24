@@ -55,7 +55,7 @@ export function SiteFooter({ nav }: { nav: NavLite[] }) {
               </li>
               <li>
                 <button type="button" onClick={showPandaBuddy} className="hover:text-primary">
-                  Panda Flauschi einblenden
+                  Panda Bambus einblenden
                 </button>
               </li>
             </ul>
