@@ -78,7 +78,14 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    groups: {
+      partnerLinks: 'affiliates';
+    };
+    categories: {
+      partnerLinks: 'affiliates';
+    };
+  };
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     groups: GroupsSelect<false> | GroupsSelect<true>;
@@ -302,6 +309,11 @@ export interface Group {
    */
   path?: string | null;
   order?: number | null;
+  partnerLinks?: {
+    docs?: (number | Affiliate)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -348,6 +360,11 @@ export interface Category {
    */
   hue?: number | null;
   order?: number | null;
+  partnerLinks?: {
+    docs?: (number | Affiliate)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -663,6 +680,7 @@ export interface GroupsSelect<T extends boolean = true> {
   slug?: T;
   path?: T;
   order?: T;
+  partnerLinks?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -677,6 +695,7 @@ export interface CategoriesSelect<T extends boolean = true> {
   icon?: T;
   hue?: T;
   order?: T;
+  partnerLinks?: T;
   updatedAt?: T;
   createdAt?: T;
 }

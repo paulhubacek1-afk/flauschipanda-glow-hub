@@ -19,7 +19,7 @@ type Doc = Record<string, any>;
 const context = { skipChecks: true, skipRevalidate: true };
 
 async function find(payload: Payload, collection: "categories" | "groups" | "pages", where: Doc, limit = 1) {
-  return payload.find({ collection, where, limit, depth: 0, overrideAccess: true, draft: true });
+  return payload.find({ collection, where, limit, depth: 0, joins: false, overrideAccess: true, draft: true });
 }
 
 function pageData(p: PackPage, groupId: number | string) {
@@ -299,7 +299,9 @@ async function ensureAffiliateSlots(payload: Payload): Promise<number> {
 /* Umbenennung: Panda GreenCore → Panda GreenTech (einmalig)            */
 /* ------------------------------------------------------------------ */
 
-export const GREENTECH_DONATE_URL = "https://www.gofundme.com/f/panda-greentech-nachhaltige-energie-fur-die-zukunft";
+/** Spendenlink für Panda GreenTech – das GoFundMe-Profil mit allen Aktionen. */
+export const GREENTECH_DONATE_URL = "https://www.gofundme.com/u/296ae88c-0583-4f07-bf00-8577db624b44";
+const OLD_DONATE_URL = "https://www.gofundme.com/f/panda-greentech-nachhaltige-energie-fur-die-zukunft";
 const swap = (v: unknown) => (typeof v === "string" ? v.replace(/GreenCore/g, "GreenTech").replace(/\/panda-branding\/greencore/g, "/panda-branding/greentech") : v);
 
 async function renameGreenTech(payload: Payload): Promise<number> {
@@ -334,13 +336,53 @@ async function renameGreenTech(payload: Payload): Promise<number> {
   const g = (settings.greencore ?? {}) as Doc;
   const next: Doc = {};
   for (const k of ["name", "headline", "text", "notice", "aboutHref", "purpose"]) if (typeof g[k] === "string" && swap(g[k]) !== g[k]) next[k] = swap(g[k]);
-  if (!g.url) next.url = GREENTECH_DONATE_URL;
+  if (!g.url || g.url === OLD_DONATE_URL) next.url = GREENTECH_DONATE_URL;
   if (!g.purpose)
     next.purpose =
       "Material, Bauteile, Prototypen, Tests und Werkzeug für die Entwicklung umweltfreundlicher Energie-Ideen wie Panda HomeCore.";
   if (Object.keys(next).length) {
     await payload.updateGlobal({ slug: "site-settings", overrideAccess: true, context, data: { greencore: { ...g, ...next } } as never });
     changes++;
+  }
+  return changes;
+}
+
+/** Alten Link zur einzelnen Spendenaktion in Seiten durch das GoFundMe-Profil ersetzen (einmalig, idempotent). */
+async function updateDonateLinks(payload: Payload): Promise<number> {
+  const res = await payload.find({
+    collection: "pages",
+    where: { or: [{ markdown: { contains: OLD_DONATE_URL } }, { "sources.url": { equals: OLD_DONATE_URL } }] },
+    draft: true,
+    limit: 100,
+    depth: 0,
+    joins: false,
+    overrideAccess: true,
+  });
+  let changes = 0;
+  for (const p of res.docs as Doc[]) {
+    const md = String(p.markdown ?? "")
+      .replace(/\[Zur Spendenaktion[^\]]*\]\(https:\/\/www\.gofundme\.com\/f\/panda-greentech[^)]*\)/g, `[Zur Spendenseite von Panda GreenTech auf GoFundMe](${GREENTECH_DONATE_URL})`)
+      .split(OLD_DONATE_URL)
+      .join(GREENTECH_DONATE_URL);
+    const sources = ((p.sources ?? []) as Doc[]).map((s) =>
+      s.url === OLD_DONATE_URL ? { title: "GoFundMe – Panda GreenTech", url: GREENTECH_DONATE_URL } : { title: s.title, url: s.url },
+    );
+    // doppelte Quellen (Profil war teils schon eingetragen) zusammenführen
+    const seen = new Set<string>();
+    const unique = sources.filter((s) => (seen.has(s.url) ? false : (seen.add(s.url), true)));
+    try {
+      await payload.update({
+        collection: "pages",
+        id: p.id,
+        overrideAccess: true,
+        context,
+        draft: p._status !== "published",
+        data: { markdown: md, sources: unique } as never,
+      });
+      changes++;
+    } catch (err) {
+      payload.logger.warn({ err }, `[inhalte] Spendenlink in ${p.path} nicht ersetzt`);
+    }
   }
   return changes;
 }
@@ -358,6 +400,7 @@ export async function applyContentPacks(payload: Payload) {
     }
   };
   await run("GreenTech-Umbenennung", renameGreenTech);
+  await run("GreenTech-Spendenlink", updateDonateLinks);
   for (const pack of contentPacks) {
     try {
       const n = await applyPack(payload, pack);

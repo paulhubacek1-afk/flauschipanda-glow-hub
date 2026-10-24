@@ -14,6 +14,14 @@ export function GreenTechNotice({ greencore, className }: { greencore: SiteSetti
         <Link href={greencore.aboutHref} className="text-success underline-offset-2 hover:underline">
           Mehr über {greencore.name}
         </Link>
+        {greencore.url && (
+          <>
+            {" · "}
+            <a href={greencore.url} target="_blank" rel="noopener noreferrer" className="font-medium text-success underline-offset-2 hover:underline">
+              Jetzt unterstützen
+            </a>
+          </>
+        )}
       </p>
     </aside>
   );

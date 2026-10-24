@@ -40,7 +40,10 @@ export const Affiliates: CollectionConfig = {
       type: "relationship",
       relationTo: ["categories", "groups"],
       hasMany: true,
-      admin: { description: "Kategorien oder Unterthemen, auf deren Money Pages das Produkt automatisch erscheint." },
+      admin: {
+        description:
+          "Kategorien oder Unterthemen, auf deren Übersichtsseite (Empfehlungsbox) und Money Pages das Produkt automatisch erscheint. Auch direkt im Unterthema bzw. in der Kategorie unter „Partnerlinks“ anlegbar.",
+      },
     },
     { name: "active", label: "Aktiv", type: "checkbox", defaultValue: true, admin: { position: "sidebar" } },
     {

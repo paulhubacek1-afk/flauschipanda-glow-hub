@@ -165,8 +165,8 @@ export const getNavigation = cache(async (): Promise<NavCategory[]> => {
   const payload = await getPayloadClient();
   const now = Date.now();
   const [cats, groups, pages] = await Promise.all([
-    payload.find({ collection: "categories", limit: 200, depth: 0, sort: ["order", "createdAt"], pagination: false }),
-    payload.find({ collection: "groups", limit: 2000, depth: 0, sort: ["order", "createdAt"], pagination: false }),
+    payload.find({ collection: "categories", limit: 200, depth: 0, joins: false, sort: ["order", "createdAt"], pagination: false }),
+    payload.find({ collection: "groups", limit: 2000, depth: 0, joins: false, sort: ["order", "createdAt"], pagination: false }),
     payload.find({
       collection: "pages",
       limit: 10000,
@@ -288,6 +288,15 @@ const htmlConverters: HTMLConvertersFunction = ({ defaultConverters }) => ({
     },
   }),
 });
+
+/** Partnerlinks, die einem Unterthema bzw. einer Kategorie zugeordnet sind („Passt zu“). */
+export async function getTopicAffiliates(rel: "groups" | "categories", id: string | number): Promise<AffiliateItem[]> {
+  const docs = await getAffiliateDocs();
+  return docs
+    .filter((a) => ((a.topics ?? []) as Doc[]).some((t) => t.relationTo === rel && idOf(t.value) === id))
+    .slice(0, 6)
+    .map(toAffiliate);
+}
 
 export async function getAffiliateLookup() {
   const docs = await getAffiliateDocs();

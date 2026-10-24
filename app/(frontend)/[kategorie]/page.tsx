@@ -4,12 +4,14 @@ import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
 import { AdSlot } from "@/components/ad-slot";
+import { AffiliateBox } from "@/components/affiliate";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CategoryIcon } from "@/components/category-icon";
+import { GreenTechNotice } from "@/components/greencore-notice";
 import { JsonLd } from "@/components/json-ld";
 import { PageCard } from "@/components/page-card";
 import { PageList } from "@/components/page-list";
-import { getCategory, getLivePagesInCategory, toSummary } from "@/lib/cms";
+import { getCategory, getLivePagesInCategory, getSettings, getTopicAffiliates, toSummary } from "@/lib/cms";
 import { collectionSchema } from "@/lib/schema";
 
 export const revalidate = 3600;
@@ -38,7 +40,11 @@ export default async function CategoryPage({ params }: Props) {
   if (!category) notFound();
 
   const path = `/${category.slug}`;
-  const live = await getLivePagesInCategory(category.slug);
+  const [live, partners, settings] = await Promise.all([
+    getLivePagesInCategory(category.slug),
+    getTopicAffiliates("categories", category.dbId),
+    getSettings(),
+  ]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-14 px-4 py-10">
@@ -119,6 +125,9 @@ export default async function CategoryPage({ params }: Props) {
           })}
         </div>
       </section>
+
+      <AffiliateBox products={partners} title={`Empfehlungen zu ${category.title}`} />
+      <GreenTechNotice greencore={settings.greencore} />
     </div>
   );
 }

@@ -46,3 +46,6 @@ export const legalNav = [
   { title: "Impressum", href: "/impressum" },
   { title: "Datenschutz", href: "/datenschutz" },
 ];
+
+/** Spendenlink für Panda GreenTech (GoFundMe-Profil). Im Admin unter „Website-Einstellungen“ änderbar. */
+export const GREENTECH_URL = "https://www.gofundme.com/u/296ae88c-0583-4f07-bf00-8577db624b44";

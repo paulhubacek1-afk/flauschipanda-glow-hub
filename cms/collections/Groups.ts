@@ -68,5 +68,17 @@ export const Groups: CollectionConfig = {
       type: "number",
       admin: { position: "sidebar", description: "Leer lassen = automatisch ans Ende der Kategorie" },
     },
+    {
+      name: "partnerLinks",
+      label: "Partnerlinks (Affiliate)",
+      type: "join",
+      collection: "affiliates",
+      on: "topics",
+      admin: {
+        description:
+          "Partnerlinks für dieses Unterthema. Sie erscheinen als gekennzeichnete Empfehlungsbox auf der Übersichtsseite und automatisch auf den Money Pages darin. Neu anlegen: „Neu erstellen“ – Partnerlink-URL eintragen, Haken bei „Platzhalter-Link“ weglassen.",
+        defaultColumns: ["name", "url", "active", "placeholder"],
+      },
+    },
   ],
 };

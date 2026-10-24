@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { openConsentSettings } from "@/lib/consent";
 import type { NavLite } from "@/lib/cms";
-import { legalNav, siteConfig } from "@/lib/site";
+import { GREENTECH_URL, legalNav, siteConfig } from "@/lib/site";
 
 import { showPandaBuddy } from "./panda-buddy";
 import { PandaLogo } from "./panda-logo";
@@ -52,6 +52,11 @@ export function SiteFooter({ nav }: { nav: NavLite[] }) {
                 <button type="button" onClick={openConsentSettings} className="hover:text-primary">
                   Cookie-Einstellungen
                 </button>
+              </li>
+              <li>
+                <a href={GREENTECH_URL} target="_blank" rel="noopener noreferrer" className="text-success hover:underline">
+                  Panda GreenTech unterstützen
+                </a>
               </li>
               <li>
                 <button type="button" onClick={showPandaBuddy} className="hover:text-primary">

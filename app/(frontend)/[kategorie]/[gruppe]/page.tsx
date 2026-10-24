@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AffiliateBox } from "@/components/affiliate";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { Cover } from "@/components/cover";
 import { JsonLd } from "@/components/json-ld";
 import { PageCard } from "@/components/page-card";
+import { GreenTechNotice } from "@/components/greencore-notice";
 import { PageList } from "@/components/page-list";
-import { getGroup, getLivePagesInGroup, toSummary } from "@/lib/cms";
+import { getGroup, getLivePagesInGroup, getSettings, getTopicAffiliates, toSummary } from "@/lib/cms";
 import { collectionSchema } from "@/lib/schema";
 
 export const revalidate = 3600;
@@ -37,7 +39,11 @@ export default async function GroupPage({ params }: Props) {
   const { category, group } = found;
 
   const path = `/${category.slug}/${group.slug}`;
-  const live = await getLivePagesInGroup(category.slug, group.slug);
+  const [live, partners, settings] = await Promise.all([
+    getLivePagesInGroup(category.slug, group.slug),
+    getTopicAffiliates("groups", group.dbId),
+    getSettings(),
+  ]);
   const siblings = category.groups.filter((g) => g.slug !== group.slug);
 
   return (
@@ -74,13 +80,15 @@ export default async function GroupPage({ params }: Props) {
               <p className="mt-1 text-sm text-muted-foreground">Rechts siehst du, welche Themen geplant sind.</p>
             </div>
           )}
+          <AffiliateBox products={partners} title={`Empfehlungen zu ${group.title}`} />
         </div>
 
-        <aside>
+        <aside className="space-y-4">
           <nav aria-label={`Alle Seiten in ${group.title}`} className="rounded-xl border bg-card/60 p-4">
             <p className="mb-2 px-2.5 text-sm font-semibold">Alle Themen in {group.title}</p>
             <PageList categorySlug={category.slug} groupSlug={group.slug} pages={group.pages} dense />
           </nav>
+          <GreenTechNotice greencore={settings.greencore} />
         </aside>
       </div>
 

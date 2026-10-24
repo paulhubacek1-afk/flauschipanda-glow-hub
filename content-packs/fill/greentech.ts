@@ -1,7 +1,6 @@
 import type { FillPage } from "../types";
 
-const GFM = { title: "GoFundMe – Panda GreenTech: Nachhaltige Energie für die Zukunft", url: "https://www.gofundme.com/f/panda-greentech-nachhaltige-energie-fur-die-zukunft" };
-const GFM_PROFILE = { title: "GoFundMe – alle Spendenaktionen von PandaAlexandra", url: "https://www.gofundme.com/u/296ae88c-0583-4f07-bf00-8577db624b44" };
+const GFM = { title: "GoFundMe – Panda GreenTech", url: "https://www.gofundme.com/u/296ae88c-0583-4f07-bf00-8577db624b44" };
 
 export const greentechPages: FillPage[] = [
   {
@@ -49,7 +48,7 @@ Alle Infos zur Spende findest du unter „Spenden“, einen Überblick über die
 
 Gespendet wird über die Plattform **GoFundMe**:
 
-**[Zur Spendenaktion „Panda GreenTech – Nachhaltige Energie für die Zukunft“](https://www.gofundme.com/f/panda-greentech-nachhaltige-energie-fur-die-zukunft)**
+**[Zur Spendenseite von Panda GreenTech auf GoFundMe](https://www.gofundme.com/u/296ae88c-0583-4f07-bf00-8577db624b44)**
 
 Dort wählst du einen Betrag und bezahlst mit den angebotenen Zahlungsarten. GoFundMe kann dir optional ein freiwilliges Trinkgeld für die Plattform vorschlagen – das kannst du anpassen.
 
@@ -78,7 +77,7 @@ Du kannst Panda GreenTech auch unterstützen, indem du die Panda Toolbox weitere
       ["Ist meine Spende steuerlich absetzbar?", "Spenden an private Spendenaktionen sind in der Regel nicht absetzbar. Im Zweifel bei einer Steuerberatung nachfragen."],
       ["Bekomme ich für meine Spende etwas zurück?", "Nein. Eine Spende ist freiwillig und ohne Gegenleistung – es ist weder ein Kauf noch eine Beteiligung."],
     ],
-    sources: [GFM, GFM_PROFILE],
+    sources: [GFM],
   },
   {
     path: "panda-branding/greentech/projekte",

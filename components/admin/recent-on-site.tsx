@@ -15,8 +15,8 @@ const TEAM = new Set(["admin", "redakteur", "autor"]);
 export async function RecentOnSite({ payload, user }: { payload?: Payload; user?: { role?: string } | null }) {
   if (!payload || !user?.role || !TEAM.has(user.role)) return null;
   const [cats, groups, pages] = await Promise.all([
-    payload.find({ collection: "categories", sort: "-updatedAt", limit: 5, depth: 0, pagination: false }),
-    payload.find({ collection: "groups", sort: "-updatedAt", limit: 5, depth: 0, pagination: false }),
+    payload.find({ collection: "categories", sort: "-updatedAt", limit: 5, depth: 0, joins: false, pagination: false }),
+    payload.find({ collection: "groups", sort: "-updatedAt", limit: 5, depth: 0, joins: false, pagination: false }),
     payload.find({ collection: "pages", sort: "-updatedAt", limit: 8, depth: 0, draft: true, pagination: false }),
   ]);
   const rows = [
