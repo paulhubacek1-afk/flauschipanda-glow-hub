@@ -6,6 +6,7 @@ import { kiCreator } from "./ki-creator";
 import { tiereHaustiere } from "./tiere-haustiere";
 import { tiereWildtiere } from "./tiere-wildtiere";
 import { toolsMusikFinanzen } from "./tools-musik-finanzen";
+import { zoosFreizeitparks } from "./zoos-freizeitparks";
 
 /** Inhalte für geplante Seiten – werden nur in noch LEERE Seiten übernommen (Money Pages ausgenommen). */
 export const fillPages: FillPage[] = [
@@ -16,4 +17,5 @@ export const fillPages: FillPage[] = [
   ...haushaltGesundheit,
   ...kiCreator,
   ...toolsMusikFinanzen,
+  ...zoosFreizeitparks,
 ];
