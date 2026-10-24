@@ -22,8 +22,11 @@ function variants(s: string): [string, string] {
   return [expanded, stripped];
 }
 
-/** Bindestriche, Satzzeichen und Leerzeichen ignorieren: „Auto-Gadgets“ = „autogadgets“ = „auto gadgets“. */
-const squash = (s: string) => s.replace(/[^\p{L}\p{N}]+/gu, "");
+/**
+ * Bindestriche ignorieren: „Auto-Gadgets“ = „autogadgets“. Leerzeichen bleiben bewusst erhalten,
+ * sonst würden Wortgrenzen verschmelzen („Hund Erstausstattung“ → „hunderst…“ = falscher Treffer).
+ */
+const squash = (s: string) => s.replace(/[-‐‑–—_/.]+/g, "");
 
 interface Prepared {
   item: SearchItem;
