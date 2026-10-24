@@ -14,7 +14,8 @@ export const Affiliates: CollectionConfig = {
     useAsTitle: "name",
     defaultColumns: ["name", "network", "active", "placeholder"],
     group: "Monetarisierung",
-    description: "Partnerlinks werden auf der Website immer als Affiliate-Link gekennzeichnet (rel=sponsored).",
+    description:
+      "Partnerlinks anlegen und verwenden: als Empfehlungsbox (Seite → Tab „Monetarisierung“) oder direkt im Text (Wort markieren → Link → „Interner Link“ → Produkt wählen). Auf der Website immer als Affiliate-Link gekennzeichnet.",
   },
   access: { read: anyone, create: isEditorOrAdmin, update: isEditorOrAdmin, delete: isEditorOrAdmin },
   hooks: { afterChange: [revalidateAfterChange], afterDelete: [revalidateAfterDelete] },

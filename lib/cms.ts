@@ -3,7 +3,7 @@
  * Alle Funktionen sind pro Anfrage zwischengespeichert (React cache).
  */
 import config from "@payload-config";
-import { convertLexicalToHTML } from "@payloadcms/richtext-lexical/html";
+import { LinkHTMLConverter, convertLexicalToHTML, type HTMLConvertersFunction } from "@payloadcms/richtext-lexical/html";
 import { getPayload, type Where } from "payload";
 import { cache } from "react";
 
@@ -256,9 +256,31 @@ const getAffiliateDocs = cache(async () => {
 
 const toAffiliate = (a: Doc): AffiliateItem => ({ key: a.key, name: a.name, label: a.label ?? "", pitch: a.pitch ?? "", url: a.url });
 
+/**
+ * Interne Links aus dem Texteditor (auf Seiten oder Affiliate-Produkte) werden zunächst als
+ * Platzhalter „cms:<sammlung>:<id>“ ausgegeben und beim Rendern aufgelöst (lib/markdown.ts):
+ * Seiten → aktuelle URL, Affiliate-Produkte → gekennzeichneter Partnerlink.
+ */
+const htmlConverters: HTMLConvertersFunction = ({ defaultConverters }) => ({
+  ...defaultConverters,
+  ...LinkHTMLConverter({
+    internalDocToHref: ({ linkNode }) => {
+      const doc = linkNode.fields.doc;
+      if (!doc) return "#";
+      const id = doc.value && typeof doc.value === "object" ? (doc.value as Doc).id : doc.value;
+      return `cms:${doc.relationTo}:${id}`;
+    },
+  }),
+});
+
 export async function getAffiliateLookup() {
   const docs = await getAffiliateDocs();
-  const map = new Map(docs.map((a) => [a.key as string, toAffiliate(a)]));
+  // Suche per Kennung (aff:kennung im Text) oder per Datenbank-ID (#id, Links aus dem Editor)
+  const map = new Map<string, AffiliateItem>();
+  for (const a of docs) {
+    map.set(a.key as string, toAffiliate(a));
+    map.set(`#${a.id}`, toAffiliate(a));
+  }
   return (key: string) => map.get(key);
 }
 
@@ -295,16 +317,17 @@ async function mapPages(docs: Doc[]): Promise<Page[]> {
     const ctx = { categorySlug: category.slug, groupTitle: group.title, pageType, year };
 
     const hasRich = lexicalToPlainText(d.content).length > 0;
-    const contentHtml = hasRich ? convertLexicalToHTML({ data: d.content }) : undefined;
+    const contentHtml = hasRich ? convertLexicalToHTML({ data: d.content, converters: htmlConverters }) : undefined;
     const text = hasRich ? lexicalToPlainText(d.content) : String(d.markdown ?? "");
     const wordCount = text.split(/\s+/).filter(Boolean).length;
 
     // Affiliate-Bereich nur auf Money Pages – eigene Auswahl oder automatisch passend
+    // Selbst gewählte Produkte gelten auf jeder Seite; automatisch ergänzt wird nur auf Money Pages
     let products: AffiliateItem[] = [];
-    if (pageType === "money") {
-      const chosen = ((d.products ?? []) as unknown[]).map((p) => affiliates.find((a) => a.id === idOf(p))).filter(Boolean) as Doc[];
-      if (chosen.length) products = chosen.map(toAffiliate);
-      else if (d.autoAffiliate !== false) {
+    const chosen = ((d.products ?? []) as unknown[]).map((p) => affiliates.find((a) => a.id === idOf(p))).filter(Boolean) as Doc[];
+    if (chosen.length) products = chosen.map(toAffiliate);
+    else if (pageType === "money") {
+      if (d.autoAffiliate !== false) {
         const match = (a: Doc, rel: string, id: string | number) =>
           ((a.topics ?? []) as Doc[]).some((t) => t.relationTo === rel && idOf(t.value) === id);
         const exact = affiliates.filter((a) => match(a, "groups", group.dbId));

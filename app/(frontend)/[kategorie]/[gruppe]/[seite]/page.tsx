@@ -130,16 +130,26 @@ export default async function LandingPage({ params }: Props) {
           {page.widgets.includes("kostenrechner") && <CostCalculator />}
 
           {/* 2 · FAQ */}
-          <Faq items={page.faq} />
+          <div data-reveal>
+            <Faq items={page.faq} />
+          </div>
 
           {/* 3 · Vergleich */}
-          {page.comparison && <ComparisonTable comparison={page.comparison} />}
+          {page.comparison && (
+            <div data-reveal>
+              <ComparisonTable comparison={page.comparison} />
+            </div>
+          )}
 
-          {/* 4 · Affiliate-Bereich – nur Money Pages */}
-          {page.pageType === "money" && <AffiliateBox products={page.products} />}
+          {/* 4 · Affiliate-Bereich – Money Pages automatisch, andere Seiten mit selbst gewählten Produkten */}
+          <AffiliateBox products={page.products} />
 
           {/* 5 · Panda-GreenCore-Box */}
-          {page.donation && <DonationBox greencore={settings.greencore} />}
+          {page.donation && (
+            <div data-reveal>
+              <DonationBox greencore={settings.greencore} />
+            </div>
+          )}
 
           <AdSlot id="seite-ende" />
           <SourcesBox page={page} />

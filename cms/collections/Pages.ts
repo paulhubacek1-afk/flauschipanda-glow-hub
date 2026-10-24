@@ -285,8 +285,8 @@ export const Pages: CollectionConfig = {
               relationTo: "affiliates",
               hasMany: true,
               admin: {
-                condition: (data) => data?.pageType === "money",
-                description: "Nur Money Pages. Leer = automatisch passende Produkte aus „Passt zu“.",
+                description:
+                  "Erscheinen als Empfehlungsbox unter dem Text – auf jeder Seite. Bei Money Pages gilt: leer = automatisch passende Produkte aus „Passt zu“. Tipp: Im Infotext ein Wort markieren → Link → „Interner Link“ → Affiliate-Produkt wählen.",
               },
             },
             {

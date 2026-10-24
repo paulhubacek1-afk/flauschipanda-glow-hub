@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 
 import { ConsentBanner } from "@/components/consent-banner";
+import { PandaBuddy } from "@/components/panda-buddy";
+import { ScrollReveal } from "@/components/scroll-reveal";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getNavigation, toNavLite } from "@/lib/cms";
@@ -50,6 +52,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </main>
         <SiteFooter nav={nav} />
         <ConsentBanner />
+        <PandaBuddy nav={nav} />
+        <ScrollReveal />
       </body>
     </html>
   );

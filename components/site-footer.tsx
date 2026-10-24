@@ -6,6 +6,7 @@ import { openConsentSettings } from "@/lib/consent";
 import type { NavLite } from "@/lib/cms";
 import { legalNav, siteConfig } from "@/lib/site";
 
+import { showPandaBuddy } from "./panda-buddy";
 import { PandaLogo } from "./panda-logo";
 
 export function SiteFooter({ nav }: { nav: NavLite[] }) {
@@ -50,6 +51,11 @@ export function SiteFooter({ nav }: { nav: NavLite[] }) {
               <li>
                 <button type="button" onClick={openConsentSettings} className="hover:text-primary">
                   Cookie-Einstellungen
+                </button>
+              </li>
+              <li>
+                <button type="button" onClick={showPandaBuddy} className="hover:text-primary">
+                  Panda Flauschi einblenden
                 </button>
               </li>
             </ul>

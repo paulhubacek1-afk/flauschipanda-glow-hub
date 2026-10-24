@@ -91,7 +91,12 @@ export default async function CategoryPage({ params }: Props) {
           {category.groups.map((g) => {
             const count = g.pages.filter((p) => p.live).length;
             return (
-              <section key={g.slug} aria-labelledby={`g-${g.slug}`} className="flex flex-col rounded-xl border bg-card/60 p-5">
+              <section
+                key={g.slug}
+                data-reveal
+                aria-labelledby={`g-${g.slug}`}
+                className="glow-hover flex flex-col rounded-xl border bg-card/60 p-5"
+              >
                 <div className="mb-3 flex items-start justify-between gap-3">
                   <h3 id={`g-${g.slug}`} className="font-display text-lg font-semibold">
                     <Link href={`${path}/${g.slug}`} className="hover:text-primary">

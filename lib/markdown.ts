@@ -46,6 +46,8 @@ const isElement = (n: unknown): n is Element => (n as Element)?.type === "elemen
 /* ------------------------------------------------------------------ */
 interface LinkOptions {
   lookup: AffiliateLookup;
+  /** Datenbank-ID einer Seite → aktuelle URL (nur live geschaltete Seiten) */
+  pageHref: (dbId: string) => string | undefined;
   onAffiliate: (key: string) => void;
   manualInternal: Set<string>;
 }
@@ -55,15 +57,29 @@ const rehypeLinks: Plugin<[LinkOptions], HastRoot> = (opts) => (tree) => {
     if (node.tagName !== "a") return;
     const href = String(node.properties?.href ?? "");
 
-    if (href.startsWith("aff:")) {
-      const key = href.slice(4);
+    // Link entfernen, Text behalten (z. B. Ziel noch nicht live oder Partnerlink nicht freigegeben)
+    const unwrap = () => {
+      if (!parent || typeof index !== "number") return false;
+      (parent as HastParent).children.splice(index, 1, ...(node.children as ElementContent[]));
+      return true;
+    };
+
+    // Link aus dem Texteditor auf eine andere Seite
+    if (href.startsWith("cms:pages:")) {
+      const target = opts.pageHref(href.slice("cms:pages:".length));
+      if (!target) return unwrap() ? [SKIP, index!] : undefined; // Zielseite (noch) nicht live → nur Text
+      node.properties = { href: target };
+      opts.manualInternal.add(target);
+      return;
+    }
+
+    // Affiliate-Link: aus dem Editor (cms:affiliates:<id>) oder im Text (aff:kennung)
+    if (href.startsWith("aff:") || href.startsWith("cms:affiliates:")) {
+      const key = href.startsWith("aff:") ? href.slice(4) : `#${href.slice("cms:affiliates:".length)}`;
       const product = opts.lookup(key);
-      if (!product && parent && typeof index === "number") {
-        // Unbekannter oder noch nicht freigegebener Partnerlink: nur den Text zeigen
-        (parent as HastParent).children.splice(index, 1, ...(node.children as ElementContent[]));
-        return [SKIP, index];
-      }
-      if (product) {
+      // Unbekannter, inaktiver oder Platzhalter-Partnerlink: nur den Text zeigen
+      if (!product) return unwrap() ? [SKIP, index!] : undefined;
+      {
         node.properties = {
           href: product.url,
           rel: AFFILIATE_REL.split(" "),
@@ -174,12 +190,14 @@ export async function renderPage(
   const autoLinked: string[] = [];
   const affiliateIds: string[] = [];
   const manualInternal = new Set<string>();
+  const hrefByDbId = new Map(linkCandidates.map((p) => [String(p.dbId), p.href]));
+  const pageHref = (dbId: string) => hrefByDbId.get(dbId);
   const lookup: AffiliateLookup = opts.lookup ?? (() => undefined);
   const targets = opts.autoLink === false ? [] : buildLinkTargets(page, linkCandidates);
 
   const processor = unified()
     .use(rehypeDemoteH1)
-    .use(rehypeLinks, { lookup, onAffiliate: (k) => affiliateIds.push(k), manualInternal })
+    .use(rehypeLinks, { lookup, pageHref, onAffiliate: (k) => affiliateIds.push(k), manualInternal })
     .use(rehypeAutoLink, { targets, max: MAX_AUTO_LINKS, manualInternal, onLink: (id) => autoLinked.push(id) })
     .use(rehypeSlug)
     .use(rehypeCollectHeadings, headings)

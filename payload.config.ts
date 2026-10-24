@@ -2,7 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { postgresAdapter } from "@payloadcms/db-postgres";
-import { lexicalEditor } from "@payloadcms/richtext-lexical";
+import { LinkFeature, lexicalEditor } from "@payloadcms/richtext-lexical";
 import { de } from "@payloadcms/translations/languages/de";
 import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
 import { buildConfig } from "payload";
@@ -37,7 +37,13 @@ export default buildConfig({
   collections: [Pages, Groups, Categories, Affiliates, Media, Users],
   globals: [SiteSettings],
   plugins: [vercelBlobStorage({ collections: { media: true }, token: process.env.BLOB_READ_WRITE_TOKEN })],
-  editor: lexicalEditor(),
+  // Links im Texteditor: extern, auf andere Seiten oder direkt auf ein Affiliate-Produkt
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures.filter((f) => f.key !== "link"),
+      LinkFeature({ enabledCollections: ["pages", "affiliates"] }),
+    ],
+  }),
   secret: process.env.PAYLOAD_SECRET || "",
   typescript: { outputFile: path.resolve(dirname, "payload-types.ts") },
   db: postgresAdapter({

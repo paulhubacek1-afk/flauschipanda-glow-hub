@@ -7,9 +7,20 @@ import { cn } from "@/lib/utils";
 import { Cover } from "./cover";
 import { Badge } from "./ui/badge";
 
-export function PageCard({ page, className, showCategory = true }: { page: PageSummary; className?: string; showCategory?: boolean }) {
+export function PageCard({
+  page,
+  className,
+  showCategory = true,
+  revealDelay = 0,
+}: {
+  page: PageSummary;
+  className?: string;
+  showCategory?: boolean;
+  /** Verzögerung (ms) fürs Einblenden beim Scrollen – für gestaffelte Karten */
+  revealDelay?: number;
+}) {
   return (
-    <article className={cn("group glow-hover relative flex flex-col overflow-hidden rounded-xl border bg-card", className)}>
+    <article data-reveal data-reveal-delay={revealDelay || undefined} className={cn("group glow-hover shine relative flex flex-col overflow-hidden rounded-xl border bg-card", className)}>
       <Cover icon={page.icon} hue={page.hue} size="sm" className="rounded-none border-0 border-b" />
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div className="flex flex-wrap gap-1.5">
