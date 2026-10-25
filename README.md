@@ -35,7 +35,7 @@ Bereits technisch geprüft:
 
 Im Admin unter **Verwaltung → Website-Einstellungen → 🛠️ Wartungsmodus**. Nur **paul_hub** kann ihn ein- und ausschalten; für alle anderen sind die Felder gesperrt. Weitere Berechtigte kannst du über die Umgebungsvariable `MAINTENANCE_ADMINS` eintragen.
 
-- **Aktiv:** Alle Besucher sehen den Wartungsscreen mit Bambus, deiner Überschrift und Nachricht. Suchmaschinen bekommen in dieser Zeit `noindex`.
+- **Aktiv:** Alle Besucher sehen den Wartungsscreen mit Flauschipanda, deiner Überschrift und Nachricht. Suchmaschinen bekommen in dieser Zeit `noindex`.
 - **Voraussichtlich bis:** Optional. Besucher sehen einen Countdown. Danach endet die Wartung automatisch, spätestens nach einer Stunde.
 - **Team-Vorschau:** Angemeldete Teammitglieder sehen auf dem Wartungsscreen „Seite trotzdem ansehen“ und können die echte Seite prüfen, mit einer gelben Hinweisleiste.
 - **Automatisch:** Fällt etwas technisch aus, z. B. wenn die Datenbank kurz nicht erreichbar ist, erscheint statt einer Fehlerseite automatisch ein freundlicher Pausen-Screen mit „Nochmal versuchen“.

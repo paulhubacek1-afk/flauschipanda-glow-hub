@@ -7,7 +7,7 @@ import { useBamboo } from "@/lib/bamboo";
 /**
  * Bambus wächst: Je mehr Bambus gesammelt ist, desto lebendiger wird der Seitenrand.
  *   ab 10 Bambus → erste Sprosse · ab 50 → ein paar Halme · ab 100 → kleiner Bambuswald mit Glühwürmchen
- * Ganz dezent, hinter dem Inhalt, nur auf breiten Bildschirmen (dort ist am Rand Platz).
+ * Ganz dezent, hinter dem Inhalt – auf dem Handy etwas kleiner und blasser.
  */
 const STALKS = [
   { x: 10, h: 0.55, w: 9, d: 0 },
@@ -45,7 +45,7 @@ export function BambooForest() {
   const maxH = 260; // px
 
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed bottom-0 left-0 -z-10 hidden h-[300px] w-[190px] opacity-[0.22] xl:block">
+    <div aria-hidden="true" className="pointer-events-none fixed bottom-0 left-0 -z-10 h-[300px] w-[190px] origin-bottom-left scale-[0.62] opacity-[0.16] sm:scale-75 xl:scale-100 xl:opacity-[0.22]">
       {STALKS.slice(0, n).map((s, i) => {
         const height = Math.round(maxH * s.h * g);
         return (

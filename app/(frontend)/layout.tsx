@@ -11,6 +11,7 @@ import { ScienceSky } from "@/components/science-sky";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { VisitorPing } from "@/components/visitor-ping";
 import { getNavigation, getSettings, isMaintenanceActive, toNavLite } from "@/lib/cms";
 import { getSiteUrl, siteConfig } from "@/lib/site";
 
@@ -33,6 +34,7 @@ const baseMetadata: Metadata = {
     type: "website",
   },
   twitter: { card: "summary_large_image" },
+  alternates: { types: { "application/rss+xml": [{ url: "/feed.xml", title: "Panda Toolbox – Neue Seiten" }] } },
   robots: { index: true, follow: true },
   // Inhaberschaft für Google Search Console / Bing Webmaster Tools bestätigen (Werte in Vercel setzen)
   verification: {
@@ -84,6 +86,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <BambooForest />
         <PandaBuddy nav={nav} />
         <ScrollReveal />
+        <VisitorPing />
       </body>
     </html>
   );

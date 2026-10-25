@@ -24,14 +24,33 @@ export default function DatenschutzPage() {
         Footer ändern.
       </p>
 
-      <h2 id="panda">Panda-Buddy „Bambus“</h2>
+      <h2 id="panda">Panda-Buddy „Flauschipanda“</h2>
       <p>
-        Der kleine Panda schlägt dir Themen vor, die zu den Kategorien passen, die du dir angesehen hast. Diese
+        Flauschipanda schlägt dir Themen vor, die zu den Kategorien passen, die du dir angesehen hast. Diese
         Interessen werden ausschließlich in deinem Browser verarbeitet und nie an uns übertragen. Ohne Einwilligung
         gelten sie nur für den aktuellen Besuch. Hast du in den Datenschutz-Einstellungen „Statistik“ oder „Werbung“
         zugestimmt, werden sie zusätzlich im Local Storage (Schlüssel „fp-interests“) gespeichert, damit der Panda dich
-        beim nächsten Besuch wiedererkennt. Verkleinerst du den Panda, wird nur diese Einstellung gespeichert
-        („fp-bambus-mini“). Beides kannst du jederzeit über die Browser-Einstellungen löschen.
+        beim nächsten Besuch wiedererkennt. Gesammelter Bambus, freigeschaltete Gegenstände und dein gewählter Skin
+        werden nur mit dieser Einwilligung oder wenn du im Panda-Menü „Sammlung merken“ einschaltest im Local Storage
+        gespeichert („fp-bambus“, „fp-bambus-merken“). Verkleinerst du den Panda, wird nur diese Einstellung gespeichert
+        („fp-bambus-mini“). Alles kannst du jederzeit über die Browser-Einstellungen löschen.
+      </p>
+
+      <h2 id="besuche">Anonyme Besucherzählung</h2>
+      <p>
+        Damit wir sehen, wie viele Menschen die Panda Toolbox nutzen und welche Artikel gerade beliebt sind, zählen wir
+        Besuche und Seitenaufrufe anonym. Dabei sendet dein Browser beim Seitenwechsel nur die aufgerufene Adresse an
+        unseren Server. Gespeichert werden ausschließlich Summen (z. B. „Besuche heute“, „Aufrufe dieser Seite“) – keine
+        IP-Adressen, keine Cookies, kein Local Storage, keine Kennungen. Um Mehrfachzählungen zu vermeiden, wird die
+        IP-Adresse für höchstens 30 Minuten im Arbeitsspeicher des Servers vorgehalten und danach verworfen
+        (berechtigtes Interesse an einer einfachen, datensparsamen Reichweitenmessung).
+      </p>
+
+      <h2 id="teilen">Teilen-Knöpfe</h2>
+      <p>
+        Die Teilen-Knöpfe sind einfache Links. Es werden keine Skripte von sozialen Netzwerken geladen und keine Daten
+        übertragen, solange du nicht selbst auf einen Knopf tippst. Erst dann öffnet sich die Seite des jeweiligen
+        Dienstes (z. B. WhatsApp, Telegram, Facebook oder X), für die dessen Datenschutzbestimmungen gelten.
       </p>
 
       <h2 id="dienste">Optionale Dienste</h2>

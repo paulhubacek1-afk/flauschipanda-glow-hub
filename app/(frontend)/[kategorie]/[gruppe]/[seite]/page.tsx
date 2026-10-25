@@ -12,6 +12,7 @@ import { Calculators } from "@/components/calculators";
 import { CostCalculator } from "@/components/cost-calculator";
 import { Cover } from "@/components/cover";
 import { DonationBox } from "@/components/donation-box";
+import { ShareButtons } from "@/components/share-buttons";
 import { Faq } from "@/components/faq";
 import { GreenTechNotice } from "@/components/greencore-notice";
 import { JsonLd } from "@/components/json-ld";
@@ -93,7 +94,7 @@ export default async function LandingPage({ params }: Props) {
   const groupHref = `/${category.slug}/${group.slug}`;
   const widgets = widgetsFor(page.href, page.widgets);
 
-  // Für Panda Bambus als Guide: „Das könnte dich auch interessieren“ – verwandte Artikel + Geschwisterseiten
+  // Für Flauschipanda als Guide: „Das könnte dich auch interessieren“ – verwandte Artikel + Geschwisterseiten
   const guideLinks: { href: string; title: string }[] = [];
   for (const p of [
     ...related,
@@ -174,6 +175,15 @@ export default async function LandingPage({ params }: Props) {
               <ComparisonTable comparison={page.comparison} />
             </div>
           )}
+
+          <div data-reveal className="rounded-xl border border-primary/20 bg-card/60 p-4">
+            <p className="mb-3 text-sm text-muted-foreground">
+              {group.slug === "greentech"
+                ? "Hilf Panda GreenTech: Teile diese Seite mit Freunden und Familie 💚"
+                : "Hat dir der Artikel geholfen? Teile ihn mit jemandem, dem er auch hilft. 🐼"}
+            </p>
+            <ShareButtons title={page.title} text={page.description} path={page.href} />
+          </div>
 
           {/* 4 · Affiliate-Bereich – Money Pages automatisch, andere Seiten mit selbst gewählten Produkten */}
           <AffiliateBox products={page.products} />

@@ -32,7 +32,7 @@ Die Panda Toolbox ist kostenlos und ohne Bezahlschranke. Auf vielen Seiten finde
 
 ## Unterstützen
 
-Alle Infos zur Spende findest du unter „Spenden“, einen Überblick über die Projektideen unter „Projekte“. Und Panda Bambus freut sich jedes Mal, wenn du hier vorbeischaust – auf den GreenTech-Seiten gießt er die Pflanze, die mit jedem Besuch wächst. 🌱`,
+Alle Infos zur Spende findest du unter „Spenden“, einen Überblick über die Projektideen unter „Projekte“. Und Flauschipanda freut sich jedes Mal, wenn du hier vorbeischaust – auf den GreenTech-Seiten gießt er die Pflanze, die mit jedem Besuch wächst. 🌱`,
     faq: [
       ["Ist Panda GreenTech eine gemeinnützige Organisation?", "Nein. Es ist ein privates Projekt, das über eine GoFundMe-Spendenaktion unterstützt werden kann."],
       ["Gibt es schon funktionierende Geräte?", "Die Projekte sind in einem frühen Entwicklungsstadium. Veröffentlichte Testergebnisse gibt es noch nicht – wir berichten über Fortschritte."],

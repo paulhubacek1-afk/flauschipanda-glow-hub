@@ -17,6 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: absoluteUrl("/startseite"), lastModified: newest, changeFrequency: "daily", priority: 1 },
     { url: absoluteUrl("/seitenstruktur"), lastModified: newest, changeFrequency: "weekly", priority: 0.5 },
+    { url: absoluteUrl("/neu"), lastModified: newest, changeFrequency: "daily", priority: 0.6 },
     ...nav
       .filter((c) => c.groups.some((g) => g.pages.some((p) => p.live)))
       .map((c) => ({ url: absoluteUrl(`/${c.slug}`), changeFrequency: "weekly" as const, priority: 0.9 })),

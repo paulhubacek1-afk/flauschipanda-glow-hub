@@ -2,8 +2,10 @@
 
 import { useSyncExternalStore } from "react";
 
+import { SKINS } from "./skins";
+
 /**
- * Bambus-Sammlung des Pandas
+ * Bambus-Sammlung von Flauschipanda
  * --------------------------
  * Besucher sammeln Bambus, während sie die Website nutzen (Seiten entdecken, Artikel lesen,
  * Zeit auf einer Seite verbringen). Damit wächst der Panda und schaltet kosmetische
@@ -37,7 +39,11 @@ export function stageFor(count: number) {
 }
 
 export function nextGoal(count: number): { at: number; name: string } | null {
-  const goals = [...STAGES.map((s) => ({ at: s.min, name: s.name })), ...ITEMS.map((i) => ({ at: i.at, name: i.name }))]
+  const goals = [
+    ...STAGES.map((s) => ({ at: s.min, name: s.name })),
+    ...ITEMS.map((i) => ({ at: i.at, name: i.name })),
+    ...SKINS.filter((k) => !k.season && k.at > 0).map((k) => ({ at: k.at, name: `Skin „${k.name}“` })),
+  ]
     .filter((g) => g.at > count)
     .sort((a, b) => a.at - b.at);
   return goals[0] ?? null;
@@ -48,6 +54,7 @@ export function unlockedBetween(before: number, after: number): string[] {
   const out: string[] = [];
   for (const s of STAGES) if (s.min > 0 && before < s.min && after >= s.min) out.push(`${s.name} 🐼`);
   for (const i of ITEMS) if (before < i.at && after >= i.at) out.push(`${i.name} ${i.emoji}`);
+  for (const k of SKINS) if (!k.season && k.at > 0 && before < k.at && after >= k.at) out.push(`Skin „${k.name}“ ${k.emoji}`);
   return out;
 }
 
@@ -59,6 +66,8 @@ export interface BambooState {
   thanked?: string;
   /** Seitenaufrufe insgesamt – für „Wusstest du schon?“ alle paar Seiten */
   views: number;
+  /** gewählter Skin (lib/skins.ts) */
+  skin?: string;
 }
 
 const KEY = "fp-bambus";
@@ -94,6 +103,7 @@ function sanitize(raw: unknown): BambooState | null {
     off: Array.isArray(r.off) ? (r.off.filter((k) => validItems.has(String(k))) as ItemKey[]) : [],
     thanked: typeof r.thanked === "string" ? r.thanked.slice(0, 10) : undefined,
     views: Math.max(0, Math.floor(Number(r.views) || 0)),
+    skin: typeof r.skin === "string" && SKINS.some((k) => k.key === r.skin) ? r.skin : undefined,
   };
 }
 
@@ -165,6 +175,11 @@ export function updateBamboo(patch: Partial<BambooState>) {
 export function toggleItem(key: ItemKey) {
   const off = state.off.includes(key) ? state.off.filter((k) => k !== key) : [...state.off, key];
   updateBamboo({ off });
+}
+
+export function setSkin(key: string) {
+  if (!SKINS.some((k) => k.key === key)) return;
+  updateBamboo({ skin: key });
 }
 
 export function hasItem(s: BambooState, key: ItemKey) {

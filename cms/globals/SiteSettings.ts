@@ -38,7 +38,7 @@ export const SiteSettings: GlobalConfig = {
           name: "message",
           label: "Nachricht",
           type: "textarea",
-          defaultValue: "Bambus und das Team bauen gerade etwas Neues ein. Gleich sind wir wieder für dich da – danke für deine Geduld! 🐼",
+          defaultValue: "Flauschipanda und das Team bauen gerade etwas Neues ein. Gleich sind wir wieder für dich da – danke für deine Geduld! 🐼",
           access: { update: isMaintenanceOwner },
         },
         {

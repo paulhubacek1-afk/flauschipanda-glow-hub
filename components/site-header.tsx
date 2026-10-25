@@ -85,6 +85,15 @@ export function SiteHeader({ nav }: { nav: NavLite[] }) {
               <ChevronDown className={cn("size-3.5 transition-transform", megaOpen && "rotate-180")} aria-hidden="true" />
             </button>
             <Link
+              href="/neu"
+              className={cn(
+                "rounded-md px-3 py-2 text-sm text-foreground/75 hover:bg-accent hover:text-accent-foreground",
+                pathname === "/neu" && "bg-primary/10 text-primary",
+              )}
+            >
+              Neu
+            </Link>
+            <Link
               href="/seitenstruktur"
               className={cn(
                 "rounded-md px-3 py-2 text-sm text-foreground/75 hover:bg-accent hover:text-accent-foreground",
@@ -232,6 +241,11 @@ export function SiteHeader({ nav }: { nav: NavLite[] }) {
                 )}
               </li>
             ))}
+            <li>
+              <Link href="/neu" className="block rounded-md px-3 py-2.5 hover:bg-accent">
+                ✨ Neu auf der Seite
+              </Link>
+            </li>
             <li>
               <Link href="/seitenstruktur" className="block rounded-md px-3 py-2.5 hover:bg-accent">
                 Alle Seiten

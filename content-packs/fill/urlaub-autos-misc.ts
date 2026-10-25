@@ -1780,7 +1780,7 @@ Vor dem Kauf prüfen, ob offene Rückrufe bestehen.`,
   /* ================= Projekte & Panda ================= */
   {
     path: "projekte-community/ueber/faq",
-    description: "FAQ zur Panda Toolbox: Was das Portal ist, ob es kostenlos ist, wie wir mit Werbung und Affiliate-Links umgehen, Datenschutz und Panda Bambus.",
+    description: "FAQ zur Panda Toolbox: Was das Portal ist, ob es kostenlos ist, wie wir mit Werbung und Affiliate-Links umgehen, Datenschutz und Flauschipanda.",
     markdown: `Hier beantworten wir Fragen rund um die **Panda Toolbox**.
 
 ## Was ist die Panda Toolbox?
@@ -1801,11 +1801,11 @@ Ein Projekt rund um umweltfreundliche Energie-Ideen, das du freiwillig unterstü
 
 ## Wer ist der Panda unten rechts?
 
-Das ist **Bambus**, unser Panda-Buddy. Er gibt Tipps, schlägt passende Artikel vor und sammelt Bambus, während du stöberst. Du kannst ihn über das Menü verkleinern und im Footer wieder einblenden.
+Das ist **Flauschipanda**, unser Panda-Buddy. Er gibt Tipps, schlägt passende Artikel vor und sammelt Bambus, während du stöberst. Du kannst ihn über das Menü verkleinern und im Footer wieder einblenden.
 
-## Speichert Bambus meine Daten?
+## Speichert Flauschipanda meine Daten?
 
-Bambus merkt sich Interessen und gesammelten Bambus nur in deinem Browser – und dauerhaft nur mit deiner Einwilligung bzw. wenn du „Sammlung merken“ einschaltest. Nichts davon wird an uns übertragen.
+Flauschipanda merkt sich Interessen und gesammelten Bambus nur in deinem Browser – und dauerhaft nur mit deiner Einwilligung bzw. wenn du „Sammlung merken“ einschaltest. Nichts davon wird an uns übertragen.
 
 ## Stimmen die Inhalte?
 
@@ -1821,7 +1821,7 @@ Wir recherchieren sorgfältig und nennen Quellen. Trotzdem können sich Informat
   },
   {
     path: "panda-branding/panda-story/panda-glow-style",
-    description: "Der Panda-Glow-Style: Türkis und Lila, dunkle Flächen, leuchtende Akzente und Panda Bambus – so sieht die Designsprache der Panda Toolbox aus.",
+    description: "Der Panda-Glow-Style: Türkis und Lila, dunkle Flächen, leuchtende Akzente und Flauschipanda – so sieht die Designsprache der Panda Toolbox aus.",
     markdown: `Die Panda Toolbox hat einen eigenen Look: den **Panda-Glow-Style**. Hier erfährst du, woraus er besteht.
 
 ## Die Farben
@@ -1831,13 +1831,13 @@ Wir recherchieren sorgfältig und nennen Quellen. Trotzdem können sich Informat
 - **Dunkle Flächen** als Bühne, damit die Farben leuchten
 - **Weiß und helles Grau** für gut lesbaren Text
 
-Türkis und Lila werden oft als **Verlauf** kombiniert – etwa in Überschriften-Akzenten, Buttons und im Halstuch von Panda Bambus.
+Türkis und Lila werden oft als **Verlauf** kombiniert – etwa in Überschriften-Akzenten, Buttons und im Halstuch von Flauschipanda.
 
 ## Der Glow
 
 Leuchtende Kanten, weiche Schatten in Türkis und Lila und sanft schimmernde Hintergründe sorgen für den typischen Glow. Wichtig ist dabei **Lesbarkeit**: Text bleibt klar, der Glow setzt nur Akzente.
 
-## Panda Bambus
+## Flauschipanda
 
 Unser Maskottchen trägt ein Türkis-Lila-Halstuch, knabbert Bambus und passt seinen Look den Themen an – mit KI-Brille, Sonnenhut, Astronautenhelm oder Schlafmütze.
 

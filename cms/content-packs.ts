@@ -386,6 +386,47 @@ async function updateDonateLinks(payload: Payload): Promise<number> {
   return changes;
 }
 
+/* ------------------------------------------------------------------ */
+/* Umbenennung: Panda „Bambus“ → Flauschipanda (einmalig, idempotent)    */
+/* ------------------------------------------------------------------ */
+
+const PANDA_NAME: [string, string][] = [
+  ["Panda Bambus", "Flauschipanda"],
+  ["Das ist **Bambus**, unser Panda-Buddy", "Das ist **Flauschipanda**, unser Panda-Buddy"],
+  ["Speichert Bambus meine Daten?", "Speichert Flauschipanda meine Daten?"],
+  ["Bambus merkt sich Interessen", "Flauschipanda merkt sich Interessen"],
+];
+const renameText = (v: unknown) => (typeof v === "string" ? PANDA_NAME.reduce((t, [a, b]) => t.split(a).join(b), v) : v);
+
+async function renamePanda(payload: Payload): Promise<number> {
+  const res = await payload.find({
+    collection: "pages",
+    where: { or: PANDA_NAME.map(([a]) => ({ markdown: { contains: a } })) },
+    draft: true,
+    limit: 50,
+    depth: 0,
+    overrideAccess: true,
+  });
+  let changes = 0;
+  for (const p of res.docs as Doc[]) {
+    const seo = (p.seo ?? {}) as Doc;
+    try {
+      await payload.update({
+        collection: "pages",
+        id: p.id,
+        overrideAccess: true,
+        context,
+        draft: p._status !== "published",
+        data: { markdown: renameText(p.markdown), seo: { ...seo, metaDescription: renameText(seo.metaDescription) } } as never,
+      });
+      changes++;
+    } catch (err) {
+      payload.logger.warn({ err }, `[inhalte] Panda-Name in ${p.path} nicht ersetzt`);
+    }
+  }
+  return changes;
+}
+
 export async function applyContentPacks(payload: Payload) {
   if (process.env.CONTENT_PACKS === "off") return;
   let total = 0;
@@ -400,6 +441,7 @@ export async function applyContentPacks(payload: Payload) {
   };
   await run("GreenTech-Umbenennung", renameGreenTech);
   await run("GreenTech-Spendenlink", updateDonateLinks);
+  await run("Panda-Name", renamePanda);
   for (const pack of contentPacks) {
     try {
       const n = await applyPack(payload, pack);

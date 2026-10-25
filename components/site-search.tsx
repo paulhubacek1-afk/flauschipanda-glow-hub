@@ -102,7 +102,7 @@ export function SiteSearch({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={onKeyDown}
-          // Panda Bambus holt seine Lupe heraus, solange gesucht wird
+          // Flauschipanda holt seine Lupe heraus, solange gesucht wird
           onFocus={() => window.dispatchEvent(new Event("fp-search-open"))}
           onBlur={() => window.dispatchEvent(new Event("fp-search-close"))}
           placeholder={placeholder}

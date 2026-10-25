@@ -14,7 +14,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
   return (
     <MaintenanceScreen
       variant="error"
-      title="Bambus repariert kurz etwas"
+      title="Flauschipanda repariert kurz etwas"
       message="Diese Seite konnte gerade nicht geladen werden. Das liegt an uns, nicht an dir – versuch es in einem Moment noch einmal."
       onRetry={reset}
     />

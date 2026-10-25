@@ -15,6 +15,7 @@ import {
   isPersisting,
   nextGoal,
   setPersist,
+  setSkin,
   stageFor,
   toggleItem,
   unlockedBetween,
@@ -23,13 +24,14 @@ import {
 } from "@/lib/bamboo";
 import type { NavLite } from "@/lib/cms";
 import { useConsent } from "@/lib/consent";
+import { SKINS, getSkin, skinUnlocked, visibleSkins } from "@/lib/skins";
 import { cn } from "@/lib/utils";
 
 import { PandaFigure, type PandaLook, type PandaPose } from "./panda-figure";
 
 /**
- * Bambus, der Panda-Buddy
- * -----------------------
+ * Flauschipanda, der Panda-Buddy
+ * ------------------------------
  * - sitzt unten rechts und knabbert Bambus; beim Lesen eines Artikels liest er ein Buch,
  *   bei offener Suche holt er die Lupe heraus, auf GreenTech-Seiten gießt er die Pflanze
  * - sammelt Bambus, während du die Website nutzt → wächst (Kleiner → Neugieriger → Toolbox → Glow Panda)
@@ -38,12 +40,15 @@ import { PandaFigure, type PandaLook, type PandaPose } from "./panda-figure";
  * - als Guide: schlägt beim Lesen passende Artikel vor, „Wusstest du schon?“ alle paar Seiten
  * - krabbelt zu Karten, die zu deinen Interessen passen (Elemente mit `data-panda-topic`), mit dezenter Leuchtspur
  * - auf Wunsch hält er sich an der Maus fest und baumelt mit (Desktop) – Esc lässt los
+ * - auf dem Handy: mit dem Finger herumziehen (er baumelt mit und tapst danach zurück),
+ *   hüpft beim schnellen Scrollen, quetscht sich beim Antippen
+ * - Skins (lib/skins.ts): Fellfarben und Outfits, freigeschaltet mit Bambus
  *
  * Interessen und Bambus bleiben im Browser: gespeichert (localStorage) nur mit Einwilligung in
  * „Statistik“/„Werbung“ oder wenn du im Panda-Menü „Sammlung merken“ einschaltest. Nichts wird übertragen.
  */
 
-/** Eigene Einstellung für Bambus – die alte „ausblenden“-Einstellung des Vorgängers gilt nicht mehr. */
+/** Eigene Einstellung für Flauschipanda – die alte „ausblenden“-Einstellung des Vorgängers gilt nicht mehr. */
 const HIDE_KEY = "fp-bambus-mini";
 const OLD_HIDE_KEY = "fp-buddy";
 const INTEREST_KEY = "fp-interests";
@@ -126,10 +131,12 @@ function pageTips(pathname: string, nav: NavLite[]): Bubble[] {
   const group = category?.groups.find((g) => g.slug === groupSlug);
   if (pathname === "/startseite") {
     return [
-      { text: `${greeting()} Ich bin Bambus, dein Panda in der Panda Toolbox. Tipp mich an, wenn du Hilfe brauchst!` },
+      { text: `${greeting()} Ich bin Flauschipanda, dein flauschiger Begleiter in der Panda Toolbox. Tipp mich an, wenn du Hilfe brauchst!` },
       { text: "Wonach suchst du? Tipp oben ein Stichwort ins Suchfeld – z. B. „Hundefutter“ oder „Prompts“." },
       { text: "Alle Themen auf einen Blick findest du in der Seitenstruktur.", link: { href: "/seitenstruktur", label: "Seitenstruktur" } },
       { text: "Je mehr du entdeckst und liest, desto mehr Bambus sammle ich – und wachse! 🎋" },
+      { text: "Mit Bambus schaltest du neue Skins für mich frei – vom Schoko-Panda bis zum König! 👑 Tipp mich an → „Meine Bambus-Sammlung“." },
+      { text: "Auf dem Handy kannst du mich mit dem Finger herumziehen – ich halt mich gut fest! 🐾" },
     ];
   }
   if (category && group && pageSlug) {
@@ -173,7 +180,7 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
   const bamboo = useBamboo();
 
   const [mounted, setMounted] = useState(false);
-  /** verkleinert = nur ein kleiner Panda-Knopf in der Ecke, mit dem man Bambus zurückholt */
+  /** verkleinert = nur ein kleiner Panda-Knopf in der Ecke, mit dem man Flauschipanda zurückholt */
   const [hidden, setHidden] = useState(false);
   const [mode, setModeState] = useState<Mode>("sit");
   const [activity, setActivity] = useState<Activity>("idle");
@@ -182,7 +189,8 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
   const [tipIndex, setTipIndex] = useState(0);
   const [bubbleLeft, setBubbleLeft] = useState(false);
   const [bubbleBelow, setBubbleBelow] = useState(false);
-  const [baseSize, setBaseSize] = useState(88);
+  const [baseSize, setBaseSize] = useState(116);
+  const [dragging, setDragging] = useState(false);
   const [canCling, setCanCling] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [tod, setTod] = useState<TimeOfDay>("day");
@@ -213,6 +221,11 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
   const bubbleRef = useRef<Bubble | null>(null);
   const facingRef = useRef<1 | -1>(-1);
   const pageStart = useRef(Date.now());
+  const btnRef = useRef<HTMLButtonElement>(null);
+  /** Ziehen mit dem Finger (Handy/Tablet) */
+  const dragStart = useRef<{ x: number; y: number } | null>(null);
+  const draggingRef = useRef(false);
+  const suppressClick = useRef(false);
 
   const stage = stageFor(bamboo.count);
   const size = Math.round(baseSize * stage.scale);
@@ -514,7 +527,7 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
     const mqFine = window.matchMedia("(pointer: fine)");
     const mqMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const update = () => {
-      setBaseSize(window.innerWidth < 640 ? 68 : 88);
+      setBaseSize(window.innerWidth < 640 ? 88 : 116);
       setCanCling(mqFine.matches && !mqMotion.matches);
       setReducedMotion(mqMotion.matches);
     };
@@ -530,6 +543,22 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
       window.removeEventListener("resize", update);
       window.removeEventListener(SHOW_BUDDY_EVENT, show);
     };
+  }, []);
+
+  // Startseite: „Meine Sammlung öffnen“
+  useEffect(() => {
+    const open = () => {
+      try {
+        window.localStorage.removeItem(HIDE_KEY);
+      } catch {
+        /* ignorieren */
+      }
+      setHidden(false);
+      quiet.current = false;
+      window.setTimeout(() => showCollectionRef.current(), 80);
+    };
+    window.addEventListener("fp-buddy-collection", open);
+    return () => window.removeEventListener("fp-buddy-collection", open);
   }, []);
 
   // Bambus-Sammlung merken? (Einwilligung oder eigener Schalter)
@@ -783,11 +812,51 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
     };
   }, [active, goToIdea]);
 
+  // Schnell gescrollt → kleiner Hüpfer (auch auf dem Handy)
+  useEffect(() => {
+    if (!active || reducedMotion) return;
+    let lastY = window.scrollY;
+    let lastT = performance.now();
+    let lastHop = 0;
+    const onScroll = () => {
+      const now = performance.now();
+      const v = Math.abs(window.scrollY - lastY) / Math.max(1, now - lastT);
+      lastY = window.scrollY;
+      lastT = now;
+      const b = btnRef.current;
+      if (!b || v < 2.2 || now - lastHop < 1400 || modeRef.current !== "sit") return;
+      lastHop = now;
+      b.classList.remove("panda-hop");
+      void b.offsetWidth; // Animation neu starten
+      b.classList.add("panda-hop");
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [active, reducedMotion]);
+
   // Maus verfolgen (für das Festhalten)
   useEffect(() => {
     const move = (e: PointerEvent) => {
       cursor.current = { x: e.clientX, y: e.clientY };
       lastMove.current = Date.now();
+      // Finger auf dem Panda bewegt → er hängt sich dran und baumelt mit
+      const st = dragStart.current;
+      if (st && !draggingRef.current && Math.hypot(e.clientX - st.x, e.clientY - st.y) > 10) {
+        draggingRef.current = true;
+        setDragging(true);
+        say(null);
+        vel.current = { x: 0, y: 0 };
+        setMode("cling");
+      }
+    };
+    const up = () => {
+      dragStart.current = null;
+      if (!draggingRef.current) return;
+      draggingRef.current = false;
+      setDragging(false);
+      suppressClick.current = true;
+      window.setTimeout(() => (suppressClick.current = false), 450);
+      drop();
     };
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") drop();
@@ -796,13 +865,18 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
       if (!e.relatedTarget) drop();
     };
     window.addEventListener("pointermove", move, { passive: true });
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
     window.addEventListener("keydown", key);
     document.addEventListener("pointerout", leave);
     return () => {
       window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
       window.removeEventListener("keydown", key);
       document.removeEventListener("pointerout", leave);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [drop]);
 
   // Aufräumen
@@ -835,12 +909,19 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
     say({ text: "", collection: true });
   };
 
+  const showCollectionRef = useRef(showCollection);
+  showCollectionRef.current = showCollection;
+
   const closeBubble = () => {
     say(null);
     if (modeRef.current === "perch" || modeRef.current === "pause") setMode("return");
   };
 
   const onPandaClick = () => {
+    if (suppressClick.current) {
+      suppressClick.current = false;
+      return;
+    }
     if (modeRef.current === "cling") return drop();
     if (bubble?.actions || bubble?.collection) return closeBubble(); // zweites Antippen schließt das Menü
     showTip();
@@ -875,6 +956,8 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
               : "sit"
         : mode;
 
+  const chosenSkin = getSkin(bamboo.skin);
+  const activeSkin = skinUnlocked(chosenSkin, bamboo.count) ? chosenSkin : getSkin("klassisch");
   const look: PandaLook = {
     helmet: catSlug === "wissenschaft-astrologie",
     hat:
@@ -899,34 +982,35 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
     sleepy: tod === "night" && activity === "idle" && !onGreencore,
     mug: tod === "morning",
     lantern: tod === "evening",
+    skin: activeSkin.key,
   };
 
   // Solange das Cookie-Banner offen ist, bleibt der Panda weg (keine Überlagerung)
   if (!mounted || !ready || !consent) return null;
 
-  // Verkleinert: kleiner Knopf in der Ecke – ein Klick holt Bambus zurück
+  // Verkleinert: kleiner Knopf in der Ecke – ein Klick holt Flauschipanda zurück
   if (hidden) {
     return (
       <button
         type="button"
         onClick={showPandaBuddy}
-        title="Bambus zurückholen"
-        aria-label="Panda Bambus zurückholen"
-        className="animate-buddy-in fixed bottom-3 right-3 z-40 flex size-12 items-center justify-center rounded-full border border-purple/40 bg-card shadow-[var(--glow-sm)] transition-transform hover:scale-110 sm:bottom-5 sm:right-5"
+        title="Flauschipanda zurückholen"
+        aria-label="Flauschipanda zurückholen"
+        className="animate-buddy-in fixed bottom-3 right-3 z-40 flex size-14 items-center justify-center rounded-full border border-purple/40 bg-card shadow-[var(--glow-sm)] transition-transform hover:scale-110 active:scale-95 sm:bottom-5 sm:right-5"
       >
-        <PandaFigure pose="sit" look={{ golden: look.golden }} className="size-10" />
+        <PandaFigure pose="sit" look={{ golden: look.golden, skin: look.skin }} className="size-12" />
       </button>
     );
   }
 
   const goal = nextGoal(bamboo.count);
-  const prevAt = [...STAGES.map((s) => s.min), ...ITEMS.map((i) => i.at)].filter((a) => a <= bamboo.count).sort((a, b) => b - a)[0] ?? 0;
+  const prevAt = [...STAGES.map((s) => s.min), ...ITEMS.map((i) => i.at), ...SKINS.filter((k) => !k.season).map((k) => k.at)].filter((a) => a <= bamboo.count).sort((a, b) => b - a)[0] ?? 0;
   const progress = goal ? (bamboo.count - prevAt) / Math.max(1, goal.at - prevAt) : 1;
 
   return (
     <div
       ref={wrapRef}
-      className={cn("fixed left-0 top-0 z-40 will-change-transform", mode === "cling" && "pointer-events-none")}
+      className={cn("fixed left-0 top-0 z-40 will-change-transform", mode === "cling" && !dragging && "pointer-events-none")}
       style={{ width: size, height: size, transform: `translate3d(${pos.current.x}px, ${pos.current.y}px, 0)` }}
     >
       <div ref={innerRef} className="relative h-full w-full" style={{ transformOrigin: "50% 4%" }}>
@@ -935,7 +1019,8 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
             role="status"
             aria-live="polite"
             className={cn(
-              "animate-bubble-in pointer-events-auto absolute w-64 rounded-2xl border border-purple/30 bg-card p-4 pr-8 text-sm shadow-[0_16px_40px_-12px_oklch(0_0_0/0.6),var(--glow-sm)] sm:w-72",
+              "animate-bubble-in pointer-events-auto absolute rounded-2xl border border-purple/30 bg-card p-4 pr-8 text-sm shadow-[0_16px_40px_-12px_oklch(0_0_0/0.6),var(--glow-sm)]",
+              bubble.collection ? "max-h-[min(72vh,560px)] w-[19rem] overflow-y-auto overscroll-contain sm:w-80" : "w-64 sm:w-72",
               bubbleBelow ? "top-[92%]" : "bottom-[92%]",
               bubbleLeft ? "right-2" : "left-2",
               bubbleBelow ? (bubbleLeft ? "rounded-tr-sm" : "rounded-tl-sm") : bubbleLeft ? "rounded-br-sm" : "rounded-bl-sm",
@@ -950,7 +1035,7 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
               <X className="size-3.5" />
             </button>
             <p className="mb-1 flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-purple">
-              <Sparkles className="size-3" aria-hidden="true" /> Bambus · {stage.name}
+              <Sparkles className="size-3" aria-hidden="true" /> Flauschipanda · {stage.name}
             </p>
 
             {bubble.collection ? (
@@ -1000,6 +1085,40 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
                     );
                   })}
                 </ul>
+                <div>
+                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-purple">Skins</p>
+                  <ul className="grid grid-cols-4 gap-1.5">
+                    {visibleSkins().map((sk) => {
+                      const open = skinUnlocked(sk, bamboo.count);
+                      const current = activeSkin.key === sk.key;
+                      return (
+                        <li key={sk.key}>
+                          <button
+                            type="button"
+                            disabled={!open}
+                            onClick={() => {
+                              setSkin(sk.key);
+                              celebrate([sk.emoji, "✨", sk.emoji]);
+                            }}
+                            aria-pressed={current}
+                            title={open ? sk.name : `${sk.name} – ab ${sk.at} Bambus`}
+                            className={cn(
+                              "flex w-full flex-col items-center rounded-lg border px-0.5 pb-1 pt-0.5 text-[10px] leading-tight transition-colors",
+                              current ? "border-primary bg-primary/10 text-foreground" : "border-border hover:border-purple/50",
+                              !open && "cursor-not-allowed opacity-60",
+                            )}
+                          >
+                            <span className="relative">
+                              <PandaFigure pose="sit" look={{ skin: sk.key }} className={cn("size-12", !open && "grayscale")} />
+                              {!open && <span className="absolute inset-0 flex items-center justify-center text-base">🔒</span>}
+                            </span>
+                            <span className="w-full truncate">{open ? sk.name : `ab ${sk.at}`}</span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
                 <p className="text-xs leading-relaxed text-muted-foreground">
                   So sammelst du: neue Seiten entdecken, Artikel lesen, eine Weile bleiben. Nur zum Spaß – rein kosmetisch.
                 </p>
@@ -1087,12 +1206,19 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
         )}
 
         <button
+          ref={btnRef}
           type="button"
           onClick={onPandaClick}
-          aria-label={mode === "cling" ? "Panda loslassen" : `Panda Bambus (${stage.name}, ${bamboo.count} Bambus): Tipps und Aktionen`}
+          onPointerDown={(e) => {
+            if (e.pointerType !== "mouse") dragStart.current = { x: e.clientX, y: e.clientY };
+          }}
+          onAnimationEnd={(e) => {
+            if (e.animationName === "panda-hop") e.currentTarget.classList.remove("panda-hop");
+          }}
+          aria-label={mode === "cling" ? "Panda loslassen" : `Flauschipanda (${stage.name}, ${bamboo.count} Bambus): Tipps und Aktionen`}
           className={cn(
-            "relative block h-full w-full rounded-full outline-none focus-visible:ring-[3px] focus-visible:ring-ring/60",
-            mode === "cling" ? "pointer-events-none" : "pointer-events-auto",
+            "relative block h-full w-full touch-none rounded-full outline-none transition-transform duration-150 select-none focus-visible:ring-[3px] focus-visible:ring-ring/60 active:scale-90",
+            mode === "cling" && !dragging ? "pointer-events-none" : "pointer-events-auto",
           )}
         >
           <PandaFigure pose={pose} facing={facing} look={look} className="h-full w-full" />
@@ -1124,7 +1250,7 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
         )}
       </div>
       {/* Hinweis beim Festhalten – außerhalb des schaukelnden Teils, damit er ruhig bleibt */}
-      {bubble && mode === "cling" && (
+      {bubble && mode === "cling" && !dragging && (
         <div className="absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded-full bg-card px-3 py-1 text-xs shadow-[var(--glow-sm)]">
           Esc = loslassen
         </div>
