@@ -72,7 +72,9 @@ export function SiteFooter({ nav }: { nav: NavLite[] }) {
         <span className="mx-2 opacity-50" aria-hidden="true">·</span>
         <span>
           powered by <span className="font-medium text-foreground/80">Designix</span> &amp;{" "}
-          <span className="font-medium text-foreground/80">WebDock</span>
+          <a href="http://webdock.dev/" target="_blank" rel="noopener" className="font-medium text-foreground/80 underline-offset-2 hover:text-primary hover:underline">
+            WebDock
+          </a>
         </span>
       </div>
     </footer>
