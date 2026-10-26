@@ -50,9 +50,9 @@ export default async function GroupPage({ params }: Props) {
   // Häufige Fragen aus den Ratgebern dieses Unterthemas – jede mit Link zur ausführlichen Antwort
   const questions = live.flatMap((p) => (p.faq[0] ? [{ q: p.faq[0].q, a: p.faq[0].a, href: p.href, title: p.title }] : [])).slice(0, 8);
   // verwandte Unterthemen in anderen Kategorien (nur mit Inhalt)
-  const groupIndex = new Map(
-    nav.flatMap((c) => c.groups.filter((g) => g.pages.some((p) => p.live)).map((g) => [`${c.slug}/${g.slug}`, { c, g }] as const)),
-  );
+  type NavCat = (typeof nav)[number];
+  const groupIndex = new Map<string, { c: NavCat; g: NavCat["groups"][number] }>();
+  for (const c of nav) for (const g of c.groups) if (g.pages.some((p) => p.live)) groupIndex.set(`${c.slug}/${g.slug}`, { c, g });
   const crossGroups = relatedGroupKeys(category.slug, group.slug, [...groupIndex.keys()]).map((k) => ({ key: k, ...groupIndex.get(k)! }));
   const toolLinks = (CATEGORY_TOOLS[category.slug] ?? [])
     .map((href) => nav.flatMap((c) => c.groups.flatMap((g) => g.pages.filter((p) => p.live && `/${c.slug}/${g.slug}/${p.slug}` === href).map((p) => ({ href, title: p.title })))))
