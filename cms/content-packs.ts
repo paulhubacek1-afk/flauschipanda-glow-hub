@@ -257,6 +257,149 @@ const AFFILIATE_PLAN: { key: string; name: string; label: string; network: strin
   { key: "plan-office-technik", name: "Monitor, Tastatur & Headset (Partnerlink eintragen)", label: "Homeoffice & Technik", network: "z. B. Amazon PartnerNet", topics: ["pc-und-hardware"] },
 ];
 
+/**
+ * Echte Partnerlinks, die das Team vorgegeben hat. Werden einmal angelegt (Kennung = key) –
+ * danach im Admin frei bearbeitbar, hier wird nichts überschrieben.
+ */
+const ABLEFY = "?pid=126073&prid=9106&upsells=none";
+const ablefy = (slug: string) => `https://myablefy.com/s/rafaelbettencourt/${slug}/payment${ABLEFY}`;
+const SPIRIT_PAGE = "/gesundheit-wohlbefinden/achtsamkeit/spiritualitaet-im-alltag";
+const SPIRIT_NOTE = "Spirituelles Angebot zur persönlichen Entwicklung – kein Ersatz für Finanz-, Rechts- oder Gesundheitsberatung.";
+const FIXED_AFFILIATES: { key: string; name: string; url: string; label: string; pitch: string; groups: string[]; pages: string[] }[] = [
+  {
+    key: "ablefy-purpose-meditation",
+    name: "Powerful Purpose Meditation – Finde deine Bestimmung",
+    url: ablefy("finde-deine-bestimmung-die-powerful-purpose-meditation-66d736ec"),
+    label: "Meditation",
+    pitch: "Geführte Meditation von Rafael Bettencourt zur Frage „Was ist meine Bestimmung?“ – als digitaler Download für ruhige Momente. Preis laut Anbieter ca. 36 € (Stand Oktober 2026).",
+    groups: ["gesundheit-wohlbefinden/achtsamkeit"],
+    pages: [SPIRIT_PAGE],
+  },
+  {
+    key: "ablefy-true-connection",
+    name: "TRUE CONNECTION Meditation – für zwei",
+    url: ablefy("die-true-connection-meditation"),
+    label: "Meditation",
+    pitch: "Geführte Meditation (knapp 20 Minuten, Download) für zwei Personen – zum Beispiel mit Partner, Freundin oder Familie, um sich bewusst Zeit füreinander zu nehmen. Preis laut Anbieter ca. 40 € (Stand Oktober 2026).",
+    groups: ["gesundheit-wohlbefinden/achtsamkeit"],
+    pages: [SPIRIT_PAGE],
+  },
+  {
+    key: "ablefy-magic-of-manifestation",
+    name: "Magic of Manifestation – Meditation",
+    url: ablefy("magic-of-manifestation"),
+    label: "Manifestation",
+    pitch: `Geführte Meditation (ca. 15 Minuten, Download), die durch Rafael Bettencourts „Manifestationsschritte“ führt – für alle, die sich für Manifestation interessieren. Preis laut Anbieter ca. 37 €. ${SPIRIT_NOTE}`,
+    groups: [],
+    pages: [SPIRIT_PAGE],
+  },
+  {
+    key: "ablefy-magnet-of-abundance",
+    name: "Magnet of Abundance – Meditation (FülleMagnet 2.0)",
+    url: ablefy("magnet-of-abundance"),
+    label: "Manifestation",
+    pitch: `Geführte Fülle-Meditation, die Neuauflage der FülleMagnet-Meditation des Anbieters, als Download. Preis laut Anbieter ca. 63 €. ${SPIRIT_NOTE}`,
+    groups: [],
+    pages: [SPIRIT_PAGE],
+  },
+  {
+    key: "ablefy-instant-money-manifestation",
+    name: "Instant Money Manifestation – Session",
+    url: ablefy("instant-money-manifestation"),
+    label: "Manifestation",
+    pitch: `Geführte Meditations-Session (ca. 25 Minuten, Download) rund um das Thema Geld und innere Haltung. Preis laut Anbieter ca. 39 €. ${SPIRIT_NOTE}`,
+    groups: [],
+    pages: [SPIRIT_PAGE],
+  },
+  {
+    key: "ablefy-magnetic-sales-bundle",
+    name: "Magnetic Sales Bundle",
+    url: ablefy("das-magnetic-sales-bundle-2ca25d2d"),
+    label: "Mindset",
+    pitch: `Paket aus einer Meditation zur Vorbereitung auf Verkaufsgespräche und einem Gesprächsleitfaden – für Selbstständige, die Achtsamkeit und Vertrieb verbinden wollen. Preis laut Anbieter ca. 56 €. ${SPIRIT_NOTE}`,
+    groups: [],
+    pages: [SPIRIT_PAGE],
+  },
+  {
+    key: "ablefy-moneylove",
+    name: "MoneyLove – 8-Wochen-Coaching",
+    url: ablefy("moneylove-werde-zu-einem-magneten-fuer-geld-fuelle"),
+    label: "Coaching",
+    pitch: `Achtwöchiges Online-Coachingprogramm rund um die eigene Einstellung zu Geld – mit Aufzeichnungen, Q&A-Videos und Community. Größere Investition (laut Anbieter 777 € einmalig oder in Raten), daher vorher in Ruhe prüfen. ${SPIRIT_NOTE}`,
+    groups: [],
+    pages: [SPIRIT_PAGE],
+  },
+];
+
+async function ensureFixedAffiliates(payload: Payload): Promise<number> {
+  const existing = (
+    await payload.find({
+      collection: "affiliates",
+      where: { key: { in: FIXED_AFFILIATES.map((a) => a.key) } },
+      limit: 100,
+      depth: 0,
+      overrideAccess: true,
+      pagination: false,
+      select: { key: true } as never,
+    })
+  ).docs as Doc[];
+  const have = new Set(existing.map((a) => String(a.key)));
+  const todo = FIXED_AFFILIATES.filter((a) => !have.has(a.key));
+  if (!todo.length) return 0;
+
+  const groups = (
+    await payload.find({ collection: "groups", limit: 2000, depth: 0, overrideAccess: true, pagination: false, select: { path: true } as never })
+  ).docs as Doc[];
+  const groupByPath = new Map(groups.map((g) => [String(g.path), g.id]));
+  const created = new Map<string, (string | number)[]>(); // Seitenpfad → neue Produkt-IDs
+  let changes = 0;
+  for (const a of todo) {
+    try {
+      const doc = (await payload.create({
+        collection: "affiliates",
+        overrideAccess: true,
+        context,
+        data: {
+          name: a.name,
+          key: a.key,
+          url: a.url,
+          network: "ablefy",
+          label: a.label,
+          pitch: a.pitch,
+          topics: a.groups.filter((g) => groupByPath.has(`/${g}`)).map((g) => ({ relationTo: "groups", value: groupByPath.get(`/${g}`) })),
+          active: true,
+          placeholder: false,
+        } as never,
+      })) as Doc;
+      for (const p of a.pages) created.set(p, [...(created.get(p) ?? []), doc.id]);
+      changes++;
+    } catch (err) {
+      payload.logger.warn({ err }, `[inhalte] Partnerlink ${a.key} nicht angelegt`);
+    }
+  }
+  // neue Produkte an die passenden Seiten hängen (bestehende Auswahl bleibt erhalten)
+  for (const [path, ids] of created) {
+    const page = (
+      await payload.find({ collection: "pages", where: { path: { equals: path } }, limit: 1, depth: 0, draft: true, overrideAccess: true })
+    ).docs[0] as Doc | undefined;
+    if (!page) continue;
+    const current = ((page.products ?? []) as unknown[]).map((p) => (p && typeof p === "object" ? (p as Doc).id : p));
+    try {
+      await payload.update({
+        collection: "pages",
+        id: page.id,
+        overrideAccess: true,
+        context,
+        draft: page._status !== "published",
+        data: { products: [...current, ...ids] } as never,
+      });
+    } catch (err) {
+      payload.logger.warn({ err }, `[inhalte] Partnerlinks an ${path} nicht verknüpft`);
+    }
+  }
+  return changes;
+}
+
 async function ensureAffiliatePlan(payload: Payload): Promise<number> {
   const existing = (
     await payload.find({
@@ -618,6 +761,7 @@ export async function applyContentPacks(payload: Payload) {
   await run("Ausführliche Neufassungen", upgradePages);
   await run("Partnerlink-Plätze", ensureAffiliateSlots);
   await run("Affiliate-Plan", ensureAffiliatePlan);
+  await run("Feste Partnerlinks", ensureFixedAffiliates);
   if (total > 0) {
     try {
       const { revalidatePath } = await import("next/cache");
