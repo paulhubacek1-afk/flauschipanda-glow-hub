@@ -13,6 +13,7 @@ import {
   hasItem,
   hasOptIn,
   isPersisting,
+  EARN_EVENT,
   effectiveCustom,
   nextGoal,
   recordVisit,
@@ -104,6 +105,8 @@ const sessionMinutes = new Map<string, number>();
 const sessionGuided = new Set<string>();
 let sessionActiveSec = 0;
 let greencoreCounted = false;
+const sessionEarned = new Set<string>();
+let dailyChecked = false;
 
 type TimeOfDay = "morning" | "day" | "evening" | "night";
 function timeOfDay(h = new Date().getHours()): TimeOfDay {
@@ -727,6 +730,37 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
     };
   }, [pathname, ready, consent, hidden, earn, sayIfFree, celebrate]);
 
+  // Bambus von anderen Stellen der Website (Rechner, Teilen, Suche) – jede Kennung einmal pro Besuch
+  useEffect(() => {
+    if (!ready || !consent) return;
+    const onEarn = (e: Event) => {
+      const { key, n } = ((e as CustomEvent).detail ?? {}) as { key?: string; n?: number };
+      if (!key || sessionEarned.has(key)) return;
+      sessionEarned.add(key);
+      earn(Math.max(1, Math.min(5, Number(n) || 1)));
+    };
+    const onSearch = () => onEarn(new CustomEvent(EARN_EVENT, { detail: { key: "suche", n: 1 } }));
+    window.addEventListener(EARN_EVENT, onEarn);
+    window.addEventListener("fp-search-open", onSearch);
+    return () => {
+      window.removeEventListener(EARN_EVENT, onEarn);
+      window.removeEventListener("fp-search-open", onSearch);
+    };
+  }, [ready, consent, earn]);
+
+  // Tagesbonus: einmal pro Tag 3 Bambus fürs Vorbeischauen
+  useEffect(() => {
+    if (!ready || !consent || dailyChecked) return;
+    dailyChecked = true;
+    const t = window.setTimeout(() => {
+      if (getBamboo().daily === todayKey()) return;
+      updateBamboo({ daily: todayKey() });
+      earn(3);
+      sayIfFree({ title: "Tagesbonus! 🎁", text: "Schön, dass du heute wieder da bist – hier sind 3 Bambus für dich! Komm morgen wieder für den nächsten Bonus." }, 7000);
+    }, 3500);
+    return () => window.clearTimeout(t);
+  }, [ready, consent, earn, sayIfFree]);
+
   // Suche offen → Lupe
   useEffect(() => {
     const open = () => setActivity("search");
@@ -1151,7 +1185,8 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
                   </a>
                 </div>
                 <p className="text-xs leading-relaxed text-muted-foreground">
-                  So sammelst du: neue Seiten entdecken, Artikel lesen, eine Weile bleiben. Nur zum Spaß – rein kosmetisch.
+                  So sammelst du: neue Seite entdecken (+1), Artikel lesen (bis +4), eine Weile bleiben (+1 pro Minute), Rechner benutzen (+2),
+                  Seite teilen (+2), suchen (+1) und täglicher Bonus (+3). Nur zum Spaß – rein kosmetisch.
                 </p>
                 <label className="flex items-start gap-2 text-xs">
                   <input

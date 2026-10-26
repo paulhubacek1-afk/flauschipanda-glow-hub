@@ -12,7 +12,7 @@ import { SiteSearch } from "@/components/site-search";
 import { Button } from "@/components/ui/button";
 import { getLivePages, getNavigation, getSearchItems, getSettings, navStats, toSummary } from "@/lib/cms";
 import { getPopularPaths, getVisitorStats } from "@/lib/counters";
-import { siteConfig } from "@/lib/site";
+import { MERCH_URL, siteConfig } from "@/lib/site";
 
 export const revalidate = 3600;
 
@@ -251,6 +251,42 @@ export default async function StartPage() {
           </div>
         </section>
       )}
+
+      {/* ---------------- Merch ---------------- */}
+      <section className="mx-auto max-w-7xl px-4 pb-12" aria-labelledby="merch">
+        <div data-reveal className="relative overflow-hidden rounded-3xl border border-purple/30 bg-gradient-to-br from-purple/15 via-card/80 to-primary/10 p-6 md:p-10">
+          <div className="absolute -left-16 -bottom-16 size-64 rounded-full bg-purple/20 blur-3xl" aria-hidden="true" />
+          <div className="relative grid gap-6 md:grid-cols-[1.4fr_1fr] md:items-center">
+            <div className="space-y-4">
+              <p className="text-sm font-medium uppercase tracking-wider text-purple">👕 FlauschiPandas Merch</p>
+              <h2 id="merch" className="text-2xl font-bold md:text-3xl">
+                Pandas zum Anziehen
+              </h2>
+              <p className="max-w-xl text-muted-foreground">
+                Gamer Panda, DJ Panda, Sleepy Panda und viele mehr: Eigene Panda-Designs auf Pullovern, Hoodies, Tassen und Stickern – gedruckt
+                und verschickt von Spreadshirt. Jeder Kauf unterstützt FlauschiPandas und Panda GreenTech.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button asChild>
+                  <a href={MERCH_URL} target="_blank" rel="noopener noreferrer">
+                    Zum Merch-Shop
+                  </a>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href="/projekte-community/panda-merch/merch-shop">Alle Designs ansehen</Link>
+                </Button>
+              </div>
+            </div>
+            <ul className="grid grid-cols-2 gap-2 text-sm" aria-label="Beliebte Designs">
+              {["🎮 Gamer Panda", "🎧 DJ Panda", "😴 Sleepy Panda", "💖 Happy Panda", "🍼 Baby Panda", "👻 Phasmo-Panda"].map((d) => (
+                <li key={d} className="rounded-xl border bg-card/70 px-3 py-2">
+                  {d}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
 
       {/* ---------------- Panda GreenTech ---------------- */}
       <section className="mx-auto max-w-7xl px-4 pb-20" aria-labelledby="greentech">

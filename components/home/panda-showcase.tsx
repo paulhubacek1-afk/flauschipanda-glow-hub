@@ -40,6 +40,9 @@ export function PandaShowcase() {
             ["🧭", "Neue Seite entdecken", "+1 Bambus"],
             ["📖", "Artikel lesen", "bis +4 Bambus"],
             ["⏳", "Eine Weile bleiben", "+1 pro Minute"],
+            ["🧮", "Rechner benutzen", "+2 Bambus"],
+            ["📣", "Seite teilen", "+2 Bambus"],
+            ["🎁", "Täglich vorbeischauen", "+3 Tagesbonus"],
           ].map(([e, t, n]) => (
             <li key={t} className="rounded-xl border bg-card/60 p-3">
               <span className="text-xl" aria-hidden="true">

@@ -49,3 +49,6 @@ export const legalNav = [
 
 /** Spendenlink für Panda GreenTech (GoFundMe-Profil). Im Admin unter „Website-Einstellungen“ änderbar. */
 export const GREENTECH_URL = "https://www.gofundme.com/u/296ae88c-0583-4f07-bf00-8577db624b44";
+
+/** Merch-Shop von FlauschiPandas (Spreadshirt) */
+export const MERCH_URL = "https://www.spreadshirt.de/shop/user/flauschipandas";

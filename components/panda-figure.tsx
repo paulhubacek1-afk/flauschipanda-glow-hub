@@ -58,7 +58,7 @@ export interface PandaLook {
 
 const HAT_EXTRAS: SkinExtra[] = [
   "chef", "pirate", "wizard", "crown", "party", "witch", "santa", "flower",
-  "ki", "safari", "racer", "beach", "sprout", "cat", "sunrays", "hood", "bamboo", "sun", "night",
+  "ki", "safari", "racer", "beach", "sprout", "cat", "sunrays", "hood", "bamboo", "sun", "night", "hair",
 ];
 
 /** Ellipse mit flauschig gewelltem Rand (lauter kleine Fell-Bögen). */
@@ -110,6 +110,7 @@ export function PandaFigure({
   const scarf = `pb-scarf-${uid}`;
   const shade = `pb-shade-${uid}`;
   const furFx = `pb-fur-${uid}`;
+  const hairG = `pb-hair-${uid}`;
   const gold = Boolean(look.golden);
   const R = resolveLook(look.skin, look.custom);
   const pal = R.palette;
@@ -171,6 +172,11 @@ export function PandaFigure({
           <stop offset="0.65" stopColor={FUR} />
           <stop offset="1" stopColor={gold ? "#f3cf6b" : pal.furEdge} />
         </radialGradient>
+        <linearGradient id={hairG} x1="0" x2="0.3" y1="0" y2="1">
+          <stop offset="0" stopColor="#b56bff" />
+          <stop offset="0.6" stopColor="#8a3dff" />
+          <stop offset="1" stopColor="#2f6bff" />
+        </linearGradient>
         {/* zotteliger Rand für Arme, Beine und Ohren */}
         <filter id={furFx} x="-15%" y="-15%" width="130%" height="130%">
           <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="7" result="n" />
@@ -316,11 +322,27 @@ export function PandaFigure({
           )}
           <ellipse cx="48" cy="46" rx="7.8" ry="10" transform="rotate(-28 48 46)" fill={INK} />
           <ellipse cx="72" cy="46" rx="7.8" ry="10" transform="rotate(28 72 46)" fill={INK} />
+          {/* Lila Mähne (Flauschi-Original) – über der Stirn, unter den Augen */}
+          {hatExtra === "hair" && (
+            <g className="pb-hat pb-hair" fill={`url(#${hairG})`} stroke="#5a1fb0" strokeWidth="0.9" strokeLinejoin="round">
+              <path d="M33 30 Q23 44 27 66 Q30 57 33.5 61 Q32 48 38 38 Z" />
+              <path d="M87 30 Q97 44 93 66 Q90 57 86.5 61 Q88 48 82 38 Z" />
+              <path d="M31 40 Q29 17 60 14 Q91 17 89 40 L84 33 L80 41 L74 32 L68 40 L62 31 L56 40 L50 32 L44 41 L38 33 Z" />
+              <path d="M53 16 Q51 10 46 9 Q53 8.5 58 14.5 Z M62 14.5 Q65 9 71 8 Q67 11.5 66 16 Z" />
+              <path d="M40 24 Q48 19 55 22 M66 21 Q74 19 81 25" fill="none" stroke="#e2c6ff" strokeWidth="1" opacity="0.7" />
+            </g>
+          )}
           <g className="pb-eyes">
             <circle cx="49.5" cy="45.5" r="3.9" fill="#fff" />
             <circle cx="70.5" cy="45.5" r="3.9" fill="#fff" />
-            <circle className="pb-pupil" cx="50.2" cy="46.2" r="2.4" fill={INK} />
-            <circle className="pb-pupil" cx="71.2" cy="46.2" r="2.4" fill={INK} />
+            {pal.iris && (
+              <>
+                <circle cx="50" cy="46" r="3.2" fill={pal.iris} />
+                <circle cx="71" cy="46" r="3.2" fill={pal.iris} />
+              </>
+            )}
+            <circle className="pb-pupil" cx="50.2" cy="46.2" r={pal.iris ? 1.6 : 2.4} fill={pal.iris ? "#0b1030" : INK} />
+            <circle className="pb-pupil" cx="71.2" cy="46.2" r={pal.iris ? 1.6 : 2.4} fill={pal.iris ? "#0b1030" : INK} />
             <circle cx="51" cy="44.8" r="0.9" fill="#fff" />
             <circle cx="72" cy="44.8" r="0.9" fill="#fff" />
           </g>

@@ -5,6 +5,7 @@ import { Calculator } from "lucide-react";
 
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
+import { earnBamboo } from "@/lib/bamboo";
 
 /**
  * Betriebskosten-Rechner. Enthält bewusst KEINE festen Marktpreise:
@@ -48,7 +49,7 @@ export function CostCalculator() {
   const cheaper = results[0].total === results[1].total ? -1 : results[0].total < results[1].total ? 0 : 1;
 
   return (
-    <section aria-labelledby="kostenrechner" className="glow-border rounded-xl bg-card/80 p-6">
+    <section aria-labelledby="kostenrechner" className="glow-border rounded-xl bg-card/80 p-6" onInput={() => earnBamboo("rechner:kosten", 2)}>
       <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
         <h2 id="kostenrechner" className="flex items-center gap-2 font-display text-xl font-semibold">
           <Calculator className="size-5 text-primary" aria-hidden="true" /> Betriebskosten-Rechner

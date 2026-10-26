@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Check, Link2, Mail, Share2 } from "lucide-react";
 
+import { earnBamboo } from "@/lib/bamboo";
 import { cn } from "@/lib/utils";
 
 /**
@@ -56,7 +57,13 @@ export function ShareButtons({
     "inline-flex h-9 min-w-9 items-center justify-center gap-1.5 rounded-full border bg-card/70 px-3 text-xs font-medium text-muted-foreground transition-all hover:border-primary/50 hover:text-primary active:scale-95";
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-2", className)}>
+    <div
+      className={cn("flex flex-wrap items-center gap-2", className)}
+      // Teilen hilft der Panda Toolbox – dafür gibt es einmal pro Seite und Besuch 2 Bambus
+      onClickCapture={(e) => {
+        if ((e.target as HTMLElement).closest("a,button")) earnBamboo(`teilen:${path ?? url}`, 2);
+      }}
+    >
       <span className="mr-1 flex items-center gap-1.5 text-sm font-medium">
         <Share2 className="size-4 text-primary" aria-hidden="true" /> {label}
       </span>

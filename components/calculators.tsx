@@ -5,6 +5,7 @@ import { Calculator, Plus, Trash2 } from "lucide-react";
 
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
+import { earnBamboo } from "@/lib/bamboo";
 
 /**
  * Kleine Online-Rechner für die Seiten unter „Tools & Apps › Online-Rechner“.
@@ -255,12 +256,30 @@ export function PercentCalculator() {
 }
 
 export function Calculators({ keys }: { keys: string[] }) {
+  // Wer einen Rechner benutzt, bekommt einmal pro Besuch 2 Bambus
+  const earn = (k: string) => () => earnBamboo(`rechner:${k}`, 2);
   return (
     <>
-      {keys.includes("spritrechner") && <FuelCalculator />}
-      {keys.includes("stromrechner") && <PowerCalculator />}
-      {keys.includes("budgetrechner") && <BudgetCalculator />}
-      {keys.includes("prozentrechner") && <PercentCalculator />}
+      {keys.includes("spritrechner") && (
+        <div onInput={earn("sprit")}>
+          <FuelCalculator />
+        </div>
+      )}
+      {keys.includes("stromrechner") && (
+        <div onInput={earn("strom")}>
+          <PowerCalculator />
+        </div>
+      )}
+      {keys.includes("budgetrechner") && (
+        <div onInput={earn("budget")}>
+          <BudgetCalculator />
+        </div>
+      )}
+      {keys.includes("prozentrechner") && (
+        <div onInput={earn("prozent")}>
+          <PercentCalculator />
+        </div>
+      )}
     </>
   );
 }

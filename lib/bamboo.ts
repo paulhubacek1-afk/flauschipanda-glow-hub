@@ -72,6 +72,8 @@ export interface BambooState {
   visits?: VisitLog;
   /** eigene Kombination aus dem Panda-Baukasten */
   custom?: CustomLook;
+  /** Datum (JJJJ-MM-TT) des letzten Tagesbonus */
+  daily?: string;
 }
 
 const KEY = "fp-bambus";
@@ -109,6 +111,7 @@ function sanitize(raw: unknown): BambooState | null {
     views: Math.max(0, Math.floor(Number(r.views) || 0)),
     skin: typeof r.skin === "string" && (r.skin === BUILDER_KEY || SKINS.some((k) => k.key === r.skin)) ? r.skin : undefined,
     custom: sanitizeCustom(r.custom),
+    daily: typeof r.daily === "string" ? r.daily.slice(0, 10) : undefined,
     visits: sanitizeVisits(r.visits),
   };
 }
@@ -169,6 +172,13 @@ export function recordVisit(path: string): string[] {
   visits[cat] = [...list, clean].slice(-MAX_VISITS_PER_CATEGORY);
   updateBamboo({ visits });
   return theme.filter((k) => !before.has(k.key) && skinUnlocked(k, state.count, visits)).map((k) => `Skin „${k.name}“ ${k.emoji}`);
+}
+
+/** Event, mit dem andere Teile der Website Bambus vergeben (Flauschipanda zählt jede Kennung nur einmal pro Besuch). */
+export const EARN_EVENT = "fp-earn";
+export function earnBamboo(key: string, n = 1) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(EARN_EVENT, { detail: { key, n } }));
 }
 
 export function hasOptIn() {

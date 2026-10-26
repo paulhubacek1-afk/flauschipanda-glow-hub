@@ -16,6 +16,8 @@ export interface SkinPalette {
   cheek: string;
   /** Halstuch (Verlauf von → bis) */
   scarf: [string, string];
+  /** farbige Iris (z. B. blaue Augen) – leer = klassische Panda-Augen */
+  iris?: string;
 }
 
 export type SkinExtra =
@@ -38,7 +40,8 @@ export type SkinExtra =
   | "hood"
   | "bamboo"
   | "sun"
-  | "night";
+  | "night"
+  | "hair";
 
 /** Accessoires (Baukasten) */
 export type SkinAcc = "none" | "sunglasses" | "nerd" | "bowtie" | "headset" | "whiskers";
@@ -98,6 +101,14 @@ export const SKINS: Skin[] = [
     emoji: "🍫",
     at: 5,
     palette: { fur: "#fff6ec", furEdge: "#ecd6c0", ink: "#5b3a28", inkSoft: "#7a5240", cheek: "#ff9f9f" },
+  },
+  {
+    key: "flauschi",
+    name: "Flauschi-Original",
+    emoji: "💜",
+    at: 10,
+    extra: "hair",
+    palette: { fur: "#f6eed8", furEdge: "#e3d2a8", ink: "#2b2118", inkSoft: "#ff4d73", cheek: "#ff8fa8", iris: "#2f6bff", scarf: ["#a35bff", "#2f6bff"] },
   },
   { key: "party", name: "Party-Panda", emoji: "🎉", at: 15, extra: "party" },
   {
@@ -295,6 +306,7 @@ export interface AccPart extends BuilderPart {
 export const FURS: FurPart[] = [
   { key: "klassisch", name: "Klassisch", at: 0, palette: {} },
   { key: "schoko", name: "Schoko", at: 5, palette: { fur: "#fff6ec", furEdge: "#ecd6c0", ink: "#5b3a28", inkSoft: "#7a5240", cheek: "#ff9f9f" } },
+  { key: "flauschi", name: "Flauschi-Original", at: 10, palette: { fur: "#f6eed8", furEdge: "#e3d2a8", ink: "#2b2118", inkSoft: "#ff4d73", cheek: "#ff8fa8", iris: "#2f6bff", scarf: ["#a35bff", "#2f6bff"] } },
   { key: "schnee", name: "Schnee", at: 10, palette: { fur: "#ffffff", furEdge: "#e6eaf2", ink: "#8b93a7", inkSoft: "#a9b0c2", cheek: "#ffb3d1" } },
   { key: "zuckerwatte", name: "Zuckerwatte", at: 20, palette: { fur: "#fff1f8", furEdge: "#f7c6dc", ink: "#6d3a62", inkSoft: "#8a5280", cheek: "#ff7fb8", scarf: ["#ffd1e8", "#c9a6ff"] } },
   { key: "minze", name: "Minze", at: 30, palette: { fur: "#f1fff8", furEdge: "#bdeed6", ink: "#1f6b56", inkSoft: "#3a8c74", cheek: "#ffb0c8", scarf: ["#9ef0cf", "#5ac8ff"] } },
@@ -324,6 +336,7 @@ export const HATS: HatPart[] = [
   { key: "bambushut", name: "Bambushut", at: 50, value: "bamboo" },
   { key: "sonnenhut", name: "Sonnenhut", at: 25, value: "sun" },
   { key: "schlafmuetze", name: "Schlafmütze", at: 35, value: "night" },
+  { key: "maehne", name: "Lila Mähne", at: 10, value: "hair" },
   { key: "party", name: "Partyhut", at: 15, value: "party" },
   { key: "blumen", name: "Blumenkranz", at: 30, value: "flower" },
   { key: "katzenohren", name: "Katzenohren", at: 45, value: "cat" },
