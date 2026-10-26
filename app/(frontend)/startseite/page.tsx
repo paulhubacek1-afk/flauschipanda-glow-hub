@@ -4,6 +4,7 @@ import { ArrowRight, Car, Fuel, Percent, Rss, Sparkles, Wallet, Zap } from "luci
 
 import { CategoryIcon } from "@/components/category-icon";
 import { HeroPanda } from "@/components/home/hero-panda";
+import { PandaBuilder } from "@/components/home/panda-builder";
 import { PandaShowcase } from "@/components/home/panda-showcase";
 import { PageCard } from "@/components/page-card";
 import { ShareButtons } from "@/components/share-buttons";
@@ -213,6 +214,11 @@ export default async function StartPage() {
       {/* ---------------- Flauschipanda ---------------- */}
       <section className="mx-auto max-w-7xl px-4 py-16" aria-labelledby="flauschipanda">
         <PandaShowcase />
+      </section>
+
+      {/* ---------------- Panda-Baukasten ---------------- */}
+      <section id="baukasten" className="mx-auto max-w-7xl scroll-mt-24 px-4 pb-16" aria-labelledby="baukasten-titel">
+        <PandaBuilder />
       </section>
 
       {/* ---------------- Neu ---------------- */}

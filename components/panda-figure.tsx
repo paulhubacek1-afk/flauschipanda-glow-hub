@@ -1,6 +1,6 @@
 import { useId } from "react";
 
-import { getSkin, paletteOf, type SkinExtra } from "@/lib/skins";
+import { resolveLook, type CustomLook, type SkinExtra } from "@/lib/skins";
 import { cn } from "@/lib/utils";
 
 /**
@@ -50,11 +50,16 @@ export interface PandaLook {
   mug?: boolean;
   /** abends: kleine Laterne */
   lantern?: boolean;
-  /** Skin aus lib/skins.ts (Fellfarbe und Outfit) */
+  /** Skin aus lib/skins.ts (Fellfarbe und Outfit) – „baukasten“ = eigene Kombination */
   skin?: string | null;
+  /** eigene Kombination aus dem Panda-Baukasten */
+  custom?: CustomLook | null;
 }
 
-const HAT_EXTRAS: SkinExtra[] = ["chef", "pirate", "wizard", "crown", "party", "witch", "santa", "flower"];
+const HAT_EXTRAS: SkinExtra[] = [
+  "chef", "pirate", "wizard", "crown", "party", "witch", "santa", "flower",
+  "ki", "safari", "racer", "beach", "sprout", "cat", "sunrays", "hood", "bamboo", "sun", "night",
+];
 
 /** Ellipse mit flauschig gewelltem Rand (lauter kleine Fell-Bögen). */
 function fluff(cx: number, cy: number, rx: number, ry: number, n: number, amp: number, cheeks = 0) {
@@ -92,25 +97,42 @@ export function PandaFigure({
   facing = 1,
   look = {},
   className,
+  still = false,
 }: {
   pose: PandaPose;
   facing?: 1 | -1;
   look?: PandaLook;
   className?: string;
+  /** Vorschaubild: ohne Animation und ohne Fell-Filter (schont Handys bei vielen Pandas auf einer Seite) */
+  still?: boolean;
 }) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
   const scarf = `pb-scarf-${uid}`;
   const shade = `pb-shade-${uid}`;
   const furFx = `pb-fur-${uid}`;
   const gold = Boolean(look.golden);
-  const skin = getSkin(look.skin);
-  const pal = paletteOf(skin);
+  const R = resolveLook(look.skin, look.custom);
+  const pal = R.palette;
   const INK = pal.ink;
   const FUR = gold ? "#fff6d6" : pal.fur;
   const SOFT = pal.inkSoft;
-  const extra = skin.extra;
+  const extra = R.extra;
+  const acc = R.acc;
   const hatExtra = extra && HAT_EXTRAS.includes(extra) && !look.helmet ? extra : null;
-  const hat = hatExtra ? null : look.hat;
+  // einfache Hüte (Bambushut, Sonnenhut, Schlafmütze) gibt es auch im Baukasten; Strand = Sonnenhut + Blüte
+  const hat = hatExtra
+    ? hatExtra === "beach"
+      ? "sun"
+      : hatExtra === "bamboo" || hatExtra === "sun" || hatExtra === "night"
+        ? hatExtra
+        : null
+    : look.hat;
+  const showGlasses = look.glasses || extra === "ki";
+  const showBinoculars = look.binoculars || extra === "safari";
+  const showWrench = look.wrench || extra === "racer";
+  const showHeadset = look.headset || acc === "headset";
+  const showSunglasses = acc === "sunglasses" || extra === "beach";
+  const hideEars = hatExtra === "cat" || hatExtra === "hood";
   const plant = Math.max(0, Math.min(1, look.plant ?? 0));
   const sleepy = Boolean(look.sleepy) && (pose === "sit" || pose === "read");
 
@@ -121,20 +143,21 @@ export function PandaFigure({
         "pb",
         `pb-${pose}`,
         look.glow && "pb-glowing",
-        skin.neon && !gold && "pb-neon",
+        R.neon && !gold && "pb-neon",
         look.curious && "pb-curious",
         gold && "pb-gold",
         sleepy && "pb-sleepy",
+        still && "pb-still",
         className,
       )}
-      style={{ transform: `scaleX(${facing})` }}
+      style={{ transform: `scaleX(${facing})`, ...(R.neonColor ? ({ "--pb-neon": R.neonColor } as React.CSSProperties) : {}) }}
       aria-hidden="true"
       focusable="false"
     >
       <defs>
         <linearGradient id={scarf} x1="0" x2="1" y1="0" y2="0">
           <stop offset="0" stopColor={gold ? "#ffe69a" : pal.scarf[0]} />
-          {skin.key === "regenbogen" && !gold && (
+          {R.rainbow && !gold && (
             <>
               <stop offset="0.25" stopColor="#ffb347" />
               <stop offset="0.45" stopColor="#ffe36b" />
@@ -206,14 +229,14 @@ export function PandaFigure({
           </g>
         )}
         <g className="pb-leg pb-leg-l">
-          <path d={LEG_L} fill={INK} filter={`url(#${furFx})`} />
+          <path d={LEG_L} fill={INK} filter={still ? undefined : `url(#${furFx})`} />
           <ellipse cx="44" cy="106" rx="5" ry="3.4" fill={SOFT} />
           <circle cx="40" cy="101.5" r="1.4" fill={SOFT} />
           <circle cx="44" cy="100.3" r="1.4" fill={SOFT} />
           <circle cx="48" cy="101.5" r="1.4" fill={SOFT} />
         </g>
         <g className="pb-leg pb-leg-r">
-          <path d={LEG_R} fill={INK} filter={`url(#${furFx})`} />
+          <path d={LEG_R} fill={INK} filter={still ? undefined : `url(#${furFx})`} />
           <ellipse cx="76" cy="106" rx="5" ry="3.4" fill={SOFT} />
           <circle cx="72" cy="101.5" r="1.4" fill={SOFT} />
           <circle cx="76" cy="100.3" r="1.4" fill={SOFT} />
@@ -225,7 +248,7 @@ export function PandaFigure({
         {/* flauschiger Brustpelz */}
         <path d="M49 96 q3 3.5 5.5 0 q2.7 3.8 5.5 0 q2.8 3.8 5.5 0 q2.5 3.5 5.5 0" fill="none" stroke={pal.furEdge} strokeWidth="1.3" strokeLinecap="round" />
         <path d="M53 102 q3.5 3 7 0 q3.5 3 7 0" fill="none" stroke={pal.furEdge} strokeWidth="1.1" strokeLinecap="round" opacity="0.8" />
-        {skin.stars && (
+        {R.stars && (
           <g className="pb-stars" fill="#fff">
             <circle cx="45" cy="92" r="0.9" />
             <circle cx="73" cy="97" r="1.1" />
@@ -233,30 +256,57 @@ export function PandaFigure({
             <circle cx="50" cy="104" r="0.8" />
           </g>
         )}
-        <path d="M32 76 Q60 62 88 76 L88 84 Q60 72 32 84 Z" fill={INK} filter={`url(#${furFx})`} />
+        <path d="M32 76 Q60 62 88 76 L88 84 Q60 72 32 84 Z" fill={INK} filter={still ? undefined : `url(#${furFx})`} />
         <path d="M41 69 Q60 79 79 69 L80 75 Q60 86 40 75 Z" fill={`url(#${scarf})`} />
         <path d="M70 76 l7 11 l-8 -1 z" fill={gold ? "#e9a92c" : pal.scarf[1]} />
+        {acc === "bowtie" && (
+          <g className="pb-bowtie">
+            <path d="M48 73 L59 78 L48 83 Z M72 73 L61 78 L72 83 Z" fill="oklch(0.6 0.22 25)" stroke={INK} strokeWidth="1" strokeLinejoin="round" />
+            <rect x="57.5" y="75.5" width="5" height="5" rx="1.5" fill="oklch(0.5 0.2 25)" stroke={INK} strokeWidth="0.8" />
+          </g>
+        )}
 
         {/* Arme hinter dem Kopf – nur beim Festklammern sichtbar (Pfoten schauen oben heraus) */}
         <g className="pb-arm pb-arm-back pb-arm-back-l">
-          <rect x="27" y="68" width="13" height="27" rx="6.5" fill={INK} filter={`url(#${furFx})`} />
+          <rect x="27" y="68" width="13" height="27" rx="6.5" fill={INK} filter={still ? undefined : `url(#${furFx})`} />
           <ellipse cx="33.5" cy="92.2" rx="3.4" ry="0.85" fill="#ff9fd0" />
         </g>
         <g className="pb-arm pb-arm-back pb-arm-back-r">
-          <rect x="80" y="68" width="13" height="27" rx="6.5" fill={INK} filter={`url(#${furFx})`} />
+          <rect x="80" y="68" width="13" height="27" rx="6.5" fill={INK} filter={still ? undefined : `url(#${furFx})`} />
           <ellipse cx="86.5" cy="92.2" rx="3.4" ry="0.85" fill="#ff9fd0" />
         </g>
 
         {/* Kopf */}
         <g className="pb-head">
-          <path d={EAR_L} fill={INK} filter={`url(#${furFx})`} />
-          <path d={EAR_R} fill={INK} filter={`url(#${furFx})`} />
-          <circle cx="36" cy="22" r="4.5" fill={pal.cheek} opacity="0.45" />
-          <circle cx="84" cy="22" r="4.5" fill={pal.cheek} opacity="0.45" />
+          {/* Sonnenkranz hinter dem Kopf */}
+          {hatExtra === "sunrays" && (
+            <g className="pb-sunrays" fill="#ffd34d" stroke="#e9a92c" strokeWidth="0.8">
+              {[-80, -55, -30, -5, 20, 45, 70].map((d) => (
+                <path key={d} d="M57 6 L60 -6 L63 6 Z" transform={`rotate(${d} 60 44)`} />
+              ))}
+            </g>
+          )}
+          {!hideEars && (
+            <>
+              <path d={EAR_L} fill={INK} filter={still ? undefined : `url(#${furFx})`} />
+              <path d={EAR_R} fill={INK} filter={still ? undefined : `url(#${furFx})`} />
+              <circle cx="36" cy="22" r="4.5" fill={pal.cheek} opacity="0.45" />
+              <circle cx="84" cy="22" r="4.5" fill={pal.cheek} opacity="0.45" />
+            </>
+          )}
+          {/* Katzenohren */}
+          {hatExtra === "cat" && (
+            <g className="pb-catears">
+              <path d="M30 30 L33 6 L50 20 Z" fill={INK} stroke={INK} strokeWidth="1.5" strokeLinejoin="round" />
+              <path d="M90 30 L87 6 L70 20 Z" fill={INK} stroke={INK} strokeWidth="1.5" strokeLinejoin="round" />
+              <path d="M34 24 L35.5 12 L44 19.5 Z" fill="#ff9fc6" />
+              <path d="M86 24 L84.5 12 L76 19.5 Z" fill="#ff9fc6" />
+            </g>
+          )}
           <path d={HEAD} fill={`url(#${shade})`} stroke={INK} strokeWidth="1.8" strokeLinejoin="round" />
           {/* Haarbüschel oben auf dem Kopf */}
           <path className="pb-tuft" d="M53 19 q1 -7 5.5 -3.5 q1.5 -6.5 5 -1 q3.5 -4 4 2.5" fill={FUR} stroke={INK} strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round" />
-          {skin.stars && (
+          {R.stars && (
             <g className="pb-stars" fill="#fff">
               <circle cx="42" cy="31" r="0.9" />
               <circle cx="78" cy="30" r="1.1" />
@@ -284,7 +334,7 @@ export function PandaFigure({
           <ellipse cx="60" cy="55.5" rx="4.3" ry="3.1" fill={INK} />
           <path className="pb-mouth" d="M54.5 59.5 q2.8 3.6 5.5 0.4 q2.7 3.2 5.5 -0.4" fill="none" stroke={INK} strokeWidth="1.6" strokeLinecap="round" />
 
-          {look.glasses && (
+          {showGlasses && (
             <g className="pb-glasses">
               <rect x="41" y="39.5" width="16" height="12" rx="4" fill={TEAL} opacity="0.32" stroke={TEAL} strokeWidth="1.5" />
               <rect x="63" y="39.5" width="16" height="12" rx="4" fill={PURPLE} opacity="0.32" stroke={TEAL} strokeWidth="1.5" />
@@ -292,7 +342,7 @@ export function PandaFigure({
               <path className="pb-holo" d="M43 42 h10 M65 42 h10" stroke="#fff" strokeWidth="0.8" opacity="0.8" />
             </g>
           )}
-          {look.headset && (
+          {showHeadset && (
             <g className="pb-headset">
               <path d="M31 44 Q31 13 60 13 Q89 13 89 44" fill="none" stroke="#3a3550" strokeWidth="3.4" />
               <rect x="26" y="38" width="9" height="15" rx="3.5" fill={SOFT} stroke={TEAL} strokeWidth="1.2" />
@@ -308,6 +358,74 @@ export function PandaFigure({
             <g className="pb-patch">
               <path d="M32 38 L44 41.5 M55 41 L88 34" stroke="#111" strokeWidth="1.4" />
               <ellipse cx="49.5" cy="46" rx="6.6" ry="6" fill="#141018" stroke="#3a3550" strokeWidth="0.8" />
+            </g>
+          )}
+
+          {/* Accessoires */}
+          {showSunglasses && (
+            <g className="pb-sunglasses">
+              <rect x="40.5" y="40" width="17" height="11" rx="5" fill="#141018" stroke="#3a3550" strokeWidth="1" />
+              <rect x="62.5" y="40" width="17" height="11" rx="5" fill="#141018" stroke="#3a3550" strokeWidth="1" />
+              <path d="M57.5 44 h5 M40.5 43 l-6 -2.5 M79.5 43 l6 -2.5" stroke="#141018" strokeWidth="1.6" />
+              <path d="M43 42.5 q3 -1.5 6 0 M65 42.5 q3 -1.5 6 0" stroke="#fff" strokeWidth="1" opacity="0.6" fill="none" />
+            </g>
+          )}
+          {acc === "nerd" && (
+            <g className="pb-nerd" fill="none" stroke="#2b2540" strokeWidth="1.8">
+              <circle cx="49.5" cy="45.5" r="7.2" />
+              <circle cx="70.5" cy="45.5" r="7.2" />
+              <path d="M56.7 45 h6.6 M42.3 44 l-7 -2 M77.7 44 l7 -2" />
+            </g>
+          )}
+          {acc === "whiskers" && (
+            <g className="pb-whiskers" stroke={INK} strokeWidth="1" strokeLinecap="round" opacity="0.75">
+              <path d="M36 56 L22 53 M36 58.5 L22 59.5 M36 61 L23 65" />
+              <path d="M84 56 L98 53 M84 58.5 L98 59.5 M84 61 L97 65" />
+            </g>
+          )}
+
+          {/* Themen- und Baukasten-Hüte */}
+          {hatExtra === "ki" && (
+            <g className="pb-hat pb-antenna">
+              <path d="M60 17 L60 6" stroke={INK} strokeWidth="1.8" strokeLinecap="round" />
+              <circle className="pb-bulb" cx="60" cy="4.5" r="3.4" fill={TEAL} stroke={INK} strokeWidth="1" />
+              <path d="M53 16 q7 -4 14 0" fill="none" stroke={TEAL} strokeWidth="1.2" opacity="0.8" />
+            </g>
+          )}
+          {hatExtra === "safari" && (
+            <g className="pb-hat pb-safari">
+              <ellipse cx="60" cy="22" rx="31" ry="5" fill="#c9b072" stroke="#8a7438" strokeWidth="1.2" />
+              <path d="M39 22 Q40 4 60 4 Q80 4 81 22 Z" fill="#dcc68a" stroke="#8a7438" strokeWidth="1.2" />
+              <path d="M40.5 17.5 Q60 21 79.5 17.5 L80 21 Q60 24.5 40 21 Z" fill="#5d4a2a" />
+            </g>
+          )}
+          {hatExtra === "racer" && (
+            <g className="pb-hat pb-racer">
+              <path d="M37 25 Q38 7 60 7 Q82 7 83 25 Q60 19 37 25 Z" fill="oklch(0.6 0.22 25)" stroke={INK} strokeWidth="1.2" />
+              <path d="M78 22 Q92 20 100 27 Q88 28.5 79 25.5 Z" fill="oklch(0.5 0.2 25)" stroke={INK} strokeWidth="1.1" />
+              <path d="M50 9.5 L50 22 M60 7 L60 20.5 M70 9.5 L70 22" stroke="#fff" strokeWidth="1.6" opacity="0.85" />
+              <circle cx="60" cy="7.5" r="1.8" fill="#fff" />
+            </g>
+          )}
+          {hatExtra === "beach" && (
+            <g className="pb-hibiscus">
+              {[0, 72, 144, 216, 288].map((a) => (
+                <circle key={a} cx={47 + 3 * Math.cos((a * Math.PI) / 180)} cy={17 + 3 * Math.sin((a * Math.PI) / 180)} r="2.6" fill="#ff5a8a" />
+              ))}
+              <circle cx="47" cy="17" r="1.6" fill="#ffe36b" />
+            </g>
+          )}
+          {hatExtra === "sprout" && (
+            <g className="pb-hat pb-sprout">
+              <path d="M60 18 Q59 11 60 5" stroke="#3f8a3a" strokeWidth="2" fill="none" strokeLinecap="round" />
+              <path d="M60 10 Q50 9 47 2 Q56 2 60 10 Z" fill="#6cc05d" stroke="#3f8a3a" strokeWidth="0.8" />
+              <path d="M60 8 Q69 6 73 -1 Q64 -1 60 8 Z" fill="#8be38f" stroke="#3f8a3a" strokeWidth="0.8" />
+            </g>
+          )}
+          {hatExtra === "hood" && (
+            <g className="pb-hat pb-hood">
+              <path d="M27 58 Q22 12 60 9 Q98 12 93 58 Q88 32 60 26 Q32 32 27 58 Z" fill="#231e38" stroke="oklch(0.72 0.19 300)" strokeWidth="1.4" />
+              <path d="M60 9 Q66 2 74 1" fill="none" stroke="#231e38" strokeWidth="4" strokeLinecap="round" />
             </g>
           )}
 
@@ -470,7 +588,7 @@ export function PandaFigure({
           </g>
         </g>
 
-        {look.binoculars && (
+        {showBinoculars && (
           <g className="pb-binoculars">
             <path d="M47 72 Q60 96 73 72" fill="none" stroke={SOFT} strokeWidth="1.3" />
             <rect x="51.5" y="85" width="7" height="9" rx="2.5" fill={SOFT} stroke={INK} strokeWidth="1" />
@@ -483,13 +601,13 @@ export function PandaFigure({
 
         {/* Arme (vorne, damit die Pfoten den Bambus halten) */}
         <g className="pb-arm pb-arm-l">
-          <rect x="27" y="68" width="13" height="27" rx="6.5" fill={INK} filter={`url(#${furFx})`} />
+          <rect x="27" y="68" width="13" height="27" rx="6.5" fill={INK} filter={still ? undefined : `url(#${furFx})`} />
         </g>
         <g className="pb-arm pb-arm-r">
-          <rect x="80" y="68" width="13" height="27" rx="6.5" fill={INK} filter={`url(#${furFx})`} />
+          <rect x="80" y="68" width="13" height="27" rx="6.5" fill={INK} filter={still ? undefined : `url(#${furFx})`} />
         </g>
         {/* Autos: Mini-Schraubenschlüssel in der linken Pfote */}
-        {look.wrench && (
+        {showWrench && (
           <g className="pb-wrench">
             <rect x="45.2" y="87" width="3.6" height="17" rx="1.5" fill="#d5dae6" stroke={INK} strokeWidth="0.9" transform="rotate(38 47 95.5)" />
             <path d="M52.4 82.4 a5 5 0 1 1 -1.6 8.4 l2.8 -1.6 l0.8 -2.8 z" fill="#d5dae6" stroke={INK} strokeWidth="0.9" />

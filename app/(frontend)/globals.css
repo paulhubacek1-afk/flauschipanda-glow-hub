@@ -518,6 +518,12 @@ input[type="search"]::-webkit-search-decoration {
   }
 }
 
+/* Vorschaubilder (Sammlung, Baukasten): keine Animation */
+.pb-still,
+.pb-still * {
+  animation: none !important;
+}
+
 /* Flauschipanda: Haarbüschel wippt, Skins */
 .pb .pb-tuft {
   transform-box: fill-box;
@@ -534,7 +540,29 @@ input[type="search"]::-webkit-search-decoration {
   }
 }
 .pb-neon {
-  filter: drop-shadow(0 0 1.5px oklch(0.86 0.14 195)) drop-shadow(0 0 12px oklch(0.86 0.14 195 / 0.7)) drop-shadow(0 0 22px oklch(0.72 0.19 300 / 0.5));
+  filter: drop-shadow(0 0 1.5px var(--pb-neon, oklch(0.86 0.14 195))) drop-shadow(0 0 12px var(--pb-neon, oklch(0.86 0.14 195))) drop-shadow(0 0 22px oklch(0.72 0.19 300 / 0.5));
+}
+.pb .pb-bulb {
+  animation: pb-holo 1.8s ease-in-out infinite;
+}
+.pb .pb-sunrays {
+  transform-box: view-box;
+  transform-origin: 60px 44px;
+  animation: pb-rays 2.6s ease-in-out infinite;
+}
+@keyframes pb-rays {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.07) rotate(4deg);
+  }
+}
+.pb .pb-sprout {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: pb-tuft 3s ease-in-out infinite;
 }
 .pb .pb-confetti {
   transform-box: fill-box;

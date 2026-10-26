@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { STAGES, nextGoal, setSkin, stageFor, useBamboo } from "@/lib/bamboo";
-import { skinUnlocked, visibleSkins } from "@/lib/skins";
+import { skinUnlocked, visibleSkins, visitProgress } from "@/lib/skins";
 import { cn } from "@/lib/utils";
 
 import { PandaFigure } from "../panda-figure";
@@ -20,7 +20,8 @@ export function PandaShowcase() {
   const stage = stageFor(count);
   const goal = nextGoal(count);
   const skins = visibleSkins();
-  const unlocked = skins.filter((s) => skinUnlocked(s, count)).length;
+  const visits = mounted ? bamboo.visits : undefined;
+  const unlocked = skins.filter((s) => skinUnlocked(s, count, visits)).length;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_1.3fr] lg:items-center">
@@ -79,7 +80,8 @@ export function PandaShowcase() {
 
       <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-4">
         {skins.map((s, i) => {
-          const open = skinUnlocked(s, count);
+          const open = skinUnlocked(s, count, visits);
+          const prog = visitProgress(s, visits);
           const current = (bamboo.skin ?? "klassisch") === s.key && open;
           return (
             <li key={s.key} data-reveal data-reveal-delay={(i % 4) * 60}>
@@ -95,14 +97,14 @@ export function PandaShowcase() {
                 )}
               >
                 <span className="relative">
-                  <PandaFigure pose="sit" look={{ skin: s.key }} className={cn("size-20 transition-transform group-hover:scale-110 sm:size-24", !open && "opacity-50 grayscale")} />
+                  <PandaFigure still pose="sit" look={{ skin: s.key }} className={cn("size-20 transition-transform group-hover:scale-110 sm:size-24", !open && "opacity-50 grayscale")} />
                   {!open && <span className="absolute inset-0 flex items-center justify-center text-2xl">🔒</span>}
                 </span>
                 <span className="mt-1 text-sm font-medium">
                   {s.emoji} {s.name}
                 </span>
                 <span className="text-[11px] text-muted-foreground">
-                  {s.season ? "Nur jetzt!" : open ? (current ? "Ausgewählt" : "Anziehen") : `ab ${s.at} Bambus`}
+                  {s.season ? "Nur jetzt!" : open ? (current ? "Ausgewählt" : "Anziehen") : prog ? `${prog.have}/${prog.need} ${prog.text}` : `ab ${s.at} Bambus`}
                 </span>
               </button>
             </li>

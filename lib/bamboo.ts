@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 
-import { SKINS } from "./skins";
+import { ACCS, BUILDER_KEY, FURS, HATS, SKINS, partUnlocked, skinUnlocked, type CustomLook, type VisitLog } from "./skins";
 
 /**
  * Bambus-Sammlung von Flauschipanda
@@ -68,6 +68,10 @@ export interface BambooState {
   views: number;
   /** gewählter Skin (lib/skins.ts) */
   skin?: string;
+  /** besuchte Seiten je Kategorie – für Themen-Skins (z. B. 10 Zoo-Seiten → Zoo-Panda) */
+  visits?: VisitLog;
+  /** eigene Kombination aus dem Panda-Baukasten */
+  custom?: CustomLook;
 }
 
 const KEY = "fp-bambus";
@@ -103,8 +107,68 @@ function sanitize(raw: unknown): BambooState | null {
     off: Array.isArray(r.off) ? (r.off.filter((k) => validItems.has(String(k))) as ItemKey[]) : [],
     thanked: typeof r.thanked === "string" ? r.thanked.slice(0, 10) : undefined,
     views: Math.max(0, Math.floor(Number(r.views) || 0)),
-    skin: typeof r.skin === "string" && SKINS.some((k) => k.key === r.skin) ? r.skin : undefined,
+    skin: typeof r.skin === "string" && (r.skin === BUILDER_KEY || SKINS.some((k) => k.key === r.skin)) ? r.skin : undefined,
+    custom: sanitizeCustom(r.custom),
+    visits: sanitizeVisits(r.visits),
   };
+}
+
+function sanitizeCustom(raw: unknown): CustomLook | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const c = raw as Partial<CustomLook>;
+  return {
+    fur: FURS.some((f) => f.key === c.fur) ? String(c.fur) : "klassisch",
+    hat: HATS.some((h) => h.key === c.hat) ? String(c.hat) : "ohne",
+    acc: ACCS.some((a) => a.key === c.acc) ? String(c.acc) : "ohne",
+  };
+}
+
+/** Baukasten: Teil wählen und die eigene Kombination gleich anziehen. */
+export function setCustom(patch: Partial<CustomLook>) {
+  const cur = state.custom ?? { fur: "klassisch", hat: "ohne", acc: "ohne" };
+  updateBamboo({ custom: { ...cur, ...patch }, skin: BUILDER_KEY });
+}
+
+/** Eigene Kombination – gesperrte Teile (z. B. nach Ende einer Saison) fallen auf „Ohne“ bzw. „Klassisch“ zurück. */
+export function effectiveCustom(s: BambooState): CustomLook {
+  const c = s.custom ?? { fur: "klassisch", hat: "ohne", acc: "ohne" };
+  const ok = <T extends { key: string }>(list: T[], key: string, fallback: string) => {
+    const part = list.find((x) => x.key === key);
+    return part && partUnlocked(part as never, s.count, s.visits) ? key : fallback;
+  };
+  return { fur: ok(FURS, c.fur, "klassisch"), hat: ok(HATS, c.hat, "ohne"), acc: ok(ACCS, c.acc, "ohne") };
+}
+
+const MAX_VISITS_PER_CATEGORY = 60;
+const CATEGORY_RE = /^[a-z0-9-]{1,60}$/;
+const PATH_RE = /^\/[a-z0-9\/-]{1,200}$/;
+
+function sanitizeVisits(raw: unknown): VisitLog | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const out: VisitLog = {};
+  for (const [cat, list] of Object.entries(raw as Record<string, unknown>)) {
+    if (!CATEGORY_RE.test(cat) || !Array.isArray(list)) continue;
+    out[cat] = list.filter((p): p is string => typeof p === "string" && PATH_RE.test(p)).slice(-MAX_VISITS_PER_CATEGORY);
+  }
+  return out;
+}
+
+/**
+ * Besuchte Seite merken (nur Pfad, nur im Browser). Gibt die Themen-Skins zurück,
+ * die dadurch gerade freigeschaltet wurden.
+ */
+export function recordVisit(path: string): string[] {
+  const clean = path.split(/[?#]/)[0].replace(/\/$/, "");
+  const cat = clean.split("/")[1] ?? "";
+  if (!CATEGORY_RE.test(cat) || !PATH_RE.test(clean)) return [];
+  const visits = { ...(state.visits ?? {}) };
+  const list = visits[cat] ?? [];
+  if (list.includes(clean)) return [];
+  const theme = SKINS.filter((k) => k.visits);
+  const before = new Set(theme.filter((k) => skinUnlocked(k, state.count, state.visits)).map((k) => k.key));
+  visits[cat] = [...list, clean].slice(-MAX_VISITS_PER_CATEGORY);
+  updateBamboo({ visits });
+  return theme.filter((k) => !before.has(k.key) && skinUnlocked(k, state.count, visits)).map((k) => `Skin „${k.name}“ ${k.emoji}`);
 }
 
 export function hasOptIn() {
@@ -178,7 +242,7 @@ export function toggleItem(key: ItemKey) {
 }
 
 export function setSkin(key: string) {
-  if (!SKINS.some((k) => k.key === key)) return;
+  if (key !== BUILDER_KEY && !SKINS.some((k) => k.key === key)) return;
   updateBamboo({ skin: key });
 }
 

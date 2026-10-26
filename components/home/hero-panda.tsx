@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { useBamboo } from "@/lib/bamboo";
-import { getSkin, skinUnlocked } from "@/lib/skins";
+import { effectiveCustom, useBamboo } from "@/lib/bamboo";
+import { BUILDER_KEY, getSkin, skinUnlocked } from "@/lib/skins";
 import { cn } from "@/lib/utils";
 
 import { PandaFigure, type PandaPose } from "../panda-figure";
@@ -28,7 +28,9 @@ export function HeroPanda({ className }: { className?: string }) {
   const timer = useRef<number | null>(null);
 
   const skin = getSkin(bamboo.skin);
-  const skinKey = mounted && skinUnlocked(skin, bamboo.count) ? skin.key : "klassisch";
+  const builder = mounted && bamboo.skin === BUILDER_KEY;
+  const skinKey = builder ? BUILDER_KEY : mounted && skinUnlocked(skin, bamboo.count, bamboo.visits) ? skin.key : "klassisch";
+  const custom = builder ? effectiveCustom(bamboo) : null;
 
   useEffect(() => {
     setMounted(true);
@@ -68,7 +70,7 @@ export function HeroPanda({ className }: { className?: string }) {
           className="block touch-manipulation rounded-full outline-none transition-transform active:scale-95 focus-visible:ring-[3px] focus-visible:ring-ring/60"
         >
           <span key={hop} className={cn("block", hop > 0 && "panda-hop")}>
-            <PandaFigure pose={scene.pose} facing={1} look={{ skin: skinKey, glow: true }} className="size-48 animate-float sm:size-64 lg:size-80" />
+            <PandaFigure pose={scene.pose} facing={1} look={{ skin: skinKey, custom, glow: true }} className="size-48 animate-float sm:size-64 lg:size-80" />
           </span>
         </button>
       </div>

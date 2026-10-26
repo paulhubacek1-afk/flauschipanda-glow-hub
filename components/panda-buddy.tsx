@@ -13,7 +13,9 @@ import {
   hasItem,
   hasOptIn,
   isPersisting,
+  effectiveCustom,
   nextGoal,
+  recordVisit,
   setPersist,
   setSkin,
   stageFor,
@@ -24,7 +26,7 @@ import {
 } from "@/lib/bamboo";
 import type { NavLite } from "@/lib/cms";
 import { useConsent } from "@/lib/consent";
-import { SKINS, getSkin, skinUnlocked, visibleSkins } from "@/lib/skins";
+import { BUILDER_COMBOS, BUILDER_KEY, SKINS, getSkin, skinUnlocked, visibleSkins, visitProgress } from "@/lib/skins";
 import { cn } from "@/lib/utils";
 
 import { PandaFigure, type PandaLook, type PandaPose } from "./panda-figure";
@@ -606,7 +608,17 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
     if (!ready || !consent) return;
     if (sessionVisited.has(pathname)) return;
     sessionVisited.add(pathname);
-    const t = window.setTimeout(() => earn(1), 1200);
+    const t = window.setTimeout(() => {
+      earn(1);
+      // Themen-Skins: Besuche je Bereich zählen (z. B. 10 Zoo-Seiten → Zoo-Panda)
+      const fresh = recordVisit(pathname);
+      if (fresh.length) {
+        celebrate(["✨", "🐼", "⭐", "🎉", "✨"]);
+        const cur = bubbleRef.current;
+        if (!cur?.actions && !cur?.collection)
+          say({ title: "Neuer Skin freigeschaltet!", text: `🎉 ${fresh.join(" · ")} – zieh ihn in deiner Sammlung an!`, important: true }, 8000);
+      }
+    }, 1200);
     const views = getBamboo().views + 1;
     updateBamboo({ views });
     let saying: number | null = null;
@@ -957,7 +969,9 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
         : mode;
 
   const chosenSkin = getSkin(bamboo.skin);
-  const activeSkin = skinUnlocked(chosenSkin, bamboo.count) ? chosenSkin : getSkin("klassisch");
+  const usingBuilder = bamboo.skin === BUILDER_KEY;
+  const custom = effectiveCustom(bamboo);
+  const activeSkin = !usingBuilder && skinUnlocked(chosenSkin, bamboo.count, bamboo.visits) ? chosenSkin : getSkin("klassisch");
   const look: PandaLook = {
     helmet: catSlug === "wissenschaft-astrologie",
     hat:
@@ -982,7 +996,8 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
     sleepy: tod === "night" && activity === "idle" && !onGreencore,
     mug: tod === "morning",
     lantern: tod === "evening",
-    skin: activeSkin.key,
+    skin: usingBuilder ? BUILDER_KEY : activeSkin.key,
+    custom: usingBuilder ? custom : null,
   };
 
   // Solange das Cookie-Banner offen ist, bleibt der Panda weg (keine Überlagerung)
@@ -998,7 +1013,7 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
         aria-label="Flauschipanda zurückholen"
         className="animate-buddy-in fixed bottom-3 right-3 z-40 flex size-14 items-center justify-center rounded-full border border-purple/40 bg-card shadow-[var(--glow-sm)] transition-transform hover:scale-110 active:scale-95 sm:bottom-5 sm:right-5"
       >
-        <PandaFigure pose="sit" look={{ golden: look.golden, skin: look.skin }} className="size-12" />
+        <PandaFigure pose="sit" look={{ golden: look.golden, skin: look.skin, custom: look.custom }} className="size-12" />
       </button>
     );
   }
@@ -1089,8 +1104,10 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
                   <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-purple">Skins</p>
                   <ul className="grid grid-cols-4 gap-1.5">
                     {visibleSkins().map((sk) => {
-                      const open = skinUnlocked(sk, bamboo.count);
-                      const current = activeSkin.key === sk.key;
+                      const open = skinUnlocked(sk, bamboo.count, bamboo.visits);
+                      const prog = visitProgress(sk, bamboo.visits);
+                      const need = prog ? `${prog.have}/${prog.need}` : `ab ${sk.at}`;
+                      const current = !usingBuilder && activeSkin.key === sk.key;
                       return (
                         <li key={sk.key}>
                           <button
@@ -1101,7 +1118,7 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
                               celebrate([sk.emoji, "✨", sk.emoji]);
                             }}
                             aria-pressed={current}
-                            title={open ? sk.name : `${sk.name} – ab ${sk.at} Bambus`}
+                            title={open ? sk.name : prog ? `${sk.name} – ${prog.have}/${prog.need} ${prog.text}` : `${sk.name} – ab ${sk.at} Bambus`}
                             className={cn(
                               "flex w-full flex-col items-center rounded-lg border px-0.5 pb-1 pt-0.5 text-[10px] leading-tight transition-colors",
                               current ? "border-primary bg-primary/10 text-foreground" : "border-border hover:border-purple/50",
@@ -1109,15 +1126,29 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
                             )}
                           >
                             <span className="relative">
-                              <PandaFigure pose="sit" look={{ skin: sk.key }} className={cn("size-12", !open && "grayscale")} />
+                              <PandaFigure still pose="sit" look={{ skin: sk.key }} className={cn("size-12", !open && "grayscale")} />
                               {!open && <span className="absolute inset-0 flex items-center justify-center text-base">🔒</span>}
                             </span>
-                            <span className="w-full truncate">{open ? sk.name : `ab ${sk.at}`}</span>
+                            <span className="w-full truncate">{open ? sk.name : need}</span>
                           </button>
                         </li>
                       );
                     })}
                   </ul>
+                  <a
+                    href="/startseite#baukasten"
+                    onClick={() => say(null)}
+                    className={cn(
+                      "mt-2 flex items-center gap-2 rounded-lg border px-2 py-1.5 text-xs font-medium hover:border-purple/50",
+                      usingBuilder ? "border-primary bg-primary/10" : "border-border",
+                    )}
+                  >
+                    <PandaFigure still pose="sit" look={{ skin: BUILDER_KEY, custom }} className="size-9" />
+                    <span>
+                      🧩 Panda-Baukasten {usingBuilder && "· angezogen"}
+                      <span className="block font-normal text-muted-foreground">{BUILDER_COMBOS.toLocaleString("de-AT")} Kombinationen – eigenen Panda bauen</span>
+                    </span>
+                  </a>
                 </div>
                 <p className="text-xs leading-relaxed text-muted-foreground">
                   So sammelst du: neue Seiten entdecken, Artikel lesen, eine Weile bleiben. Nur zum Spaß – rein kosmetisch.
