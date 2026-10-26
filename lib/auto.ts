@@ -101,7 +101,15 @@ export function autoDescription(title: string, ctx: AutoContext = {}): string {
 export function autoLinkAnchors(page: { title: string; label?: string | null }): string[] {
   const set = new Set<string>([page.title]);
   const label = page.label?.trim();
-  if (label && label !== page.title && label.length > 6 && !/^(faq|tipps|tickets|preise|hotels|prompts)\b/i.test(label)) {
+  // Kurznamen nur, wenn sie für sich eindeutig sind: mindestens zwei Wörter und kein allgemeiner Anfang
+  // („Öffnungszeiten“, „Achterbahnen“ oder „Mit Kindern“ würden sonst auf den falschen Zoo/Park verlinken)
+  if (
+    label &&
+    label !== page.title &&
+    label.length > 6 &&
+    label.trim().split(/\s+/).length >= 2 &&
+    !/^(faq|tipps|tickets|preise|hotels|prompts|mit|für|im|in|am|beste|günstig)\b/i.test(label)
+  ) {
     set.add(label);
   }
   return [...set];

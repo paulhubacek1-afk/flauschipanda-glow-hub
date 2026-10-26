@@ -96,12 +96,32 @@ const RELATED_GROUPS: [string, string][] = [
   ["autos-mobilitaet/kosten-vergleiche", "tools-apps/rechner"],
   ["finanzen-sparen/budget", "tools-apps/rechner"],
 ];
-const pairHas = (pairs: [string, string][], x: string, y: string) => pairs.some(([a, b]) => (a === x && b === y) || (a === y && b === x));
+// „kategorie/*“ = jedes Unterthema dieser Kategorie
+const RELATED_GROUPS_WILD: [string, string][] = [
+  ["freizeitparks/*", "babys-kinder/ausfluege"],
+  ["freizeitparks/*", "urlaub-reisen/familienurlaub"],
+  ["freizeitparks/*", "zoos/ratgeber"],
+  ["zoos/*", "babys-kinder/ausfluege"],
+  ["zoos/*", "freizeitparks/ratgeber"],
+  ["zoos/*", "tiere/pandas"],
+  ["urlaub-reisen/*", "freizeitparks/ratgeber"],
+  ["urlaub-reisen/*", "zoos/ratgeber"],
+  ["ki/*", "creator/youtube"],
+  ["ki/*", "tools-apps/automatisierung"],
+  ["creator/*", "tools-apps/youtube-tools"],
+  ["creator/*", "musik-entertainment/youtube-musik"],
+];
+const keyMatch = (pattern: string, key: string) => (pattern.endsWith("/*") ? key.startsWith(pattern.slice(0, -1)) : pattern === key);
+const pairHas = (pairs: [string, string][], x: string, y: string) =>
+  pairs.some(([a, b]) => (keyMatch(a, x) && keyMatch(b, y)) || (keyMatch(a, y) && keyMatch(b, x)));
 
 export function affinity(a: Page, b: Page) {
   let score = 0;
   if (pairHas(RELATED_CATEGORIES, a.category.slug, b.category.slug)) score += 1;
-  if (pairHas(RELATED_GROUPS, `${a.category.slug}/${a.group.slug}`, `${b.category.slug}/${b.group.slug}`)) score += 3;
+  const ka = `${a.category.slug}/${a.group.slug}`;
+  const kb = `${b.category.slug}/${b.group.slug}`;
+  if (pairHas(RELATED_GROUPS, ka, kb)) score += 3;
+  else if (pairHas(RELATED_GROUPS_WILD, ka, kb)) score += 2;
   if (a.category.slug === b.category.slug) score += 2;
   if (a.category.slug === b.category.slug && a.group.slug === b.group.slug) score += 3;
   score += a.tags.filter((t) => b.tags.includes(t)).length;
@@ -214,8 +234,8 @@ export function getInlineLinks(source: Page, live: Page[], toolHrefs: string[], 
 /** Verwandte Unterthemen in anderen Kategorien (für die Übersichtsseiten der Unterthemen). */
 export function relatedGroupKeys(categorySlug: string, groupSlug: string, allGroupKeys: string[], limit = 6): string[] {
   const key = `${categorySlug}/${groupSlug}`;
-  const direct = RELATED_GROUPS.flatMap(([a, b]) => (a === key ? [b] : b === key ? [a] : []));
-  const cats = RELATED_CATEGORIES.flatMap(([a, b]) => (a === categorySlug ? [b] : b === categorySlug ? [a] : []));
-  const byCat = allGroupKeys.filter((k) => cats.includes(k.split("/")[0]));
-  return [...new Set([...direct, ...byCat])].filter((k) => allGroupKeys.includes(k)).slice(0, limit);
+  const direct = allGroupKeys.filter(
+    (k) => k !== key && !k.startsWith(`${categorySlug}/`) && (pairHas(RELATED_GROUPS, key, k) || pairHas(RELATED_GROUPS_WILD, key, k)),
+  );
+  return [...new Set(direct)].slice(0, limit);
 }
