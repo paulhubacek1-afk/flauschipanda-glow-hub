@@ -24,6 +24,9 @@ import { lexicalToPlainText } from "../lexical-text";
  * Das Feld „Automatik-Vorschau“ zeigt nach dem Speichern, was erzeugt wurde.
  */
 
+/** Steht im Rich-Text-Feld echter Text? (läuft auch im Browser für die Feld-Bedingungen) */
+const hasRichText = (c: unknown) => /"text":"[^"\s][^"]*"/.test(JSON.stringify((c as { root?: unknown } | undefined)?.root ?? ""));
+
 const idOf = (v: unknown) => (v && typeof v === "object" ? (v as { id: string | number }).id : (v as string | number));
 
 const computeAutomation: CollectionBeforeChangeHook = async ({ data, req, originalDoc, context, operation }) => {
@@ -186,14 +189,25 @@ export const Pages: CollectionConfig = {
         {
           label: "Inhalt",
           fields: [
-            { name: "content", label: "Infotext", type: "richText" },
             {
               name: "markdown",
-              label: "Infotext (Markdown, importiert)",
-              type: "textarea",
+              label: "Infotext",
+              type: "code",
               admin: {
-                condition: (data) => Boolean(data?.markdown),
-                description: "Importierter Text. Wird angezeigt, solange der Rich-Text-Infotext leer ist.",
+                language: "markdown",
+                editorOptions: { wordWrap: "on", minimap: { enabled: false }, lineNumbers: "off", fontSize: 14 },
+                condition: (data) => Boolean(data?.markdown) || !hasRichText(data?.content),
+                description:
+                  "Hier den Text bearbeiten. Kurzanleitung: „## Überschrift“ · „- Aufzählung“ · „1. Nummerierung“ · „**fett**“ · „[Linktext](/tiere/hunde)“ · „- [ ] Checkliste“ · Tabellen mit | Spalte | Spalte |. Interne Links entstehen zusätzlich automatisch. Mit „Vorschau“ oben rechts siehst du das Ergebnis.",
+              },
+            },
+            {
+              name: "content",
+              label: "Infotext im Editor (optional)",
+              type: "richText",
+              admin: {
+                condition: (data) => !data?.markdown || hasRichText(data?.content),
+                description: "Wenn hier Text steht, wird er statt des Markdown-Infotexts angezeigt.",
               },
             },
             {

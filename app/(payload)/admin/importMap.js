@@ -24,10 +24,12 @@ import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
 import { RecentOnSite as RecentOnSite_fp01 } from '../../../components/admin/recent-on-site'
+import { TeamFlag as TeamFlag_fp02 } from '../../../components/admin/team-flag'
 
 /** @type import('payload').ImportMap */
 export const importMap = {
   "/components/admin/recent-on-site#RecentOnSite": RecentOnSite_fp01,
+  "/components/admin/team-flag#TeamFlag": TeamFlag_fp02,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#LexicalDiffComponent": LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e,

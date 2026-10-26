@@ -7,6 +7,7 @@ import { AdSlot } from "@/components/ad-slot";
 import { AffiliateBox } from "@/components/affiliate";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CategoryIcon } from "@/components/category-icon";
+import { EditButton } from "@/components/edit-button";
 import { GreenTechNotice } from "@/components/greencore-notice";
 import { JsonLd } from "@/components/json-ld";
 import { PageCard } from "@/components/page-card";
@@ -49,6 +50,7 @@ export default async function CategoryPage({ params }: Props) {
   return (
     <div className="mx-auto max-w-7xl space-y-14 px-4 py-10">
       <JsonLd data={collectionSchema(category.title, category.description, path, live)} />
+      <EditButton collection="categories" id={category.dbId} label="Kategorie bearbeiten" />
 
       <header className="space-y-5">
         <Breadcrumbs items={[{ name: "Startseite", href: "/startseite" }, { name: category.title, href: path }]} />

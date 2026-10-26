@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { AffiliateBox } from "@/components/affiliate";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { Cover } from "@/components/cover";
+import { EditButton } from "@/components/edit-button";
 import { JsonLd } from "@/components/json-ld";
 import { PageCard } from "@/components/page-card";
 import { GreenTechNotice } from "@/components/greencore-notice";
@@ -62,6 +63,7 @@ export default async function GroupPage({ params }: Props) {
   return (
     <div className="mx-auto max-w-7xl space-y-12 px-4 py-10">
       <JsonLd data={collectionSchema(group.title, group.description, path, live)} />
+      <EditButton collection="groups" id={group.dbId} label="Unterthema bearbeiten" />
       <header className="space-y-6">
         <Breadcrumbs
           items={[

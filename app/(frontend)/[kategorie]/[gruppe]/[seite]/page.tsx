@@ -12,6 +12,7 @@ import { Calculators } from "@/components/calculators";
 import { CostCalculator } from "@/components/cost-calculator";
 import { Cover } from "@/components/cover";
 import { DonationBox } from "@/components/donation-box";
+import { EditButton } from "@/components/edit-button";
 import { ShareButtons } from "@/components/share-buttons";
 import { Faq } from "@/components/faq";
 import { GreenTechNotice } from "@/components/greencore-notice";
@@ -110,6 +111,7 @@ export default async function LandingPage({ params }: Props) {
       <JsonLd data={articleSchema(page)} />
       <JsonLd data={faqSchema(page)} />
       <div hidden data-panda-guide={JSON.stringify({ links: guideLinks })} />
+      <EditButton collection="pages" id={page.dbId} label="Seite bearbeiten" />
 
       {isDraft && (
         <p role="status" className="mb-6 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm">

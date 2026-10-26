@@ -219,6 +219,101 @@ async function fillEmptyPages(payload: Payload): Promise<number> {
 }
 
 /* ------------------------------------------------------------------ */
+/* Affiliate-Plan: vorbereitete Partnerlink-Plätze je Themenbereich       */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Für jeden geplanten Einnahmebereich ein paar Platzhalter-Partnerlinks, schon mit „Passt zu“
+ * (Kategorie bzw. Unterthema) verknüpft. Sie erscheinen nie öffentlich, bis jemand im Admin den
+ * echten Partnerlink einträgt und den Haken „Platzhalter-Link“ entfernt. Danach tauchen sie
+ * automatisch auf allen passenden Seiten in der Box „Passende Empfehlungen“ auf.
+ * Konditionen und Freischaltung immer beim jeweiligen Partnerprogramm prüfen.
+ */
+const AFFILIATE_PLAN: { key: string; name: string; label: string; network: string; topics: string[] }[] = [
+  // 1 · KI-Software
+  { key: "plan-ki-bild", name: "KI-Bildgenerator (Partnerlink eintragen)", label: "KI-Software", network: "Partnerprogramm des Anbieters prüfen", topics: ["ki/bildgeneratoren", "tiere/tier-ki-prompts"] },
+  { key: "plan-ki-video", name: "KI-Video- oder Transkriptions-Tool (Partnerlink eintragen)", label: "KI-Software", network: "Partnerprogramm des Anbieters prüfen", topics: ["ki", "creator/youtube"] },
+  { key: "plan-ki-automation", name: "Automatisierungs-Tool (Partnerlink eintragen)", label: "KI-Software", network: "Partnerprogramm des Anbieters prüfen", topics: ["ki/ki-basics", "tools-apps/automatisierung"] },
+  // 2 · Hosting & Website
+  { key: "plan-hosting", name: "Webhosting & Domain (z. B. IONOS – Partnerlink eintragen)", label: "Website starten", network: "IONOS Partnerprogramm", topics: ["tools-apps/business-tools", "creator/branding", "finanzen-sparen/online-verdienen"] },
+  { key: "plan-wp-hosting", name: "WordPress-Hosting (z. B. Kinsta – Partnerlink eintragen)", label: "Website starten", network: "Kinsta Partnerprogramm", topics: ["tools-apps/business-tools", "creator/monetarisierung"] },
+  // 3 · Creator-Ausrüstung
+  { key: "plan-creator-mikro", name: "Mikrofon für YouTube & Podcast (Partnerlink eintragen)", label: "Creator-Ausrüstung", network: "z. B. Amazon PartnerNet", topics: ["creator/youtube", "musik-entertainment/musikproduktion"] },
+  { key: "plan-creator-licht", name: "Ringlicht & Stativ (Partnerlink eintragen)", label: "Creator-Ausrüstung", network: "z. B. Amazon PartnerNet", topics: ["creator/youtube", "creator/content-planung"] },
+  { key: "plan-creator-schnitt", name: "Schnitt- & Untertitel-Software (Partnerlink eintragen)", label: "Creator-Ausrüstung", network: "Partnerprogramm des Anbieters prüfen", topics: ["creator/youtube", "tools-apps/youtube-tools"] },
+  // 4 · Kurse & Bücher
+  { key: "plan-buecher", name: "Bücher, E-Books & Hörbücher (z. B. Hugendubel – Partnerlink eintragen)", label: "Bücher & Kurse", network: "Hugendubel Partnerprogramm", topics: ["ki/ki-basics", "wissenschaft-astrologie", "babys-kinder/lernen"] },
+  { key: "plan-kurse", name: "Online-Kurs (KI, Programmieren, Creator – Partnerlink eintragen)", label: "Bücher & Kurse", network: "Lernplattform-Partnerprogramm prüfen", topics: ["ki/ki-basics", "creator/monetarisierung"] },
+  // 5 · Tierzubehör
+  { key: "plan-tier-hund", name: "Hundezubehör: Spielzeug, Betten, Transport (z. B. zooplus – Partnerlink eintragen)", label: "Tierzubehör", network: "zooplus Partnerprogramm", topics: ["tiere/hunde", "urlaub-reisen/mit-hund"] },
+  { key: "plan-tier-katze", name: "Katzenzubehör: Kratzbaum, Spielzeug, Katzenklo (z. B. zooplus – Partnerlink eintragen)", label: "Tierzubehör", network: "zooplus Partnerprogramm", topics: ["tiere/katzen"] },
+  { key: "plan-tier-klein", name: "Kleintierbedarf: Gehege, Käfig, Heu (Partnerlink eintragen)", label: "Tierzubehör", network: "zooplus Partnerprogramm", topics: ["tiere/kaninchen", "tiere/meerschweinchen", "tiere/hamster"] },
+  // 6 · Reisen & Freizeit
+  { key: "plan-reise-hotel", name: "Hotels & Pauschalreisen (z. B. DERTOUR – Partnerlink eintragen)", label: "Reisen & Freizeit", network: "DERTOUR Partnerprogramm", topics: ["urlaub-reisen/unterkuenfte", "urlaub-reisen/familienurlaub", "urlaub-reisen/urlaubsziele"] },
+  { key: "plan-reise-park", name: "Freizeitpark-Tickets & Erlebnisse (Partnerlink eintragen)", label: "Reisen & Freizeit", network: "Ticket-/Erlebnis-Partnerprogramm prüfen", topics: ["freizeitparks", "zoos"] },
+  { key: "plan-reise-gepaeck", name: "Reisegepäck & Ausflugszubehör (Partnerlink eintragen)", label: "Reisen & Freizeit", network: "z. B. Amazon PartnerNet", topics: ["urlaub-reisen/reiseplanung", "babys-kinder/ausfluege"] },
+  // 7 · Homeoffice & Technik
+  { key: "plan-office-stuhl", name: "Ergonomischer Bürostuhl & Schreibtisch (Partnerlink eintragen)", label: "Homeoffice & Technik", network: "z. B. Amazon PartnerNet", topics: ["pc-und-hardware", "haushalt-wohnen/einrichtung"] },
+  { key: "plan-office-technik", name: "Monitor, Tastatur & Headset (Partnerlink eintragen)", label: "Homeoffice & Technik", network: "z. B. Amazon PartnerNet", topics: ["pc-und-hardware"] },
+];
+
+async function ensureAffiliatePlan(payload: Payload): Promise<number> {
+  const existing = (
+    await payload.find({
+      collection: "affiliates",
+      where: { key: { like: "plan-" } },
+      limit: 200,
+      depth: 0,
+      overrideAccess: true,
+      pagination: false,
+      select: { key: true } as never,
+    })
+  ).docs as Doc[];
+  const have = new Set(existing.map((a) => String(a.key)));
+  const todo = AFFILIATE_PLAN.filter((p) => !have.has(p.key));
+  if (!todo.length) return 0;
+
+  const [cats, groups] = await Promise.all([
+    payload.find({ collection: "categories", limit: 200, depth: 0, overrideAccess: true, pagination: false, select: { slug: true } as never }),
+    payload.find({ collection: "groups", limit: 2000, depth: 0, overrideAccess: true, pagination: false, select: { path: true } as never }),
+  ]);
+  const catBySlug = new Map((cats.docs as Doc[]).map((c) => [String(c.slug), c.id]));
+  const groupByPath = new Map((groups.docs as Doc[]).map((g) => [String(g.path), g.id]));
+  let changes = 0;
+  for (const p of todo) {
+    const topics = p.topics
+      .map((t) =>
+        t.includes("/")
+          ? groupByPath.has(`/${t}`) && { relationTo: "groups", value: groupByPath.get(`/${t}`) }
+          : catBySlug.has(t) && { relationTo: "categories", value: catBySlug.get(t) },
+      )
+      .filter(Boolean);
+    try {
+      await payload.create({
+        collection: "affiliates",
+        overrideAccess: true,
+        context,
+        data: {
+          name: p.name,
+          key: p.key,
+          url: "https://partnerlink-eintragen.invalid",
+          network: p.network,
+          label: p.label,
+          pitch: "Hier kurz und ehrlich beschreiben, warum ihr das Produkt empfehlt (gern mit Vor- und Nachteilen). Danach Produktname und Partnerlink eintragen und den Haken „Platzhalter-Link“ entfernen.",
+          topics,
+          active: true,
+          placeholder: true,
+        } as never,
+      });
+      changes++;
+    } catch (err) {
+      payload.logger.warn({ err }, `[inhalte] Affiliate-Plan ${p.key} nicht angelegt`);
+    }
+  }
+  return changes;
+}
+
+/* ------------------------------------------------------------------ */
 /* Ausführliche Neufassungen (nur unveränderte oder leere Seiten)       */
 /* ------------------------------------------------------------------ */
 
@@ -522,6 +617,7 @@ export async function applyContentPacks(payload: Payload) {
   await run("Seiten befüllen", fillEmptyPages);
   await run("Ausführliche Neufassungen", upgradePages);
   await run("Partnerlink-Plätze", ensureAffiliateSlots);
+  await run("Affiliate-Plan", ensureAffiliatePlan);
   if (total > 0) {
     try {
       const { revalidatePath } = await import("next/cache");
