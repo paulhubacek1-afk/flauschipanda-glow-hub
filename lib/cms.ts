@@ -346,12 +346,12 @@ async function mapPages(docs: Doc[]): Promise<Page[]> {
     const text = hasRich ? lexicalToPlainText(d.content) : String(d.markdown ?? "");
     const wordCount = text.split(/\s+/).filter(Boolean).length;
 
-    // Affiliate-Bereich nur auf Money Pages – eigene Auswahl oder automatisch passend
-    // Selbst gewählte Produkte gelten auf jeder Seite; automatisch ergänzt wird nur auf Money Pages
+    // Affiliate-Bereich: selbst gewählte Produkte – sonst automatisch passende aus Unterthema/Kategorie
     let products: AffiliateItem[] = [];
     const chosen = ((d.products ?? []) as unknown[]).map((p) => affiliates.find((a) => a.id === idOf(p))).filter(Boolean) as Doc[];
     if (chosen.length) products = chosen.map(toAffiliate);
-    else if (pageType === "money") {
+    else {
+      // Partnerlinks aus dem Unterthema bzw. der Kategorie („Passt zu“) erscheinen automatisch auf jeder Seite darin
       if (d.autoAffiliate !== false) {
         const match = (a: Doc, rel: string, id: string | number) =>
           ((a.topics ?? []) as Doc[]).some((t) => t.relationTo === rel && idOf(t.value) === id);

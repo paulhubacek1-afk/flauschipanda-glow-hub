@@ -9,7 +9,9 @@ import { JsonLd } from "@/components/json-ld";
 import { PageCard } from "@/components/page-card";
 import { GreenTechNotice } from "@/components/greencore-notice";
 import { PageList } from "@/components/page-list";
-import { getGroup, getLivePagesInGroup, getSettings, getTopicAffiliates, toSummary } from "@/lib/cms";
+import { getGroup, getLivePagesInGroup, getNavigation, getSettings, getTopicAffiliates, toSummary } from "@/lib/cms";
+import { relatedGroupKeys } from "@/lib/linking";
+import { CATEGORY_TOOLS } from "@/lib/tools";
 import { collectionSchema } from "@/lib/schema";
 
 export const revalidate = 3600;
@@ -39,11 +41,22 @@ export default async function GroupPage({ params }: Props) {
   const { category, group } = found;
 
   const path = `/${category.slug}/${group.slug}`;
-  const [live, partners, settings] = await Promise.all([
+  const [live, partners, settings, nav] = await Promise.all([
     getLivePagesInGroup(category.slug, group.slug),
     getTopicAffiliates("groups", group.dbId),
     getSettings(),
+    getNavigation(),
   ]);
+  // Häufige Fragen aus den Ratgebern dieses Unterthemas – jede mit Link zur ausführlichen Antwort
+  const questions = live.flatMap((p) => (p.faq[0] ? [{ q: p.faq[0].q, a: p.faq[0].a, href: p.href, title: p.title }] : [])).slice(0, 8);
+  // verwandte Unterthemen in anderen Kategorien (nur mit Inhalt)
+  const groupIndex = new Map(
+    nav.flatMap((c) => c.groups.filter((g) => g.pages.some((p) => p.live)).map((g) => [`${c.slug}/${g.slug}`, { c, g }] as const)),
+  );
+  const crossGroups = relatedGroupKeys(category.slug, group.slug, [...groupIndex.keys()]).map((k) => ({ key: k, ...groupIndex.get(k)! }));
+  const toolLinks = (CATEGORY_TOOLS[category.slug] ?? [])
+    .map((href) => nav.flatMap((c) => c.groups.flatMap((g) => g.pages.filter((p) => p.live && `/${c.slug}/${g.slug}/${p.slug}` === href).map((p) => ({ href, title: p.title })))))
+    .flat();
   const siblings = category.groups.filter((g) => g.slug !== group.slug);
 
   return (
@@ -80,6 +93,29 @@ export default async function GroupPage({ params }: Props) {
               <p className="mt-1 text-sm text-muted-foreground">Rechts siehst du, welche Themen geplant sind.</p>
             </div>
           )}
+          {questions.length > 0 && (
+            <section aria-labelledby="fragen" className="space-y-4">
+              <h2 id="fragen" className="text-2xl font-semibold">
+                Häufige Fragen zu {group.title}
+              </h2>
+              <div className="divide-y rounded-xl border bg-card/60">
+                {questions.map((x) => (
+                  <details key={x.href} className="group p-4">
+                    <summary className="flex cursor-pointer list-none items-start justify-between gap-3 font-medium">
+                      {x.q}
+                      <span className="mt-0.5 text-primary transition-transform group-open:rotate-45" aria-hidden="true">
+                        +
+                      </span>
+                    </summary>
+                    <p className="mt-2 text-sm text-muted-foreground">{x.a}</p>
+                    <Link href={x.href} className="mt-2 inline-block text-sm font-medium text-primary hover:underline">
+                      Mehr dazu: {x.title} →
+                    </Link>
+                  </details>
+                ))}
+              </div>
+            </section>
+          )}
           <AffiliateBox products={partners} title={`Empfehlungen zu ${group.title}`} />
         </div>
 
@@ -88,9 +124,42 @@ export default async function GroupPage({ params }: Props) {
             <p className="mb-2 px-2.5 text-sm font-semibold">Alle Themen in {group.title}</p>
             <PageList categorySlug={category.slug} groupSlug={group.slug} pages={group.pages} dense />
           </nav>
+          {toolLinks.length > 0 && (
+            <nav aria-label="Passende Rechner" className="rounded-xl border bg-card/60 p-4">
+              <p className="mb-2 px-2.5 text-sm font-semibold">Passende Rechner</p>
+              <ul className="space-y-1 text-sm">
+                {toolLinks.map((t) => (
+                  <li key={t.href}>
+                    <Link href={t.href} className="block rounded-md px-2.5 py-1.5 text-foreground/85 hover:bg-primary/10 hover:text-primary">
+                      🧮 {t.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
           <GreenTechNotice greencore={settings.greencore} />
         </aside>
       </div>
+
+      {crossGroups.length > 0 && (
+        <nav aria-labelledby="auch-interessant">
+          <h2 id="auch-interessant" className="mb-4 text-xl font-semibold">
+            Auch interessant
+          </h2>
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {crossGroups.map(({ key, c, g }) => (
+              <li key={key}>
+                <Link href={`/${key}`} className="glow-hover flex h-full flex-col rounded-xl border bg-card/60 p-4">
+                  <span className="text-xs text-muted-foreground">{c.title}</span>
+                  <span className="font-medium">{g.title}</span>
+                  <span className="mt-1 line-clamp-2 text-sm text-muted-foreground">{g.description}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
 
       <nav aria-labelledby="weitere">
         <h2 id="weitere" className="mb-4 text-xl font-semibold">

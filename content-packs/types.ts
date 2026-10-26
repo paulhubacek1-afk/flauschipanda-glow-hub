@@ -48,3 +48,9 @@ export interface FillPage {
   comparison?: PackPage["comparison"];
   sources?: { title: string; url: string }[];
 }
+
+/**
+ * Ausführlichere Neufassung einer Seite. Wird nur übernommen, wenn die Seite noch leer ist oder
+ * noch exakt den ursprünglich generierten Text enthält – im Admin bearbeitete Seiten bleiben unangetastet.
+ */
+export type UpgradePage = FillPage;

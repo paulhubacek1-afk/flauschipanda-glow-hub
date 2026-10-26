@@ -1147,6 +1147,51 @@ input[type="search"]::-webkit-search-decoration {
 .prose-glow hr {
   border-color: var(--border);
 }
+/* Checklisten (- [ ] …) */
+.prose-glow li.task-list-item {
+  list-style: none;
+  margin-left: -1.2em;
+}
+.prose-glow li.task-list-item::before,
+.prose-glow .inline-related li::before {
+  display: none;
+}
+.prose-glow li.task-list-item input[type="checkbox"] {
+  margin-right: 0.55em;
+  accent-color: var(--primary);
+  transform: translateY(1px);
+}
+/* „Passend dazu“-Kasten im Artikel (lib/markdown.ts) */
+.prose-glow .inline-related {
+  margin: 1.8em 0;
+  padding: 1rem 1.2rem;
+  border: 1px solid oklch(0.86 0.14 195 / 0.3);
+  border-radius: calc(var(--radius) + 4px);
+  background: linear-gradient(110deg, oklch(0.86 0.14 195 / 0.07), oklch(0.72 0.19 300 / 0.07));
+}
+.prose-glow .inline-related-title {
+  margin: 0 0 0.4em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--purple);
+}
+.prose-glow .inline-related ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.prose-glow .inline-related li {
+  margin: 0.2em 0;
+}
+.prose-glow .inline-related a {
+  font-weight: 500;
+  text-decoration: none;
+}
+.prose-glow .inline-related a:hover {
+  text-decoration: underline;
+}
 
 /* ---------------- Wissenschaft & Astrologie: Sternenhimmel (components/science-sky.tsx) ---------------- */
 .science-star {

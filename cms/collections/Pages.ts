@@ -83,7 +83,7 @@ const computeAutomation: CollectionBeforeChangeHook = async ({ data, req, origin
     `Auto-Verlinkung von anderen Seiten über: ${anchors.join(", ")}`,
     `Verwandte Artikel: ${(merged.related as unknown[] | undefined)?.length ? "manuell gewählt" : "automatisch (Unterthema & Kategorie)"}`,
     `Panda-GreenTech-Box: ${merged.donation === false ? "aus" : "an"}`,
-    `Affiliate-Bereich: ${pageType === "money" ? ((merged.products as unknown[] | undefined)?.length ? "manuell gewählte Produkte" : "automatisch passende Produkte") : "aus (nur Money Pages)"}`,
+    `Affiliate-Bereich: ${(merged.products as unknown[] | undefined)?.length ? "manuell gewählte Produkte" : "automatisch passende Partnerlinks aus Unterthema/Kategorie"}`,
   ];
 
   const hints: string[] = [];
@@ -287,7 +287,7 @@ export const Pages: CollectionConfig = {
               hasMany: true,
               admin: {
                 description:
-                  "Erscheinen als Empfehlungsbox unter dem Text – auf jeder Seite. Bei Money Pages gilt: leer = automatisch passende Produkte aus „Passt zu“. Tipp: Im Infotext ein Wort markieren → Link → „Interner Link“ → Affiliate-Produkt wählen.",
+                  "Erscheinen als Empfehlungsbox unter dem Text – auf jeder Seite. Leer = automatisch die Partnerlinks des Unterthemas bzw. der Kategorie („Passt zu“). Tipp: Im Infotext ein Wort markieren → Link → „Interner Link“ → Affiliate-Produkt wählen.",
               },
             },
             {
@@ -295,7 +295,9 @@ export const Pages: CollectionConfig = {
               label: "Passende Produkte automatisch wählen",
               type: "checkbox",
               defaultValue: true,
-              admin: { condition: (data) => data?.pageType === "money" },
+              admin: {
+                description: "Leer gelassene Produkte → Partnerlinks aus dem Unterthema bzw. der Kategorie erscheinen automatisch.",
+              },
             },
             { name: "donation", label: "Panda-GreenTech-Box anzeigen", type: "checkbox", defaultValue: true },
           ],

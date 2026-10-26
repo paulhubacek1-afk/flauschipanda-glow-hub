@@ -22,11 +22,11 @@ import { SourcesBox } from "@/components/sources-box";
 import { TableOfContents } from "@/components/table-of-contents";
 import { Badge } from "@/components/ui/badge";
 import { getAffiliateLookup, getDraftPage, getGroup, getLivePage, getLivePages, getSettings, lastModified, toSummary } from "@/lib/cms";
-import { getRelatedPages } from "@/lib/linking";
+import { getInlineLinks, getRelatedPages } from "@/lib/linking";
 import { renderPage } from "@/lib/markdown";
 import { articleSchema, faqSchema } from "@/lib/schema";
 import { siteConfig } from "@/lib/site";
-import { widgetsFor } from "@/lib/tools";
+import { CATEGORY_TOOLS, widgetsFor } from "@/lib/tools";
 import { formatDate, toIsoDate } from "@/lib/utils";
 
 /**
@@ -86,8 +86,9 @@ export default async function LandingPage({ params }: Props) {
     getAffiliateLookup(),
     getGroup(kategorie, gruppe),
   ]);
-  const rendered = await renderPage(page, live, { lookup });
   const related = getRelatedPages(page, live, 3);
+  const inline = getInlineLinks(page, live, CATEGORY_TOOLS[page.category.slug] ?? [], related.map((p) => p.href));
+  const rendered = await renderPage(page, live, { lookup, inline });
   const siblings = found?.group.pages ?? [];
   const hasAffiliate = rendered.affiliateIds.length > 0 || page.products.length > 0;
   const { category, group } = page;

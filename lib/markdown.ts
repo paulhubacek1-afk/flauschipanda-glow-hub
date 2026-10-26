@@ -12,7 +12,7 @@ import type { Root as HastRoot, Element, ElementContent, Parent as HastParent, T
 
 import { AFFILIATE_REL } from "./affiliate";
 import type { AffiliateItem, Page } from "./cms";
-import { MAX_AUTO_LINKS, buildLinkTargets, findFirstMatch, type LinkTarget } from "./linking";
+import { MAX_AUTO_LINKS, buildGroupTargets, buildLinkTargets, findFirstMatch, type LinkTarget } from "./linking";
 
 /**
  * Infotext → HTML.
@@ -155,6 +155,58 @@ const rehypeAutoLink: Plugin<[AutoLinkOptions], HastRoot> = (opts) => (tree) => 
 };
 
 /* ------------------------------------------------------------------ */
+/* „Passend dazu“-Kasten mitten im Artikel                              */
+/* ------------------------------------------------------------------ */
+export interface InlineLink {
+  href: string;
+  title: string;
+  kind: "tool" | "page";
+}
+interface InlineOptions {
+  links: InlineLink[];
+  /** schon im Text verlinkte Ziele – werden nicht doppelt angeboten */
+  linked: () => Set<string>;
+}
+
+const rehypeInlineRelated: Plugin<[InlineOptions], HastRoot> = (opts) => (tree) => {
+  const linked = opts.linked();
+  const links = opts.links.filter((l) => !linked.has(l.href)).slice(0, 3);
+  if (!links.length) return;
+  const box: Element = {
+    type: "element",
+    tagName: "aside",
+    properties: { className: ["inline-related"], ariaLabel: "Passend dazu" },
+    children: [
+      { type: "element", tagName: "p", properties: { className: ["inline-related-title"] }, children: [{ type: "text", value: "Passend dazu" }] },
+      {
+        type: "element",
+        tagName: "ul",
+        properties: {},
+        children: links.map(
+          (l): Element => ({
+          type: "element",
+          tagName: "li",
+          properties: {},
+          children: [
+            {
+              type: "element",
+              tagName: "a",
+              properties: { href: l.href, dataInline: l.kind },
+              children: [{ type: "text", value: `${l.kind === "tool" ? "🧮 " : "📖 "}${l.title}` }],
+            },
+          ],
+          }),
+        ),
+      },
+    ],
+  };
+  // vor der dritten Zwischenüberschrift einfügen (nach dem ersten Drittel des Textes), sonst am Ende
+  const h2s = tree.children.map((c, i) => (isElement(c) && c.tagName === "h2" ? i : -1)).filter((i) => i >= 0);
+  const at = h2s.length >= 3 ? h2s[2] : h2s.length === 2 ? h2s[1] : tree.children.length;
+  tree.children.splice(at, 0, box);
+};
+
+/* ------------------------------------------------------------------ */
 /* Überschriften: H1 im Text zu H2 machen (der Seitentitel ist die H1)  */
 /* und fürs Inhaltsverzeichnis einsammeln                               */
 /* ------------------------------------------------------------------ */
@@ -186,7 +238,7 @@ async function toHast(page: Page): Promise<HastRoot> {
 export async function renderPage(
   page: Page,
   linkCandidates: Page[],
-  opts: { lookup?: AffiliateLookup; autoLink?: boolean } = {},
+  opts: { lookup?: AffiliateLookup; autoLink?: boolean; inline?: InlineLink[] } = {},
 ): Promise<RenderedPage> {
   const headings: TocHeading[] = [];
   const autoLinked: string[] = [];
@@ -195,12 +247,20 @@ export async function renderPage(
   const hrefByDbId = new Map(linkCandidates.map((p) => [String(p.dbId), p.href]));
   const pageHref = (dbId: string) => hrefByDbId.get(dbId);
   const lookup: AffiliateLookup = opts.lookup ?? (() => undefined);
-  const targets = opts.autoLink === false ? [] : buildLinkTargets(page, linkCandidates);
+  // Seiten zuerst, danach Unterthemen-Übersichten (bei gleichem Treffer gewinnt die Seite)
+  const targets = opts.autoLink === false ? [] : [...buildLinkTargets(page, linkCandidates), ...buildGroupTargets(page, linkCandidates)];
 
   const processor = unified()
     .use(rehypeDemoteH1)
     .use(rehypeLinks, { lookup, pageHref, onAffiliate: (k) => affiliateIds.push(k), manualInternal })
     .use(rehypeAutoLink, { targets, max: MAX_AUTO_LINKS, manualInternal, onLink: (id) => autoLinked.push(id) })
+    .use(rehypeInlineRelated, {
+      links: opts.inline ?? [],
+      linked: () => {
+        const hrefById = new Map(targets.map((t) => [t.id, t.href]));
+        return new Set([...manualInternal, ...autoLinked.map((id) => hrefById.get(id) ?? "")]);
+      },
+    })
     .use(rehypeSlug)
     .use(rehypeCollectHeadings, headings)
     .use(rehypeStringify);

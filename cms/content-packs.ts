@@ -219,6 +219,74 @@ async function fillEmptyPages(payload: Payload): Promise<number> {
 }
 
 /* ------------------------------------------------------------------ */
+/* Ausführliche Neufassungen (nur unveränderte oder leere Seiten)       */
+/* ------------------------------------------------------------------ */
+
+async function upgradePages(payload: Payload): Promise<number> {
+  const { upgradePages: upgrades, groupUpgrades } = await import("../content-packs/upgrades");
+  const { fillPages } = await import("../content-packs/fill");
+  const oldByPath = new Map(fillPages.map((f) => [f.path, f]));
+  let changes = 0;
+
+  for (const u of upgrades) {
+    const doc = (
+      await payload.find({ collection: "pages", where: { path: { equals: `/${u.path}` } }, limit: 1, depth: 0, draft: true, overrideAccess: true })
+    ).docs[0] as Doc | undefined;
+    if (!doc) continue;
+    const current = String(doc.markdown ?? "").trim();
+    const old = oldByPath.get(u.path);
+    const untouched = (!current && isEmptyRich(doc.content)) || (old && current === old.markdown.trim());
+    if (!untouched || current === u.markdown.trim()) continue; // im Admin bearbeitet oder schon neu → nicht anfassen
+    const seo = (doc.seo ?? {}) as Doc;
+    const keepDescription = seo.metaDescription && seo.metaDescription !== old?.description;
+    try {
+      await payload.update({
+        collection: "pages",
+        id: doc.id,
+        overrideAccess: true,
+        context,
+        data: {
+          _status: "published",
+          ...(doc.publishedAt ? {} : { publishedAt: new Date().toISOString() }),
+          markdown: u.markdown.trim(),
+          faq: (u.faq ?? []).map(([q, a]) => ({ q, a })),
+          ...(u.comparison
+            ? {
+                comparison: {
+                  title: u.comparison.title,
+                  columns: u.comparison.columns.map((name) => ({ name })),
+                  rows: u.comparison.rows.map((r) => ({ label: r.label, values: r.values.map((value) => ({ value })) })),
+                  note: u.comparison.note,
+                },
+              }
+            : {}),
+          seo: {
+            ...seo,
+            metaDescription: keepDescription ? seo.metaDescription : u.description,
+            focusKeyword: seo.focusKeyword || u.focusKeyword,
+            linkAnchors: seo.linkAnchors?.length ? seo.linkAnchors : (u.linkAnchors ?? []).map((anchor) => ({ anchor })),
+          },
+          sources: (u.sources ?? []).map((s) => ({ title: s.title, url: s.url })),
+          factCheck: { required: true, status: "ausstehend" },
+        } as never,
+      });
+      changes++;
+    } catch (err) {
+      payload.logger.warn({ err }, `[inhalte] Neufassung /${u.path} fehlgeschlagen`);
+    }
+  }
+
+  for (const g of groupUpgrades) {
+    const group = (await find(payload, "groups", { path: { equals: g.path } })).docs[0] as Doc | undefined;
+    if (group && String(group.description ?? "").trim() === g.oldDescription) {
+      await payload.update({ collection: "groups", id: group.id, overrideAccess: true, context, data: { description: g.description } as never });
+      changes++;
+    }
+  }
+  return changes;
+}
+
+/* ------------------------------------------------------------------ */
 /* Money Pages: vorbereitete Partnerlink-Plätze                         */
 /* ------------------------------------------------------------------ */
 
@@ -452,6 +520,7 @@ export async function applyContentPacks(payload: Payload) {
     }
   }
   await run("Seiten befüllen", fillEmptyPages);
+  await run("Ausführliche Neufassungen", upgradePages);
   await run("Partnerlink-Plätze", ensureAffiliateSlots);
   if (total > 0) {
     try {

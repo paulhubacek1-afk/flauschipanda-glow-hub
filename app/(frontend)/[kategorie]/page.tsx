@@ -112,9 +112,11 @@ export default async function CategoryPage({ params }: Props) {
                       {g.title}
                     </Link>
                   </h3>
-                  <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
-                    {count}/{g.pages.length}
-                  </span>
+                  {count > 0 && (
+                    <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                      {count} {count === 1 ? "Ratgeber" : "Ratgeber"}
+                    </span>
+                  )}
                 </div>
                 <PageList categorySlug={category.slug} groupSlug={g.slug} pages={g.pages} dense />
                 <Link href={`${path}/${g.slug}`} className="mt-auto flex items-center gap-1 pt-4 text-sm text-primary hover:underline">
