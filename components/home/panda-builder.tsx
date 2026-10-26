@@ -37,7 +37,7 @@ export function PandaBuilder() {
         </h2>
         <PandaFigure pose="perch" facing={1} look={{ skin: BUILDER_KEY, custom: current, glow: true }} className="size-48 animate-float" />
         <p className="text-sm text-muted-foreground">
-          {BUILDER_COMBOS.toLocaleString("de-AT")} mögliche Kombinationen – davon hast du{" "}
+          Bis zu {BUILDER_COMBOS.toLocaleString("de-AT")} Kombinationen – davon hast du gerade{" "}
           <strong className="text-foreground">{unlockedCount.toLocaleString("de-AT")}</strong> freigeschaltet.
         </p>
         <p className={cn("rounded-full px-3 py-1 text-xs font-medium", wearing ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground")}>

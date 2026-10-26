@@ -252,7 +252,9 @@ export function skinUnlocked(skin: Skin, count: number, visits?: VisitLog, date 
 
 /** Skins, die man gerade sehen kann (Saison-Skins nur in ihrer Saison). */
 export function visibleSkins(date = new Date()) {
-  return SKINS.filter((s) => !s.season || inSeason(s, date));
+  // Reihenfolge: Bambus-Skins nach Preis, dann Themen-Skins, dann Saison-Skins
+  const rank = (s: Skin) => (s.season ? 2 : s.visits ? 1 : 0);
+  return SKINS.filter((s) => !s.season || inSeason(s, date)).sort((a, b) => rank(a) - rank(b) || a.at - b.at);
 }
 
 export function getSkin(key?: string | null): Skin {
