@@ -473,8 +473,12 @@ async function upgradePages(payload: Payload): Promise<number> {
     if (!doc) continue;
     const current = String(doc.markdown ?? "").trim();
     const old = oldByPath.get(u.path);
-    const untouched = (!current && isEmptyRich(doc.content)) || (old && current === old.markdown.trim());
-    if (!untouched || current === u.markdown.trim()) continue; // im Admin bearbeitet oder schon neu → nicht anfassen
+    const richEmpty = isEmptyRich(doc.content);
+    // nur unveränderte Seiten: leer, oder noch der ursprünglich erzeugte Text (auch wenn er schon automatisch in den Editor übernommen wurde)
+    const untouched =
+      doc.textSource !== "bearbeitet" &&
+      ((!current && richEmpty) || (old && current === old.markdown.trim() && (richEmpty || doc.textSource === "auto")));
+    if (!untouched || current === u.markdown.trim()) continue; // von Hand bearbeitet oder schon neu → nicht anfassen
     const seo = (doc.seo ?? {}) as Doc;
     const keepDescription = seo.metaDescription && seo.metaDescription !== old?.description;
     try {
@@ -487,6 +491,8 @@ async function upgradePages(payload: Payload): Promise<number> {
           _status: "published",
           ...(doc.publishedAt ? {} : { publishedAt: new Date().toISOString() }),
           markdown: u.markdown.trim(),
+          content: null, // wird anschließend automatisch in den Editor übernommen
+          textSource: "auto",
           faq: (u.faq ?? []).map(([q, a]) => ({ q, a })),
           ...(u.comparison
             ? {
@@ -521,6 +527,109 @@ async function upgradePages(payload: Payload): Promise<number> {
       changes++;
     }
   }
+  return changes;
+}
+
+/* ------------------------------------------------------------------ */
+/* Alte Markdown-Texte in den Editor übernehmen                          */
+/* ------------------------------------------------------------------ */
+
+const TABLE_DIVIDER = /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/;
+
+/** Markdown in Abschnitte teilen: normaler Text und Tabellen (Tabellen werden zu Blöcken „Tabelle“). */
+function splitTables(md: string) {
+  const lines = md.split("\n");
+  const parts: { table: boolean; text: string }[] = [];
+  let buf: string[] = [];
+  const flush = (table: boolean) => {
+    if (buf.join("").trim()) parts.push({ table, text: buf.join("\n").trim() });
+    buf = [];
+  };
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].trim().startsWith("|") && TABLE_DIVIDER.test(lines[i + 1] ?? "")) {
+      flush(false);
+      while (i < lines.length && lines[i].trim().startsWith("|")) buf.push(lines[i++]);
+      i--;
+      flush(true);
+    } else buf.push(lines[i]);
+  }
+  flush(false);
+  return parts;
+}
+
+const objectId = () => Array.from({ length: 24 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+
+/** Kennzahlen eines HTML-Texts – damit beim Umwandeln nichts verloren geht. */
+function htmlStats(html: string) {
+  const count = (re: RegExp) => (html.match(re) ?? []).length;
+  const text = html.replace(/<[^>]+>/g, " ").replace(/&[a-z#0-9]+;/gi, " ").replace(/\s+/g, " ").trim();
+  return { h: count(/<h[2-6][\s>]/g), li: count(/<li[\s>]/g), a: count(/<a\s/g), table: count(/<table[\s>]/g), len: text.length };
+}
+
+async function convertPagesToEditor(payload: Payload): Promise<number> {
+  const started = Date.now();
+  const { convertMarkdownToLexical, editorConfigFactory } = await import("@payloadcms/richtext-lexical");
+  const { convertLexicalToHTML } = await import("@payloadcms/richtext-lexical/html");
+  const { htmlConverters, markdownTableToHtml } = await import("../lib/lexical-html");
+  const { editorFeatures } = await import("./editor");
+  const editorConfig = await editorConfigFactory.fromFeatures({ config: payload.config, features: editorFeatures as never });
+
+  const res = await payload.find({
+    collection: "pages",
+    limit: 2000,
+    depth: 0,
+    draft: true,
+    overrideAccess: true,
+    pagination: false,
+    select: { path: true, markdown: true, content: true, textSource: true, _status: true } as never,
+  });
+  let changes = 0;
+  let skipped = 0;
+  for (const doc of res.docs as Doc[]) {
+    if (Date.now() - started > FILL_BUDGET_MS) break;
+    const md = String(doc.markdown ?? "").trim();
+    if (!md || !isEmptyRich(doc.content) || doc.textSource === "bearbeitet") continue;
+    try {
+      const children: Doc[] = [];
+      for (const part of splitTables(md)) {
+        if (part.table) {
+          children.push({ type: "block", version: 2, format: "", fields: { id: objectId(), blockName: "", blockType: "tabelle", markdown: part.text } });
+        } else {
+          const json = convertMarkdownToLexical({ editorConfig, markdown: part.text }) as unknown as { root: { children: Doc[] } };
+          children.push(...json.root.children);
+        }
+      }
+      const content = { root: { type: "root", format: "", indent: 0, version: 1, direction: "ltr", children } };
+      // Prüfen: gleich viele Überschriften, Listenpunkte, Links und Tabellen, gleiche Textlänge (± 10 %)
+      const before = htmlStats(markdownTableToHtml(md));
+      const after = htmlStats(convertLexicalToHTML({ data: content as never, converters: htmlConverters }));
+      const ok =
+        before.h === after.h &&
+        before.li === after.li &&
+        before.a === after.a &&
+        before.table === after.table &&
+        after.len >= before.len * 0.9 &&
+        after.len <= before.len * 1.1;
+      if (!ok) {
+        skipped++;
+        payload.logger.warn(`[inhalte] ${doc.path}: Übernahme in den Editor übersprungen (${JSON.stringify({ before, after })})`);
+        continue;
+      }
+      await payload.update({
+        collection: "pages",
+        id: doc.id,
+        overrideAccess: true,
+        context,
+        draft: doc._status !== "published",
+        data: { content, textSource: doc.textSource || "auto" } as never,
+      });
+      changes++;
+    } catch (err) {
+      skipped++;
+      payload.logger.warn({ err }, `[inhalte] ${doc.path}: Übernahme in den Editor fehlgeschlagen`);
+    }
+  }
+  if (skipped) payload.logger.info(`[inhalte] ${skipped} Seiten bleiben vorerst im alten Textformat`);
   return changes;
 }
 
@@ -759,6 +868,7 @@ export async function applyContentPacks(payload: Payload) {
   }
   await run("Seiten befüllen", fillEmptyPages);
   await run("Ausführliche Neufassungen", upgradePages);
+  await run("Texte in den Editor übernehmen", convertPagesToEditor);
   await run("Partnerlink-Plätze", ensureAffiliateSlots);
   await run("Affiliate-Plan", ensureAffiliatePlan);
   await run("Feste Partnerlinks", ensureFixedAffiliates);

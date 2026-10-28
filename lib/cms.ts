@@ -3,13 +3,14 @@
  * Alle Funktionen sind pro Anfrage zwischengespeichert (React cache).
  */
 import config from "@payload-config";
-import { LinkHTMLConverter, convertLexicalToHTML, type HTMLConvertersFunction } from "@payloadcms/richtext-lexical/html";
+import { convertLexicalToHTML } from "@payloadcms/richtext-lexical/html";
 import { getPayload, type Where } from "payload";
 import { cache } from "react";
 
 import { lexicalToPlainText } from "@/cms/lexical-text";
 
 import { autoDescription, autoLinkAnchors, autoSeoTitle, type PageType } from "./auto";
+import { htmlConverters } from "./lexical-html";
 import type { IconName } from "./hierarchy";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -140,6 +141,40 @@ export interface SiteSettingsData {
   siteName: string;
   tagline: string;
   greencore: { name: string; headline: string; text: string; purpose: string; url: string; notice: string; aboutHref: string };
+  links: SiteLinks;
+}
+
+export interface SiteLink {
+  label: string;
+  url: string;
+  newTab?: boolean;
+}
+export interface SiteLinks {
+  merchUrl: string;
+  header: SiteLink[];
+  footer: SiteLink[];
+  social: SiteLink[];
+  poweredBy: SiteLink[];
+}
+
+/** Nur sichere Adressen anzeigen (interne Pfade, http(s), mailto) */
+export function safeHref(url: unknown): string | null {
+  const u = String(url ?? "").trim();
+  return /^(https?:\/\/|\/(?!\/)|mailto:)/i.test(u) ? u : null;
+}
+
+const DEFAULT_LINKS: SiteLinks = {
+  merchUrl: "https://www.spreadshirt.de/shop/user/flauschipandas",
+  header: [],
+  footer: [],
+  social: [],
+  poweredBy: [{ label: "Designix", url: "" }, { label: "WebDock", url: "http://webdock.dev/" }],
+};
+
+function mapLinks(list: unknown, requireUrl = true): SiteLink[] {
+  return ((Array.isArray(list) ? list : []) as Doc[])
+    .map((l) => ({ label: String(l?.label ?? "").trim(), url: safeHref(l?.url) ?? "", newTab: l?.newTab === true }))
+    .filter((l) => l.label && (!requireUrl || l.url));
 }
 
 /* ------------------------------------------------------------------ */
@@ -233,7 +268,14 @@ export function navStats(nav: NavCategory[]) {
 
 export const getSettings = cache(async (): Promise<SiteSettingsData> => {
   const payload = await getPayloadClient();
-  const s = (await payload.findGlobal({ slug: "site-settings", depth: 0 })) as Doc;
+  let s: Doc = {};
+  try {
+    s = (await payload.findGlobal({ slug: "site-settings", depth: 0 })) as Doc;
+  } catch (err) {
+    // Einstellungen nicht lesbar (z. B. neue Spalte fehlt noch) → Website läuft mit Standardwerten weiter
+    payload.logger.error({ err }, "[einstellungen] Website-Einstellungen konnten nicht geladen werden");
+  }
+  const powered = mapLinks(s.poweredBy, false);
   const g = (s.greencore ?? {}) as Doc;
   const m = (s.maintenance ?? {}) as Doc;
   return {
@@ -254,6 +296,13 @@ export const getSettings = cache(async (): Promise<SiteSettingsData> => {
       notice: g.notice || "Diese Seite ist Teil der Panda Toolbox.",
       aboutHref: g.aboutHref || "/panda-branding/greentech",
     },
+    links: {
+      merchUrl: safeHref(s.merchUrl) ?? DEFAULT_LINKS.merchUrl,
+      header: mapLinks(s.headerLinks),
+      footer: mapLinks(s.footerLinks),
+      social: mapLinks(s.socialLinks),
+      poweredBy: powered.length ? powered : DEFAULT_LINKS.poweredBy,
+    },
   };
 });
 
@@ -271,23 +320,6 @@ const getAffiliateDocs = cache(async () => {
 });
 
 const toAffiliate = (a: Doc): AffiliateItem => ({ key: a.key, name: a.name, label: a.label ?? "", pitch: a.pitch ?? "", url: a.url });
-
-/**
- * Interne Links aus dem Texteditor (auf Seiten oder Affiliate-Produkte) werden zunächst als
- * Platzhalter „cms:<sammlung>:<id>“ ausgegeben und beim Rendern aufgelöst (lib/markdown.ts):
- * Seiten → aktuelle URL, Affiliate-Produkte → gekennzeichneter Partnerlink.
- */
-const htmlConverters: HTMLConvertersFunction = ({ defaultConverters }) => ({
-  ...defaultConverters,
-  ...LinkHTMLConverter({
-    internalDocToHref: ({ linkNode }) => {
-      const doc = linkNode.fields.doc;
-      if (!doc) return "#";
-      const id = doc.value && typeof doc.value === "object" ? (doc.value as Doc).id : doc.value;
-      return `cms:${doc.relationTo}:${id}`;
-    },
-  }),
-});
 
 /** Partnerlinks, die einem Unterthema bzw. einer Kategorie zugeordnet sind („Passt zu“). */
 export async function getTopicAffiliates(rel: "groups" | "categories", id: string | number): Promise<AffiliateItem[]> {

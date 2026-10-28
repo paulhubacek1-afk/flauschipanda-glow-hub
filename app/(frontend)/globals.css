@@ -1189,6 +1189,24 @@ input[type="search"]::-webkit-search-decoration {
   accent-color: var(--primary);
   transform: translateY(1px);
 }
+/* Checklisten aus dem Editor (Lexical) */
+.prose-glow li[role="checkbox"] {
+  list-style: none;
+  outline: none;
+}
+.prose-glow li[role="checkbox"]::before {
+  top: 0.32em;
+  left: -1.45rem;
+  width: 0.95em;
+  height: 0.95em;
+  border-radius: 4px;
+  border: 1.5px solid var(--primary);
+  background: transparent;
+  box-shadow: none;
+}
+.prose-glow li[role="checkbox"][aria-checked="true"]::before {
+  background: var(--primary);
+}
 /* „Passend dazu“-Kasten im Artikel (lib/markdown.ts) */
 .prose-glow .inline-related {
   margin: 1.8em 0;

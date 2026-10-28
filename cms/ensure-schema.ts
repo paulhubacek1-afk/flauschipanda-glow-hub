@@ -34,6 +34,48 @@ export async function ensureSchema(payload: Payload) {
   } catch (err) {
     payload.logger.warn({ err }, "[schema] Zähler-Tabelle konnte nicht angelegt werden");
   }
+  // Textherkunft der Seiten („auto“ = automatisch erzeugt, „bearbeitet“ = von Hand geändert) – auch in den Versionen
+  for (const q of [
+    `ALTER TABLE IF EXISTS "pages" ADD COLUMN IF NOT EXISTS "text_source" varchar`,
+    `ALTER TABLE IF EXISTS "_pages_v" ADD COLUMN IF NOT EXISTS "version_text_source" varchar`,
+  ]) {
+    try {
+      await drizzle.execute(sql.raw(q));
+    } catch (err) {
+      payload.logger.warn({ err }, "[schema] Spalte für Textherkunft konnte nicht ergänzt werden");
+    }
+  }
+  // Website-Links (Website-Einstellungen → Links): Shop-Adresse und Link-Listen
+  const linkTable = (name: string, newTab: boolean) => `
+    CREATE TABLE IF NOT EXISTS "site_settings_${name}" (
+      "_order" integer NOT NULL,
+      "_parent_id" integer NOT NULL REFERENCES "site_settings"("id") ON DELETE CASCADE,
+      "id" varchar PRIMARY KEY NOT NULL,
+      "label" varchar,
+      "url" varchar${newTab ? `,
+      "new_tab" boolean DEFAULT false` : ""}
+    )`;
+  for (const q of [
+    `ALTER TABLE IF EXISTS "site_settings" ADD COLUMN IF NOT EXISTS "merch_url" varchar`,
+    linkTable("header_links", true),
+    linkTable("footer_links", true),
+    linkTable("social_links", false),
+    linkTable("powered_by", false),
+    `CREATE INDEX IF NOT EXISTS "site_settings_header_links_order_idx" ON "site_settings_header_links" ("_order")`,
+    `CREATE INDEX IF NOT EXISTS "site_settings_header_links_parent_id_idx" ON "site_settings_header_links" ("_parent_id")`,
+    `CREATE INDEX IF NOT EXISTS "site_settings_footer_links_order_idx" ON "site_settings_footer_links" ("_order")`,
+    `CREATE INDEX IF NOT EXISTS "site_settings_footer_links_parent_id_idx" ON "site_settings_footer_links" ("_parent_id")`,
+    `CREATE INDEX IF NOT EXISTS "site_settings_social_links_order_idx" ON "site_settings_social_links" ("_order")`,
+    `CREATE INDEX IF NOT EXISTS "site_settings_social_links_parent_id_idx" ON "site_settings_social_links" ("_parent_id")`,
+    `CREATE INDEX IF NOT EXISTS "site_settings_powered_by_order_idx" ON "site_settings_powered_by" ("_order")`,
+    `CREATE INDEX IF NOT EXISTS "site_settings_powered_by_parent_id_idx" ON "site_settings_powered_by" ("_parent_id")`,
+  ]) {
+    try {
+      await drizzle.execute(sql.raw(q));
+    } catch (err) {
+      payload.logger.warn({ err }, "[schema] Link-Einstellungen: Tabelle/Spalte konnte nicht ergänzt werden");
+    }
+  }
   // neue Auswahlwerte für Kategorie-Symbole (Postgres-Enum)
   for (const value of ["monitor", "atom"]) {
     try {

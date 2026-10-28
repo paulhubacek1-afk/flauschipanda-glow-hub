@@ -268,7 +268,7 @@ export default async function StartPage() {
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button asChild>
-                  <a href={MERCH_URL} target="_blank" rel="noopener noreferrer">
+                  <a href={settings.links.merchUrl || MERCH_URL} target="_blank" rel="noopener noreferrer">
                     Zum Merch-Shop
                   </a>
                 </Button>

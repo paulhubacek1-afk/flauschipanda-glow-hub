@@ -76,11 +76,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="de" className={`${inter.variable} ${grotesk.variable}`}>
       <body className="flex min-h-dvh flex-col">
         {draft.isEnabled && <PreviewBar maintenance={maintenance} />}
-        <SiteHeader nav={nav} />
+        <SiteHeader nav={nav} links={settings.links.header} />
         <main id="inhalt" className="flex-1">
           {children}
         </main>
-        <SiteFooter nav={nav} />
+        <SiteFooter nav={nav} links={settings.links} greentechUrl={settings.greencore.url} />
         <ConsentBanner />
         <ScienceSky />
         <BambooForest />

@@ -61,6 +61,12 @@ const computeAutomation: CollectionBeforeChangeHook = async ({ data, req, origin
     }
   }
 
+  // --- Von Hand bearbeitet? Dann schreiben automatische Text-Updates diese Seite nie mehr um ---
+  if (!context?.skipChecks && originalDoc) {
+    const changed = (k: string) => k in data && JSON.stringify(data[k] ?? null) !== JSON.stringify(originalDoc[k] ?? null);
+    if (changed("content") || changed("markdown")) data.textSource = "bearbeitet";
+  }
+
   // --- Interne Links: Nachbarseiten im selben Unterthema ---
   const siblings = await req.payload.find({
     collection: "pages",
@@ -190,25 +196,32 @@ export const Pages: CollectionConfig = {
           label: "Inhalt",
           fields: [
             {
-              name: "markdown",
+              name: "content",
               label: "Infotext",
+              type: "richText",
+              admin: {
+                description:
+                  "Text wie in Word bearbeiten: Werkzeugleiste oben für Überschriften, Listen, Checklisten und Zitate. Links: Text markieren → Link-Symbol → Webadresse, andere Seite oder Affiliate-Produkt wählen. Tabellen: „+“ → Block „Tabelle“. Interne Links entstehen zusätzlich automatisch.",
+              },
+            },
+            {
+              name: "markdown",
+              label: "Infotext (alte Textfassung)",
               type: "code",
               admin: {
                 language: "markdown",
                 editorOptions: { wordWrap: "on", minimap: { enabled: false }, lineNumbers: "off", fontSize: 14 },
-                condition: (data) => Boolean(data?.markdown) || !hasRichText(data?.content),
+                // nur sichtbar, solange der Text noch nicht in den Editor übernommen wurde
+                condition: (data) => Boolean(data?.markdown) && !hasRichText(data?.content),
                 description:
-                  "Hier den Text bearbeiten. Kurzanleitung: „## Überschrift“ · „- Aufzählung“ · „1. Nummerierung“ · „**fett**“ · „[Linktext](/tiere/hunde)“ · „- [ ] Checkliste“ · Tabellen mit | Spalte | Spalte |. Interne Links entstehen zusätzlich automatisch. Mit „Vorschau“ oben rechts siehst du das Ergebnis.",
+                  "Dieser Text wird gerade automatisch in den Editor oben übernommen. Bis dahin kannst du ihn hier bearbeiten (## Überschrift, - Liste, **fett**, [Linktext](/adresse)).",
               },
             },
             {
-              name: "content",
-              label: "Infotext im Editor (optional)",
-              type: "richText",
-              admin: {
-                condition: (data) => !data?.markdown || hasRichText(data?.content),
-                description: "Wenn hier Text steht, wird er statt des Markdown-Infotexts angezeigt.",
-              },
+              name: "textSource",
+              label: "Textherkunft",
+              type: "text",
+              admin: { hidden: true },
             },
             {
               name: "widgets",

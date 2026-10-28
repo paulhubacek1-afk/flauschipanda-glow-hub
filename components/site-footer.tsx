@@ -3,13 +3,16 @@
 import Link from "next/link";
 
 import { openConsentSettings } from "@/lib/consent";
-import type { NavLite } from "@/lib/cms";
+import type { NavLite, SiteLinks } from "@/lib/cms";
 import { GREENTECH_URL, MERCH_URL, legalNav, siteConfig } from "@/lib/site";
 
 import { showPandaBuddy } from "./panda-buddy";
 import { PandaLogo } from "./panda-logo";
 
-export function SiteFooter({ nav }: { nav: NavLite[] }) {
+export function SiteFooter({ nav, links, greentechUrl }: { nav: NavLite[]; links?: SiteLinks; greentechUrl?: string }) {
+  const merchUrl = links?.merchUrl || MERCH_URL;
+  const ext = (newTab?: boolean) => (newTab ? { target: "_blank", rel: "noopener noreferrer" } : {});
+  const powered = links?.poweredBy?.length ? links.poweredBy : [{ label: "Designix", url: "" }, { label: "WebDock", url: "http://webdock.dev/" }];
   return (
     <footer className="mt-24 border-t border-purple/20 bg-card/40">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-[1.2fr_2.5fr]">
@@ -54,12 +57,12 @@ export function SiteFooter({ nav }: { nav: NavLite[] }) {
                 </button>
               </li>
               <li>
-                <a href={MERCH_URL} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                <a href={merchUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                   👕 FlauschiPandas Merch-Shop
                 </a>
               </li>
               <li>
-                <a href={GREENTECH_URL} target="_blank" rel="noopener noreferrer" className="text-success hover:underline">
+                <a href={greentechUrl || GREENTECH_URL} target="_blank" rel="noopener noreferrer" className="text-success hover:underline">
                   Panda GreenTech unterstützen
                 </a>
               </li>
@@ -68,7 +71,33 @@ export function SiteFooter({ nav }: { nav: NavLite[] }) {
                   Flauschipanda einblenden
                 </button>
               </li>
+              {links?.footer.map((l) => (
+                <li key={`${l.label}${l.url}`}>
+                  <a href={l.url} {...ext(l.newTab)} className="hover:text-primary">
+                    {l.label}
+                  </a>
+                </li>
+              ))}
             </ul>
+            {links?.social.length ? (
+              <div className="mt-5">
+                <h2 className="mb-2 text-sm font-semibold text-foreground">Folge uns</h2>
+                <ul className="flex flex-wrap gap-2 text-sm">
+                  {links.social.map((l) => (
+                    <li key={`${l.label}${l.url}`}>
+                      <a
+                        href={l.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block rounded-full border px-3 py-1 text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
+                      >
+                        {l.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
@@ -76,10 +105,19 @@ export function SiteFooter({ nav }: { nav: NavLite[] }) {
         © {new Date().getFullYear()} {siteConfig.name}
         <span className="mx-2 opacity-50" aria-hidden="true">·</span>
         <span>
-          powered by <span className="font-medium text-foreground/80">Designix</span> &amp;{" "}
-          <a href="http://webdock.dev/" target="_blank" rel="noopener" className="font-medium text-foreground/80 underline-offset-2 hover:text-primary hover:underline">
-            WebDock
-          </a>
+          powered by{" "}
+          {powered.map((p, i) => (
+            <span key={p.label}>
+              {i > 0 && (i === powered.length - 1 ? " & " : ", ")}
+              {p.url ? (
+                <a href={p.url} target="_blank" rel="noopener" className="font-medium text-foreground/80 underline-offset-2 hover:text-primary hover:underline">
+                  {p.label}
+                </a>
+              ) : (
+                <span className="font-medium text-foreground/80">{p.label}</span>
+              )}
+            </span>
+          ))}
         </span>
       </div>
     </footer>

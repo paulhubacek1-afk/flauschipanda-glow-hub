@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, LayoutGrid, Menu, Search, X } from "lucide-react";
 
-import type { NavLite } from "@/lib/cms";
+import type { NavLite, SiteLink } from "@/lib/cms";
 import { cn } from "@/lib/utils";
 
 import { CategoryIcon } from "./category-icon";
@@ -13,7 +13,7 @@ import { PandaLogo } from "./panda-logo";
 import { Button } from "./ui/button";
 
 /** Header mit Mega-Menü – wird vollständig aus dem CMS erzeugt. */
-export function SiteHeader({ nav }: { nav: NavLite[] }) {
+export function SiteHeader({ nav, links = [] }: { nav: NavLite[]; links?: SiteLink[] }) {
   const pathname = usePathname();
   const [megaOpen, setMegaOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -102,6 +102,19 @@ export function SiteHeader({ nav }: { nav: NavLite[] }) {
             >
               Alle Seiten
             </Link>
+            {links.map((l) => (
+              <a
+                key={`${l.label}${l.url}`}
+                href={l.url}
+                {...(l.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                className={cn(
+                  "rounded-md px-3 py-2 text-sm text-foreground/75 hover:bg-accent hover:text-accent-foreground",
+                  pathname === l.url && "bg-primary/10 text-primary",
+                )}
+              >
+                {l.label}
+              </a>
+            ))}
             <Link
               href="/suche"
               aria-label="Suche"
@@ -251,6 +264,13 @@ export function SiteHeader({ nav }: { nav: NavLite[] }) {
                 Alle Seiten
               </Link>
             </li>
+            {links.map((l) => (
+              <li key={`${l.label}${l.url}`}>
+                <a href={l.url} {...(l.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})} className="block rounded-md px-3 py-2.5 hover:bg-accent">
+                  {l.label}
+                </a>
+              </li>
+            ))}
           </ul>
         </nav>
       )}
