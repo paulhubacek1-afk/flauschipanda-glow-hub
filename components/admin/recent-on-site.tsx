@@ -14,6 +14,11 @@ const TEAM = new Set(["admin", "redakteur", "autor"]);
 
 export async function RecentOnSite({ payload, user }: { payload?: Payload; user?: { role?: string } | null }) {
   if (!payload || !user?.role || !TEAM.has(user.role)) return null;
+  // Wie viele Seiten stehen noch im alten Textformat (werden beim nächsten Start automatisch in den Editor übernommen)?
+  const pending = await payload
+    .count({ collection: "pages", where: { and: [{ markdown: { exists: true } }, { markdown: { not_equals: "" } }, { textSource: { exists: false } }] } })
+    .then((r) => r.totalDocs)
+    .catch(() => 0);
   const [cats, groups, pages] = await Promise.all([
     payload.find({ collection: "categories", sort: "-updatedAt", limit: 5, depth: 0, joins: false, pagination: false }),
     payload.find({ collection: "groups", sort: "-updatedAt", limit: 5, depth: 0, joins: false, pagination: false }),
@@ -39,6 +44,12 @@ export async function RecentOnSite({ payload, user }: { payload?: Payload; user?
 
   return (
     <section style={{ marginTop: 32, marginBottom: 32 }}>
+      {pending > 0 && (
+        <p style={{ marginBottom: 16, padding: "10px 14px", borderRadius: 8, background: "var(--theme-elevation-50)" }}>
+          ✏️ Noch <strong>{pending}</strong> Seiten im alten Textformat – sie werden nach und nach automatisch in den Editor mit Werkzeugleiste
+          übernommen. Bis dahin lässt sich der Text dieser Seiten im Feld „Infotext (alte Textfassung)“ bearbeiten.
+        </p>
+      )}
       <h2 style={{ marginBottom: 6 }}>Zuletzt bearbeitet – auf der Website ansehen</h2>
       <p style={{ marginTop: 0, marginBottom: 14, color: "var(--theme-elevation-600)" }}>
         „Ansehen“ öffnet die Seite in der Team-Vorschau – auch Entwürfe, die noch nicht veröffentlicht sind.
