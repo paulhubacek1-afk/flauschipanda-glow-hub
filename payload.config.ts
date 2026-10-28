@@ -63,8 +63,9 @@ export default buildConfig({
   // fehlende neue Spalten (z. B. Wartungsmodus) sicher ergänzen
   onInit: async (payload) => {
     await ensureSchema(payload);
-    // Inhaltspakete (z. B. PC & Hardware) in leere Kategorien übernehmen
-    await applyContentPacks(payload);
+    // Inhaltspakete, Text-Updates und Übernahme in den Editor: im Hintergrund, damit Admin und Website
+    // nach einem Kaltstart sofort antworten (nicht auf diese Arbeit warten müssen)
+    void applyContentPacks(payload).catch((err) => payload.logger.error({ err }, "[inhalte] Hintergrund-Aufgaben fehlgeschlagen"));
   },
   // GraphQL wird nicht genutzt → abgeschaltet (weniger Angriffsfläche)
   graphQL: { disable: true },

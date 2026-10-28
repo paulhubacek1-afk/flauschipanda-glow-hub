@@ -566,6 +566,9 @@ function htmlStats(html: string) {
   return { h: count(/<h[2-6][\s>]/g), li: count(/<li[\s>]/g), a: count(/<a\s/g), table: count(/<table[\s>]/g), len: text.length };
 }
 
+/** Übernahme in den Editor: kleine Portionen pro Start, damit die Datenbank nicht lange belegt ist */
+const CONVERT_BUDGET_MS = 12_000;
+
 async function convertPagesToEditor(payload: Payload): Promise<number> {
   const started = Date.now();
   const { convertMarkdownToLexical, editorConfigFactory } = await import("@payloadcms/richtext-lexical");
@@ -586,7 +589,7 @@ async function convertPagesToEditor(payload: Payload): Promise<number> {
   let changes = 0;
   let skipped = 0;
   for (const doc of res.docs as Doc[]) {
-    if (Date.now() - started > FILL_BUDGET_MS) break;
+    if (Date.now() - started > CONVERT_BUDGET_MS) break;
     const md = String(doc.markdown ?? "").trim();
     if (!md || !isEmptyRich(doc.content) || doc.textSource === "bearbeitet") continue;
     try {
