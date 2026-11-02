@@ -57,7 +57,7 @@ export interface PandaLook {
 }
 
 const HAT_EXTRAS: SkinExtra[] = [
-  "chef", "pirate", "wizard", "crown", "party", "witch", "santa", "flower",
+  "chef", "pirate", "wizard", "crown", "party", "santa", "flower",
   "ki", "safari", "racer", "beach", "sprout", "cat", "sunrays", "hood", "bamboo", "sun", "night", "hair",
 ];
 
@@ -495,14 +495,6 @@ export function PandaFigure({
               <circle cx="60" cy="16" r="2.2" fill="oklch(0.6 0.22 25)" />
               <circle cx="50" cy="17" r="1.6" fill={TEAL} />
               <circle cx="70" cy="17" r="1.6" fill={PURPLE} />
-            </g>
-          )}
-          {hatExtra === "witch" && (
-            <g className="pb-hat pb-witch">
-              <ellipse cx="60" cy="22" rx="33" ry="5.5" fill="#2b1d3d" stroke={INK} strokeWidth="1.2" />
-              <path d="M45 21 Q53 12 57 3 Q63 -1 69 3 Q64 8 75 21 Z" fill="#3b2a55" stroke={INK} strokeWidth="1.2" />
-              <path d="M46 18 Q60 22 74 18 L75 21 Q60 25 45 21 Z" fill="#ff8a1f" />
-              <circle cx="69" cy="3" r="1.6" fill="#ff8a1f" />
             </g>
           )}
           {hatExtra === "santa" && (
