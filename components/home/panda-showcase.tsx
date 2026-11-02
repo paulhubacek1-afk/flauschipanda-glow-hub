@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { STAGES, nextGoal, setSkin, stageFor, useBamboo } from "@/lib/bamboo";
@@ -78,6 +79,12 @@ export function PandaShowcase() {
           >
             🐼 Meine Sammlung öffnen
           </button>
+          <Link
+            href="/spiele"
+            className="mt-3 ml-2 inline-flex items-center gap-2 rounded-full border border-primary/35 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:border-primary hover:bg-primary/15"
+          >
+            🎮 Panda Games spielen
+          </Link>
         </div>
       </div>
 
