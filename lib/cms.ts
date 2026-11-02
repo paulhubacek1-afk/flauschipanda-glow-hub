@@ -244,13 +244,13 @@ export const getNavigation = cache(async (): Promise<NavCategory[]> => {
     icon: (c.icon ?? "paw") as IconName,
     hue: typeof c.hue === "number" ? c.hue : 195,
     groups: (groups.docs as Doc[])
-      .filter((g) => idOf(g.category) === c.id)
+      .filter((g) => sameId(g.category, c.id))
       .map((g) => ({
         dbId: g.id,
         slug: g.slug,
         title: g.title,
         description: g.description ?? `${g.title}: Ratgeber, Vergleiche und Tipps – verständlich und ehrlich erklärt.`,
-        pages: (pagesByGroup.get(g.id) ?? []).map((p) => ({
+        pages: (pagesByGroup.get(String(g.id)) ?? []).map((p) => ({
           id: `${c.slug}/${g.slug}/${p.slug}`,
           slug: p.slug,
           label: p.label || p.title,
