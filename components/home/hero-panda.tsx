@@ -57,10 +57,6 @@ export function HeroPanda({ className }: { className?: string }) {
         {/* Leuchten + Bambusblätter, die herumfliegen */}
         <div className="absolute inset-[12%] -z-10 rounded-full bg-primary/25 blur-3xl animate-pulse-glow" aria-hidden="true" />
         <div className="absolute inset-[18%] -z-10 translate-x-6 rounded-full bg-purple/30 blur-3xl" aria-hidden="true" />
-        <span aria-hidden="true" className="hero-leaf left-[6%] top-[20%]">🦇</span>
-        <span aria-hidden="true" className="hero-leaf right-[4%] top-[8%] [animation-delay:-2s]">🕸️</span>
-        <span aria-hidden="true" className="hero-leaf bottom-[22%] right-[0%] [animation-delay:-4s]">👻</span>
-        <span aria-hidden="true" className="hero-leaf bottom-[30%] left-[0%] [animation-delay:-5.5s]">🎃</span>
         <button
           type="button"
           onClick={() => {
