@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { addBamboo, updateBamboo, useBamboo } from "@/lib/bamboo";
 import { PandaFigure } from "@/components/panda-figure";
 
@@ -32,9 +32,12 @@ function randomTarget() {
 
 function shuffledDeck() {
   const faces = ["🐼", "🎋", "🍡", "⭐", "🎍", "💚"];
-  return [...faces, ...faces]
-    .map((emoji, index) => ({ id: index, emoji }))
-    .sort(() => Math.random() - 0.5);
+  const cards = [...faces, ...faces].map((emoji, id) => ({ id, emoji }));
+  for (let index = cards.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [cards[index], cards[swapIndex]] = [cards[swapIndex], cards[index]];
+  }
+  return cards;
 }
 
 function formatRemaining(ms: number) {
@@ -166,7 +169,8 @@ export function PandaGames() {
       setMatched(nextMatched);
       setSelected([]);
       if (nextMatched.length === deck.length) {
-        const reward = Math.max(6, Math.min(16, 22 - moves));
+        const completedMoves = moves + 1;
+        const reward = Math.max(6, Math.min(16, 22 - completedMoves));
         setMemoryReward(reward);
         addBamboo(reward);
       }
