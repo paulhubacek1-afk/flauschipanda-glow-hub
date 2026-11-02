@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, LayoutGrid, Menu, Search, X } from "lucide-react";
+import { ChevronDown, LayoutGrid, Menu, Search, Youtube, X } from "lucide-react";
 
 import type { NavLite, SiteLink } from "@/lib/cms";
 import { cn } from "@/lib/utils";
@@ -85,6 +85,16 @@ export function SiteHeader({ nav, links = [] }: { nav: NavLite[]; links?: SiteLi
               <ChevronDown className={cn("size-3.5 transition-transform", megaOpen && "rotate-180")} aria-hidden="true" />
             </button>
             <Link
+              href="/spiele"
+              aria-current={pathname === "/spiele" ? "page" : undefined}
+              className={cn(
+                "rounded-md px-3 py-2 text-sm text-foreground/75 hover:bg-accent hover:text-accent-foreground",
+                pathname === "/spiele" && "bg-primary/10 text-primary",
+              )}
+            >
+              Spiele
+            </Link>
+            <Link
               href="/neu"
               className={cn(
                 "rounded-md px-3 py-2 text-sm text-foreground/75 hover:bg-accent hover:text-accent-foreground",
@@ -115,6 +125,16 @@ export function SiteHeader({ nav, links = [] }: { nav: NavLite[]; links?: SiteLi
                 {l.label}
               </a>
             ))}
+            <a
+              href="https://www.youtube.com/@FlauschiPandas"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="FlauschiPandas auf YouTube"
+              title="FlauschiPandas auf YouTube"
+              className="rounded-md p-2 text-foreground/75 hover:bg-accent hover:text-primary"
+            >
+              <Youtube className="size-4" aria-hidden="true" />
+            </a>
             <Link
               href="/suche"
               aria-label="Suche"
@@ -254,6 +274,16 @@ export function SiteHeader({ nav, links = [] }: { nav: NavLite[]; links?: SiteLi
                 )}
               </li>
             ))}
+            <li>
+              <Link href="/spiele" className="block rounded-md px-3 py-2.5 hover:bg-accent">
+                🐼 Panda Games
+              </Link>
+            </li>
+            <li>
+              <a href="https://www.youtube.com/@FlauschiPandas" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-md px-3 py-2.5 hover:bg-accent">
+                <Youtube className="size-4" aria-hidden="true" /> FlauschiPandas auf YouTube
+              </a>
+            </li>
             <li>
               <Link href="/neu" className="block rounded-md px-3 py-2.5 hover:bg-accent">
                 ✨ Neu auf der Seite
