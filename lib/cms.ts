@@ -183,7 +183,22 @@ function mapLinks(list: unknown, requireUrl = true): SiteLink[] {
 
 export const getPayloadClient = cache(async () => getPayload({ config }));
 
-const idOf = (v: unknown) => (v && typeof v === "object" ? (v as Doc).id : v) as string | number;
+const idOf = (v: unknown): string | number | undefined => {
+  if (v === null || v === undefined) return undefined;
+  if (typeof v === "object") {
+    const relation = v as Doc;
+    return relation.id ?? relation.value ?? relation._id;
+  }
+  return v as string | number;
+};
+
+const sameId = (left: unknown, right: unknown) => {
+  const a = idOf(left);
+  const b = idOf(right);
+  return a !== undefined && b !== undefined && String(a) === String(b);
+};
+
+const slugKey = (value: unknown) => String(value ?? "").trim().toLowerCase();
 
 const liveWhere = (now: Date): Where => ({
   and: [
@@ -215,7 +230,9 @@ export const getNavigation = cache(async (): Promise<NavCategory[]> => {
   const pagesByGroup = new Map<string | number, Doc[]>();
   for (const p of pages.docs as Doc[]) {
     const gid = idOf(p.group);
-    pagesByGroup.set(gid, [...(pagesByGroup.get(gid) ?? []), p]);
+    if (gid === undefined) continue;
+    const key = String(gid);
+    pagesByGroup.set(key, [...(pagesByGroup.get(key) ?? []), p]);
   }
 
   return (cats.docs as Doc[]).map((c, i) => ({
@@ -246,12 +263,15 @@ export const getNavigation = cache(async (): Promise<NavCategory[]> => {
 });
 
 export async function getCategory(slug: string) {
-  return (await getNavigation()).find((c) => c.slug === slug);
+  const key = slugKey(slug);
+  if (!key) return undefined;
+  return (await getNavigation()).find((c) => slugKey(c.slug) === key);
 }
 
 export async function getGroup(categorySlug: string, groupSlug: string) {
   const category = await getCategory(categorySlug);
-  const group = category?.groups.find((g) => g.slug === groupSlug);
+  const groupKey = slugKey(groupSlug);
+  const group = category?.groups.find((g) => slugKey(g.slug) === groupKey);
   return category && group ? { category, group } : undefined;
 }
 
