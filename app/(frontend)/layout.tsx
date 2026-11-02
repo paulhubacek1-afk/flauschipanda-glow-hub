@@ -7,6 +7,7 @@ import { MaintenanceScreen } from "@/components/maintenance-screen";
 import { PreviewBar } from "@/components/preview-bar";
 import { BambooForest } from "@/components/bamboo-forest";
 import { PandaBuddy } from "@/components/panda-buddy";
+import { PandaGachaReminder } from "@/components/panda-gacha-reminder";
 import { ScienceSky } from "@/components/science-sky";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { SiteFooter } from "@/components/site-footer";
@@ -90,6 +91,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ScienceSky />
         <BambooForest />
         <PandaBuddy nav={nav} />
+        <PandaGachaReminder />
         <ScrollReveal />
         <VisitorPing />
       </body>
