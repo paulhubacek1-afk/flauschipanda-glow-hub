@@ -1,16 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 import { getSeasonalTheme, type SeasonalTheme } from "@/lib/seasonal-theme";
 
-const DECORATIONS: Record<SeasonalTheme, [string, string, string, string]> = {
-  spring: ["🌸", "🦋", "🌼", "🍃"],
-  summer: ["☀️", "🌴", "🍉", "🌊"],
-  autumn: ["🍂", "🍁", "🌰", "🍄"],
-  halloween: ["🦇", "🕸️", "👻", "🎃"],
-  winter: ["❄️", "🌨️", "🧣", "⛄"],
-  christmas: ["🎄", "⭐", "🎁", "❄️"],
+const PARTICLE_SYMBOLS: Record<SeasonalTheme, string[]> = {
+  spring: ["🌸", "🌼", "🍃", "🦋", "✿"],
+  summer: ["☀️", "✦", "🌺", "·", "🌊"],
+  autumn: ["🍂", "🍁", "🍃", "🌰"],
+  halloween: ["🦇", "✦", "🕸️", "🎃", "·"],
+  winter: ["❄", "❅", "❆", "·", "✧"],
+  christmas: ["❄", "❅", "❆", "✧", "·", "✨"],
+};
+
+const PARTICLE_COUNTS: Record<SeasonalTheme, number> = {
+  spring: 28,
+  summer: 24,
+  autumn: 34,
+  halloween: 28,
+  winter: 46,
+  christmas: 58,
 };
 
 const THEME_COLORS: Record<SeasonalTheme, string> = {
@@ -21,6 +30,16 @@ const THEME_COLORS: Record<SeasonalTheme, string> = {
   winter: "#568dc9",
   christmas: "#27854c",
 };
+
+function particleStyle(index: number): CSSProperties {
+  return {
+    "--particle-left": ((index * 47 + 11) % 100) + "%",
+    "--fall-duration": 11 + ((index * 5) % 13) + "s",
+    "--fall-delay": "-" + ((index * 7) % 24) + "s",
+    "--fall-drift": ((index * 29) % 181 - 90) + "px",
+    "--particle-size": 0.7 + ((index * 11) % 16) / 10 + "rem",
+  } as CSSProperties;
+}
 
 export function SeasonalTheme({ initialTheme }: { initialTheme: SeasonalTheme }) {
   const [theme, setTheme] = useState<SeasonalTheme>(initialTheme);
@@ -45,13 +64,38 @@ export function SeasonalTheme({ initialTheme }: { initialTheme: SeasonalTheme })
     };
   }, []);
 
+  const symbols = PARTICLE_SYMBOLS[theme];
+  const particles = Array.from({ length: PARTICLE_COUNTS[theme] }, (_, index) => ({
+    symbol: symbols[index % symbols.length],
+    index,
+  }));
+
   return (
-    <div className={`seasonal-effects seasonal-effects--${theme}`} aria-hidden="true">
-      {DECORATIONS[theme].map((symbol, index) => (
-        <span className="seasonal-particle" key={`${theme}-${index}`}>
-          {symbol}
-        </span>
-      ))}
+    <div className={"seasonal-effects seasonal-effects--" + theme} aria-hidden="true">
+      <div className="seasonal-atmosphere" />
+      {theme === "christmas" && (
+        <div className="seasonal-garland">
+          {Array.from({ length: 22 }, (_, index) => (
+            <span
+              className="seasonal-bulb"
+              key={index}
+              style={{ "--light-delay": "-" + ((index % 7) * 0.23) + "s" } as CSSProperties}
+            />
+          ))}
+        </div>
+      )}
+      <div className={"seasonal-particles seasonal-particles--" + theme}>
+        {particles.map(({ symbol, index }) => (
+          <span
+            className="seasonal-particle"
+            key={theme + "-" + index}
+            style={particleStyle(index)}
+          >
+            {symbol}
+          </span>
+        ))}
+      </div>
+      {theme === "halloween" && <div className="seasonal-fog" />}
     </div>
   );
 }
