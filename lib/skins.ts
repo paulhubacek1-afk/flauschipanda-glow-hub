@@ -27,7 +27,6 @@ export type SkinExtra =
   | "cape"
   | "crown"
   | "party"
-  | "witch"
   | "santa"
   | "flower"
   | "ki"
@@ -222,9 +221,23 @@ export const SKINS: Skin[] = [
     palette: { fur: "#f3fff4", furEdge: "#c6ecc9", cheek: "#ffb0c8", scarf: ["#8be38f", "#2fbf71"] },
     visits: { category: "panda-branding", prefix: "/panda-branding/greentech/", articles: true, count: 3, text: "GreenTech-Seiten entdeckt" },
   },
-  // Saison-Skins: in dieser Zeit für alle frei
-  { key: "halloween", name: "Halloween", emoji: "🎃", at: 0, season: { from: [10, 15], to: [11, 3] }, extra: "witch" },
-  { key: "weihnachten", name: "Weihnachten", emoji: "🎅", at: 0, season: { from: [12, 1], to: [1, 6] }, extra: "santa" },
+  // Saison-Skin: der Weihnachtspanda ist ab November für alle frei
+  {
+    key: "weihnachten",
+    name: "Weihnachtspanda",
+    emoji: "🎅",
+    at: 0,
+    season: { from: [11, 1], to: [1, 6] },
+    extra: "santa",
+    palette: {
+      fur: "#fffdf8",
+      furEdge: "#e8eaf0",
+      ink: "#25202c",
+      inkSoft: "#51485e",
+      cheek: "#ff9aa8",
+      scarf: ["#c62828", "#23834b"],
+    },
+  },
 ];
 
 export type SkinKey = string;
@@ -351,7 +364,6 @@ export const HATS: HatPart[] = [
   { key: "renn", name: "Rennkappe", at: 0, skin: "auto-panda", value: "racer" },
   { key: "strand", name: "Strohhut", at: 0, skin: "urlaub-panda", value: "beach" },
   { key: "spross", name: "GreenTech-Spross", at: 0, skin: "greentech-panda", value: "sprout" },
-  { key: "hexe", name: "Hexenhut", at: 0, season: { from: [10, 15], to: [11, 3] }, value: "witch" },
   { key: "weihnacht", name: "Weihnachtsmütze", at: 0, season: { from: [12, 1], to: [1, 6] }, value: "santa" },
 ];
 
