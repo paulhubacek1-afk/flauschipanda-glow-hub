@@ -16,9 +16,9 @@
   --popover-foreground: oklch(0.96 0.012 250);
 
   /* Markenfarben */
-  --primary: oklch(0.86 0.14 195); /* Türkis */
+  --primary: oklch(0.78 0.17 55); /* Kürbisorange */
   --primary-foreground: oklch(0.17 0.035 275);
-  --purple: oklch(0.72 0.19 300); /* Lila */
+  --purple: oklch(0.70 0.20 300); /* Spuk-Violett */
   --purple-foreground: oklch(0.17 0.035 275);
 
   --secondary: oklch(0.25 0.05 285);
@@ -32,12 +32,19 @@
   --success: oklch(0.8 0.15 160);
 
   --border: oklch(0.78 0.12 260 / 0.18);
-  --input: oklch(0.86 0.14 195 / 0.24);
-  --ring: oklch(0.86 0.14 195);
+  --input: oklch(0.78 0.17 55 / 0.24);
+  --ring: oklch(0.78 0.17 55);
 
   --brand-gradient: linear-gradient(110deg, var(--primary) 0%, var(--purple) 100%);
-  --glow-sm: 0 0 12px oklch(0.86 0.14 195 / 0.22), 0 0 18px oklch(0.72 0.19 300 / 0.14);
-  --glow-md: -8px 0 28px oklch(0.86 0.14 195 / 0.28), 8px 0 28px oklch(0.72 0.19 300 / 0.28), 0 0 2px oklch(0.86 0.14 195 / 0.6);
+  --glow-sm: 0 0 12px oklch(0.78 0.17 55 / 0.26), 0 0 18px oklch(0.70 0.20 300 / 0.18);
+  --glow-md: -8px 0 28px oklch(0.78 0.17 55 / 0.32), 8px 0 28px oklch(0.70 0.20 300 / 0.30), 0 0 2px oklch(0.78 0.17 55 / 0.65);
+}
+
+body {
+  background-image:
+    radial-gradient(ellipse at 8% 2%, oklch(0.62 0.19 55 / 0.10), transparent 34rem),
+    radial-gradient(ellipse at 96% 24%, oklch(0.52 0.20 300 / 0.10), transparent 42rem);
+  background-attachment: fixed;
 }
 
 @theme inline {
@@ -172,8 +179,8 @@ input[type="search"]::-webkit-search-decoration {
 
 @utility bg-grid {
   background-image:
-    linear-gradient(oklch(0.86 0.14 195 / 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(0.72 0.19 300 / 0.07) 1px, transparent 1px);
+    linear-gradient(oklch(0.78 0.17 55 / 0.075) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.70 0.20 300 / 0.075) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
@@ -1331,7 +1338,7 @@ input[type="search"]::-webkit-search-decoration {
   top: 2rem;
   width: 22rem;
   height: 22rem;
-  background: oklch(0.86 0.14 195 / 0.5);
+  background: oklch(0.78 0.17 55 / 0.58);
 }
 .hero-orb-b {
   right: -6rem;
