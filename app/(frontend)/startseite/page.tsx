@@ -69,7 +69,7 @@ export default async function StartPage() {
               href="/neu"
               className="inline-flex animate-fade-up items-center gap-2 rounded-full border border-purple/40 bg-card/70 px-3.5 py-1.5 text-xs font-medium text-foreground/85 shadow-[var(--glow-sm)] transition-transform hover:scale-[1.03] active:scale-95"
             >
-              <Sparkles className="size-3.5 text-primary" aria-hidden="true" /> Neu: Flauschipanda hat jetzt Skins · Spooky Glow Edition · {fmt(stats.live)} Seiten online
+              <Sparkles className="size-3.5 text-primary" aria-hidden="true" /> Neu: Flauschipanda hat jetzt Skins · Saison-Design automatisch · {fmt(stats.live)} Seiten online
               <ArrowRight className="size-3.5" aria-hidden="true" />
             </Link>
             <h1 className="animate-fade-up text-4xl font-bold leading-tight [animation-delay:120ms] md:text-6xl">
