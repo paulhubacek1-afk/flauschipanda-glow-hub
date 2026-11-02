@@ -29,13 +29,13 @@
   --secondary-foreground: oklch(0.94 0.02 280);
   --muted: oklch(0.225 0.035 280);
   --muted-foreground: oklch(0.76 0.03 265);
-  --accent: oklch(0.29 0.08 295);
+  --accent: color-mix(in oklab, var(--primary) 18%, var(--card));
   --accent-foreground: oklch(0.96 0.03 300);
   --destructive: oklch(0.66 0.2 25);
   --warning: oklch(0.84 0.15 85);
   --success: oklch(0.8 0.15 160);
 
-  --border: oklch(0.78 0.12 260 / 0.18);
+  --border: color-mix(in oklab, var(--purple) 22%, transparent);
   --input: color-mix(in oklab, var(--primary) 24%, transparent);
   --ring: var(--primary);
 
@@ -261,8 +261,8 @@ input[type="search"]::-webkit-search-decoration {
 
 @utility bg-grid {
   background-image:
-    linear-gradient(oklch(0.78 0.17 55 / 0.075) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(0.70 0.20 300 / 0.075) 1px, transparent 1px);
+    linear-gradient(color-mix(in oklab, var(--primary) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--purple) 12%, transparent) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
@@ -1427,7 +1427,7 @@ input[type="search"]::-webkit-search-decoration {
   bottom: -4rem;
   width: 26rem;
   height: 26rem;
-  background: oklch(0.72 0.19 300 / 0.5);
+  background: var(--season-glow-two);
   animation-delay: -8s;
 }
 @keyframes hero-orb {
