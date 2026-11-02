@@ -109,7 +109,7 @@ function sanitize(raw: unknown): BambooState | null {
     off: Array.isArray(r.off) ? (r.off.filter((k) => validItems.has(String(k))) as ItemKey[]) : [],
     thanked: typeof r.thanked === "string" ? r.thanked.slice(0, 10) : undefined,
     views: Math.max(0, Math.floor(Number(r.views) || 0)),
-    skin: typeof r.skin === "string" && (r.skin === BUILDER_KEY || SKINS.some((k) => k.key === r.skin)) ? r.skin : undefined,
+    skin: typeof r.skin === "string" && r.skin === "halloween" ? "weihnachten" : typeof r.skin === "string" && (r.skin === BUILDER_KEY || SKINS.some((k) => k.key === r.skin)) ? r.skin : undefined,
     custom: sanitizeCustom(r.custom),
     daily: typeof r.daily === "string" ? r.daily.slice(0, 10) : undefined,
     visits: sanitizeVisits(r.visits),
