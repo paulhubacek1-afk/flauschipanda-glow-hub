@@ -74,6 +74,10 @@ export interface BambooState {
   custom?: CustomLook;
   /** Datum (JJJJ-MM-TT) des letzten Tagesbonus */
   daily?: string;
+  /** Zeitpunkt, ab dem die nächste kostenlose Panda-Glückskapsel verfügbar ist */
+  gachaNextAt?: number;
+  /** Zeitpunkt, zu dem die letzte Glückskapsel-Einladung gezeigt wurde */
+  gachaLastOfferAt?: number;
 }
 
 const KEY = "fp-bambus";
@@ -112,6 +116,8 @@ function sanitize(raw: unknown): BambooState | null {
     skin: typeof r.skin === "string" && r.skin === "halloween" ? "weihnachten" : typeof r.skin === "string" && (r.skin === BUILDER_KEY || SKINS.some((k) => k.key === r.skin)) ? r.skin : undefined,
     custom: sanitizeCustom(r.custom),
     daily: typeof r.daily === "string" ? r.daily.slice(0, 10) : undefined,
+    gachaNextAt: Number.isFinite(Number(r.gachaNextAt)) && Number(r.gachaNextAt) > 0 ? Number(r.gachaNextAt) : undefined,
+    gachaLastOfferAt: Number.isFinite(Number(r.gachaLastOfferAt)) && Number(r.gachaLastOfferAt) > 0 ? Number(r.gachaLastOfferAt) : undefined,
     visits: sanitizeVisits(r.visits),
   };
 }
