@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { STAGES, nextGoal, setSkin, stageFor, useBamboo } from "@/lib/bamboo";
-import { skinUnlocked, visibleSkins, visitProgress } from "@/lib/skins";
+import { getSkin, skinUnlocked, visibleSkins, visitProgress } from "@/lib/skins";
 import { cn } from "@/lib/utils";
 
 import { PandaFigure } from "../panda-figure";
@@ -33,7 +33,7 @@ export function PandaShowcase() {
         <p className="text-muted-foreground">
           Flauschipanda sitzt unten rechts, gibt dir Tipps und schlägt passende Artikel vor. Beim Stöbern sammelt er{" "}
           <strong className="text-foreground">Bambus</strong> 🎋 – damit wächst er und du schaltest neue Skins frei: vom Schoko-Panda
-          über den Zauberer bis zum König. Auf dem Handy kannst du ihn sogar mit dem Finger herumziehen!
+          über den Zauberer bis zum Weihnachtspanda und König. Auf dem Handy kannst du ihn sogar mit dem Finger herumziehen!
         </p>
         <ul className="grid gap-2 text-sm sm:grid-cols-3">
           {[
@@ -85,7 +85,8 @@ export function PandaShowcase() {
         {skins.map((s, i) => {
           const open = skinUnlocked(s, count, visits);
           const prog = visitProgress(s, visits);
-          const current = (bamboo.skin ?? "klassisch") === s.key && open;
+          const seasonalDefault = skinUnlocked(getSkin("weihnachten"), count, visits) ? "weihnachten" : "klassisch";
+          const current = (bamboo.skin ?? seasonalDefault) === s.key && open;
           return (
             <li key={s.key} data-reveal data-reveal-delay={(i % 4) * 60}>
               <button
