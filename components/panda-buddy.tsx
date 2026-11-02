@@ -1002,7 +1002,8 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
               : "sit"
         : mode;
 
-  const chosenSkin = getSkin(bamboo.skin);
+  const seasonalDefault = skinUnlocked(getSkin("weihnachten"), bamboo.count, bamboo.visits) ? "weihnachten" : "klassisch";
+  const chosenSkin = getSkin(bamboo.skin ?? seasonalDefault);
   const usingBuilder = bamboo.skin === BUILDER_KEY;
   const custom = effectiveCustom(bamboo);
   const activeSkin = !usingBuilder && skinUnlocked(chosenSkin, bamboo.count, bamboo.visits) ? chosenSkin : getSkin("klassisch");
