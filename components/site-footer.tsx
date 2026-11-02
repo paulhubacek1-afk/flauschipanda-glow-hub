@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Youtube } from "lucide-react";
 
 import { openConsentSettings } from "@/lib/consent";
 import type { NavLite, SiteLinks } from "@/lib/cms";
@@ -8,6 +9,8 @@ import { GREENTECH_URL, MERCH_URL, legalNav, siteConfig } from "@/lib/site";
 
 import { showPandaBuddy } from "./panda-buddy";
 import { PandaLogo } from "./panda-logo";
+
+const YOUTUBE_URL = "https://www.youtube.com/@FlauschiPandas";
 
 export function SiteFooter({ nav, links, greentechUrl }: { nav: NavLite[]; links?: SiteLinks; greentechUrl?: string }) {
   const merchUrl = links?.merchUrl || MERCH_URL;
@@ -39,6 +42,9 @@ export function SiteFooter({ nav, links, greentechUrl }: { nav: NavLite[]; links
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link href="/spiele" className="font-medium text-primary hover:underline">🐼 Panda Games</Link>
+              </li>
             </ul>
           </div>
           <div>
@@ -79,25 +85,33 @@ export function SiteFooter({ nav, links, greentechUrl }: { nav: NavLite[]; links
                 </li>
               ))}
             </ul>
-            {links?.social.length ? (
-              <div className="mt-5">
-                <h2 className="mb-2 text-sm font-semibold text-foreground">Folge uns</h2>
-                <ul className="flex flex-wrap gap-2 text-sm">
-                  {links.social.map((l) => (
-                    <li key={`${l.label}${l.url}`}>
-                      <a
-                        href={l.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block rounded-full border px-3 py-1 text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
-                      >
-                        {l.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
+            <div className="mt-5">
+              <h2 className="mb-2 text-sm font-semibold text-foreground">Folge uns</h2>
+              <ul className="flex flex-wrap gap-2 text-sm">
+                {(links?.social ?? []).filter((l) => l.url !== YOUTUBE_URL).map((l) => (
+                  <li key={`${l.label}${l.url}`}>
+                    <a
+                      href={l.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block rounded-full border px-3 py-1 text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
+                    >
+                      {l.label}
+                    </a>
+                  </li>
+                ))}
+                <li>
+                  <a
+                    href={YOUTUBE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-primary/35 px-3 py-1 text-primary transition-colors hover:border-primary hover:bg-primary/10"
+                  >
+                    <Youtube className="size-4" aria-hidden="true" /> YouTube
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
