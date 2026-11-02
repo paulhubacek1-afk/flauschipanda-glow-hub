@@ -12,6 +12,8 @@ import { ScrollReveal } from "@/components/scroll-reveal";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { VisitorPing } from "@/components/visitor-ping";
+import { SeasonalTheme } from "@/components/seasonal-theme";
+import { getSeasonalTheme } from "@/lib/seasonal-theme";
 import { getNavigation, getSettings, isMaintenanceActive, toNavLite } from "@/lib/cms";
 import { getSiteUrl, siteConfig } from "@/lib/site";
 
@@ -59,13 +61,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const [navigation, settings, draft] = await Promise.all([getNavigation(), getSettings(), draftMode()]);
   const nav = toNavLite(navigation);
   const maintenance = isMaintenanceActive(settings.maintenance);
+  const seasonalTheme = getSeasonalTheme();
 
   // Wartungsmodus: alle Besucher sehen nur den Wartungsscreen.
   // Teammitglieder können über /api/vorschau trotzdem die echte Seite ansehen.
   if (maintenance && !draft.isEnabled) {
     return (
-      <html lang="de" className={`${inter.variable} ${grotesk.variable}`}>
+      <html lang="de" data-season-theme={seasonalTheme} className={`${inter.variable} ${grotesk.variable}`}>
         <body>
+          <SeasonalTheme initialTheme={seasonalTheme} />
           <MaintenanceScreen title={settings.maintenance.title} message={settings.maintenance.message} until={settings.maintenance.until} />
         </body>
       </html>
@@ -73,8 +77,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <html lang="de" className={`${inter.variable} ${grotesk.variable}`}>
+    <html lang="de" data-season-theme={seasonalTheme} className={`${inter.variable} ${grotesk.variable}`}>
       <body className="flex min-h-dvh flex-col">
+        <SeasonalTheme initialTheme={seasonalTheme} />
         {draft.isEnabled && <PreviewBar maintenance={maintenance} />}
         <SiteHeader nav={nav} links={settings.links.header} />
         <main id="inhalt" className="flex-1">
