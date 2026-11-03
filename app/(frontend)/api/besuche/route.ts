@@ -55,7 +55,7 @@ export async function POST(request: Request) {
   if (fresh(ip)) keys.push(VISITS_TOTAL, visitsDayKey());
   try {
     // Seitenaufruf nur für echte, veröffentlichte Artikel zählen
-    if (path && fresh(`${ip} ${path}`)) {
+    if (path && fresh(`${ip} ${path}`) && String(process.env.DATABASE_URI ?? "").trim()) {
       const payload = await getPayload({ config });
       const found = await payload.find({
         collection: "pages",
