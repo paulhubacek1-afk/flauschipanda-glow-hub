@@ -48,13 +48,12 @@ function AdminDatabaseUnavailable() {
             Das Admin-CMS ist gerade nicht erreichbar
           </h1>
           <p style={{ color: "#c5c5d0", lineHeight: 1.65 }}>
-            Payload kann momentan keine Verbindung zur PostgreSQL-Datenbank herstellen. Ohne
-            diese Verbindung sind Anmeldung, Benutzerprüfung und Dashboard nicht verfügbar.
+            Für diese Umgebung ist keine erreichbare Datenbank verfügbar. Anmeldung, Benutzerprüfung
+            und Dashboard können deshalb gerade nicht geladen werden.
           </p>
           <p style={{ color: "#a1a1b2", fontSize: "13px", lineHeight: 1.5 }}>
-            Beim Datenbankanbieter ist das Projekt-Kontingent überschritten. Bitte prüfe den
-            Datenbankstatus und das Nutzungslimit. Deine gespeicherten Inhalte werden durch
-            diesen Verbindungsfehler nicht gelöscht.
+            Deine gespeicherten Inhalte bleiben erhalten. Sobald die Datenbank wieder erreichbar ist,
+            steht die Verwaltung wie gewohnt zur Verfügung.
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "18px" }}>
             <a
@@ -95,13 +94,17 @@ function AdminDatabaseUnavailable() {
 }
 
 const Layout = async ({ children }: Args) => {
+  // Preview-Deployments haben absichtlich keine Produktionsdatenbank.
+  // Den Admin-Fallback direkt rendern, statt localhost:5432 anzusprechen.
+  if (!String(process.env.DATABASE_URI ?? "").trim()) return <AdminDatabaseUnavailable />;
+
   // Erst die Verbindung prüfen, bevor Payloads eigenes Layout läuft.
   // So kann ein nicht erreichbares CMS keine ungefangene 500-Antwort erzeugen.
   try {
     const payload = await getPayload({ config });
     await payload.count({ collection: "users", overrideAccess: true });
   } catch (error) {
-    console.error("[admin-layout] PostgreSQL ist nicht erreichbar; Admin-Fallback wird angezeigt.", error);
+    console.warn("[admin-layout] Datenbank nicht erreichbar; Admin-Fallback wird angezeigt.", error instanceof Error ? error.message : error);
     return <AdminDatabaseUnavailable />;
   }
 
