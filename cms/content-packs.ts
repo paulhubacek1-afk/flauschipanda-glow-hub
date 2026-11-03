@@ -158,8 +158,8 @@ async function ensureHierarchyPages(payload: Payload): Promise<number> {
     payload.find({ collection: "pages", limit: 10000, depth: 0, pagination: false, draft: true, overrideAccess: true, select: { path: true } as never }),
   ]);
 
-  const categories = new Map((categoryResult.docs as Doc[]).map((doc) => [String(doc.slug), doc]));
-  const groups = new Map((groupResult.docs as Doc[]).map((doc) => [String(doc.path ?? ""), doc]));
+  const categories = new Map<string, Doc>((categoryResult.docs as Doc[]).map((doc): [string, Doc] => [String(doc.slug), doc]));
+  const groups = new Map<string, Doc>((groupResult.docs as Doc[]).map((doc): [string, Doc] => [String(doc.path ?? ""), doc]));
   const pages = new Set((pageResult.docs as Doc[]).map((doc) => String(doc.path ?? "")));
   const started = Date.now();
   let changes = 0;
