@@ -116,10 +116,8 @@ function descriptionFor(title: string, group: string): string {
   return description.length <= 160 ? description : `${title}: Die wichtigsten Grundlagen, Kriterien und Schritte im Überblick.`;
 }
 
-function markdownFor(title: string, category: string, group: string, guide: GuideContext, prosCons: ReturnType<typeof createProsCons>): string {
-  return `# ${title}
-
-${guide.intro}
+function markdownFor(title: string, category: string, group: string, guide: GuideContext): string {
+  return `${guide.intro}
 
 Der Beitrag gehört zum Bereich **${category}** und zum Unterthema **${group}**. Er ist als verständlicher Einstieg gedacht. Prüfe bei zeitabhängigen Angaben immer die aktuelle Information der zuständigen Stelle oder des jeweiligen Anbieters.
 
@@ -130,14 +128,6 @@ Bevor du dich entscheidest oder loslegst, lohnt es sich, den eigenen Bedarf gena
 ## Die wichtigsten Kriterien
 
 ${guide.checks.map((x) => `- ${x}`).join("\n")}
-
-## Vorteile und mögliche Nachteile
-
-**Vorteile**
-${prosCons.pros.map((x) => `- ${x}`).join("\n")}
-
-**Nachteile und Grenzen**
-${prosCons.cons.map((x) => `- ${x}`).join("\n")}
 
 ## Schritt für Schritt
 
@@ -163,7 +153,7 @@ export function createFallbackFillPages(): FillPage[] {
       description: descriptionFor(page.title, group.title),
       focusKeyword: page.title,
       linkAnchors: [page.title, page.label, group.title].filter(Boolean),
-      markdown: markdownFor(page.title, category.title, group.title, guide, prosCons),
+      markdown: markdownFor(page.title, category.title, group.title, guide),
       prosCons,
       faq: [
         [`Worauf sollte ich bei „${page.title}“ zuerst achten?`, `Beginne mit deinem konkreten Ziel und den wichtigsten Voraussetzungen. Prüfe anschließend die Kriterien aus diesem Ratgeber und vergleiche passende Informationen aus verlässlichen Quellen.`],
