@@ -186,6 +186,10 @@ function mapLinks(list: unknown, requireUrl = true): SiteLink[] {
 
 export const getPayloadClient = cache(async () => getPayload({ config }));
 
+/** Preview-Deployments ohne Datenbank verwenden bewusst die lokale Seitenstruktur. */
+const hasCmsDatabase = () => Boolean(String(process.env.DATABASE_URI ?? "").trim());
+
+
 const idOf = (v: unknown): string | number | undefined => {
   if (v === null || v === undefined) return undefined;
   if (typeof v === "object") {
@@ -246,6 +250,7 @@ function fallbackNavigation(): NavCategory[] {
 /* ------------------------------------------------------------------ */
 
 export const getNavigation = cache(async (): Promise<NavCategory[]> => {
+  if (!hasCmsDatabase()) return fallbackNavigation();
   try {
     const payload = await getPayloadClient();
     const now = Date.now();
@@ -297,7 +302,7 @@ export const getNavigation = cache(async (): Promise<NavCategory[]> => {
     }));
   } catch (error) {
     // Footer, Header und Kategoriestruktur bleiben auch bei einem DB-Ausfall sichtbar.
-    console.error("[navigation] CMS-Navigation konnte nicht geladen werden; lokale Grundstruktur wird verwendet.", error);
+    console.warn("[navigation] CMS nicht erreichbar; lokale Grundstruktur wird verwendet.", error instanceof Error ? error.message : error);
     return fallbackNavigation();
   }
 });
@@ -328,12 +333,12 @@ export function navStats(nav: NavCategory[]) {
 
 export const getSettings = cache(async (): Promise<SiteSettingsData> => {
   let s: Doc = {};
-  try {
+  if (hasCmsDatabase()) try {
     const payload = await getPayloadClient();
     s = (await payload.findGlobal({ slug: "site-settings", depth: 0 })) as Doc;
   } catch (error) {
     // Fallback auch dann, wenn bereits der Aufbau der Payload-Verbindung fehlschlägt.
-    console.error("[einstellungen] Website-Einstellungen konnten nicht geladen werden", error);
+    console.warn("[einstellungen] CMS nicht erreichbar; Standard-Einstellungen werden verwendet.", error instanceof Error ? error.message : error);
   }
 
   const powered = mapLinks(s.poweredBy, false);
@@ -377,6 +382,7 @@ export const getSettings = cache(async (): Promise<SiteSettingsData> => {
 
 /** Aktive Affiliate-Produkte mit echtem Link (Platzhalter werden nie öffentlich gezeigt). */
 const getAffiliateDocs = cache(async () => {
+  if (!hasCmsDatabase()) return [] as Doc[];
   try {
     const payload = await getPayloadClient();
     const res = await payload.find({
@@ -389,7 +395,7 @@ const getAffiliateDocs = cache(async () => {
     return res.docs as Doc[];
   } catch (error) {
     // Empfehlungen sind optional: Ein CMS-/Datenbankausfall darf öffentliche Seiten nicht blockieren.
-    console.error("[cms] Affiliate-Daten konnten nicht geladen werden; leere Liste wird verwendet.", error);
+    console.warn("[cms] Affiliate-Daten nicht verfügbar; leere Liste wird verwendet.", error instanceof Error ? error.message : error);
     return [];
   }
 });
@@ -515,6 +521,7 @@ async function mapPages(docs: Doc[]): Promise<Page[]> {
 
 /** Alle öffentlich sichtbaren Seiten (veröffentlicht und Veröffentlichungszeit erreicht). */
 export const getLivePages = cache(async (): Promise<Page[]> => {
+  if (!hasCmsDatabase()) return [];
   try {
     const payload = await getPayloadClient();
     const res = await payload.find({
@@ -532,7 +539,7 @@ export const getLivePages = cache(async (): Promise<Page[]> => {
     return pages;
   } catch (error) {
     // Öffentliche Seiten bleiben mit einem leeren CMS-Inhalt erreichbar, wenn die DB ausfällt.
-    console.error("[cms] Live-Seiten konnten nicht geladen werden; leere Liste wird verwendet.", error);
+    console.warn("[cms] Live-Seiten nicht verfügbar; leere Liste wird verwendet.", error instanceof Error ? error.message : error);
     return [];
   }
 });
@@ -546,6 +553,7 @@ export async function getLivePage(category: string, group: string, slug: string)
  * Wird nur im Vorschaumodus (draftMode, nur für angemeldete Teammitglieder) aufgerufen.
  */
 export async function getDraftPage(category: string, group: string, slug: string): Promise<(Page & { isDraft: boolean }) | undefined> {
+  if (!hasCmsDatabase()) return undefined;
   const payload = await getPayloadClient();
   const res = await payload.find({
     collection: "pages",
