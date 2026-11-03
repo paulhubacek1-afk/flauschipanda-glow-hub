@@ -3,6 +3,8 @@ export interface ProsConsData {
   pros: string[];
   cons: string[];
   note?: string;
+  /** false, wenn der Artikel bereits eigene Vor-/Nachteile im Fließtext enthält. */
+  display?: boolean;
 }
 
 const clean = (value: string) =>
@@ -42,6 +44,7 @@ export function createProsCons(path: string, title: string, markdown = ""): Pros
       pros: storedPros,
       cons: storedCons,
       note: "Die Punkte fassen die wichtigsten Aspekte des Artikels zusammen.",
+      display: false,
     };
   }
 
@@ -188,6 +191,7 @@ export function resolveProsCons(
       pros,
       cons,
       note: typeof stored.note === "string" ? stored.note : "Zusammenfassung der wichtigsten Vor- und Nachteile.",
+      display: !(pointsFromSection(markdown, ["Vorteile", "Was dafür spricht", "Pluspunkte"]).length && pointsFromSection(markdown, ["Nachteile", "Nachteile und Grenzen", "Grenzen"]).length),
     };
   }
   return createProsCons(path, title, markdown);
