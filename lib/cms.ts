@@ -8,6 +8,7 @@ import { getPayload, type Where } from "payload";
 import { cache } from "react";
 
 import { lexicalToPlainText } from "@/cms/lexical-text";
+import { resolveProsCons, type ProsConsData } from "./editorial";
 
 import { autoDescription, autoLinkAnchors, autoSeoTitle, type PageType } from "./auto";
 import { htmlConverters } from "./lexical-html";
@@ -100,6 +101,7 @@ export interface Page {
   readingMinutes: number;
   faq: { q: string; a: string }[];
   comparison?: Comparison;
+  prosCons: ProsConsData;
   products: AffiliateItem[];
   donation: boolean;
   widgets: string[];
@@ -492,6 +494,7 @@ async function mapPages(docs: Doc[]): Promise<Page[]> {
       readingMinutes: Math.max(1, Math.round(wordCount / 200)),
       faq: ((d.faq ?? []) as Doc[]).map((f) => ({ q: f.q, a: f.a })),
       comparison: mapComparison(d.comparison),
+      prosCons: resolveProsCons(d.prosCons, `${category.slug}/${group.slug}/${d.slug}`, d.title, text),
       products,
       donation: d.donation !== false,
       widgets: (d.widgets ?? []) as string[],
