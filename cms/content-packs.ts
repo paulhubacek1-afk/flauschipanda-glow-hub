@@ -183,7 +183,6 @@ async function fillEmptyPages(payload: Payload): Promise<number> {
     if (Date.now() - started > FILL_BUDGET_MS) break;
     const doc = byPath.get(`/${f.path}`);
     if (!doc) continue; // Seite gibt es (nicht mehr) – nichts anlegen
-    if (doc.pageType === "money") continue; // Money Pages schreibt das Team selbst (mit Partnerlinks)
     if (String(doc.markdown ?? "").trim() || !isEmptyRich(doc.content)) continue; // schon Inhalt → nie überschreiben
     const seo = (doc.seo ?? {}) as Doc;
     const prosCons = f.prosCons ?? createProsCons(f.path, doc.title, f.markdown);
