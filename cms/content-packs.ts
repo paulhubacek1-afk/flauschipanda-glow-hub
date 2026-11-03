@@ -160,6 +160,63 @@ const isEmptyRich = (c: unknown) => {
   return !children.some((n) => (n.children?.length ?? 0) > 0 || n.type !== "paragraph");
 };
 
+/**
+ * Entfernt alte Standardtexte aus früheren automatischen Befüllungen.
+ * Von Hand bearbeitete Seiten bleiben unangetastet; betroffene Seiten werden Entwürfe.
+ */
+async function removeGenericFallbackPages(payload: Payload): Promise<number> {
+  const result = await payload.find({
+    collection: "pages",
+    limit: 2000,
+    depth: 0,
+    draft: true,
+    overrideAccess: true,
+    pagination: false,
+    select: { path: true, markdown: true, content: true, textSource: true, seo: true } as never,
+  });
+  let cleaned = 0;
+
+  for (const doc of result.docs as Doc[]) {
+    if (doc.textSource === "bearbeitet") continue;
+    const source = String(doc.markdown ?? "") + JSON.stringify(doc.content ?? {});
+    const isGenericFallback =
+      source.includes("Der Beitrag gehört zum Bereich **") &&
+      source.includes("## Kurz erklärt") &&
+      source.includes("## Typische Fehler vermeiden") &&
+      source.includes("## Fazit");
+    if (!isGenericFallback) continue;
+
+    const seo = (doc.seo ?? {}) as Doc;
+    const description = String(seo.metaDescription ?? "");
+    const genericDescription =
+      description.endsWith(": Grundlagen, wichtige Kriterien, praktische Schritte und typische Fehler im Überblick.") ||
+      description.endsWith(": Die wichtigsten Grundlagen, Kriterien und Schritte im Überblick.");
+
+    try {
+      await payload.update({
+        collection: "pages",
+        id: doc.id,
+        overrideAccess: true,
+        context,
+        data: {
+          _status: "draft",
+          markdown: "",
+          content: null,
+          faq: [],
+          prosCons: { pros: "", cons: "", note: "" },
+          sources: [],
+          ...(genericDescription ? { seo: { ...seo, metaDescription: "" } } : {}),
+        } as never,
+      });
+      cleaned++;
+    } catch (err) {
+      payload.logger.warn({ err }, "[inhalte] Ein allgemeiner Fülltext konnte nicht entfernt werden");
+    }
+  }
+
+  return cleaned;
+}
+
 /** Zeitbudget pro Start, damit ein Kaltstart nie lange blockiert – der Rest folgt beim nächsten Start. */
 const FILL_BUDGET_MS = 40_000;
 
@@ -878,6 +935,7 @@ export async function applyContentPacks(payload: Payload) {
   await run("GreenTech-Umbenennung", renameGreenTech);
   await run("GreenTech-Spendenlink", updateDonateLinks);
   await run("Panda-Name", renamePanda);
+  await run("Allgemeine Fülltexte entfernen", removeGenericFallbackPages);
   for (const pack of contentPacks) {
     try {
       const n = await applyPack(payload, pack);
