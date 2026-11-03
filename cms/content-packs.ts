@@ -1,5 +1,6 @@
 import type { Payload } from "payload";
 
+import { createProsCons } from "../lib/editorial";
 import { contentPacks } from "../content-packs";
 import type { ContentPack, PackPage } from "../content-packs/types";
 
@@ -22,7 +23,8 @@ async function find(payload: Payload, collection: "categories" | "groups" | "pag
   return payload.find({ collection, where, limit, depth: 0, overrideAccess: true, draft: true });
 }
 
-function pageData(p: PackPage, groupId: number | string) {
+function pageData(p: PackPage, groupId: number | string, path: string) {
+  const prosCons = p.prosCons ?? createProsCons(path, p.title, p.markdown);
   return {
     title: p.title,
     label: p.label,
@@ -41,6 +43,11 @@ function pageData(p: PackPage, groupId: number | string) {
           note: p.comparison.note,
         }
       : undefined,
+    prosCons: {
+      pros: prosCons.pros.join("\n"),
+      cons: prosCons.cons.join("\n"),
+      note: prosCons.note ?? "",
+    },
     donation: true,
     seo: {
       metaDescription: p.description,
@@ -134,7 +141,7 @@ async function applyPack(payload: Payload, pack: ContentPack): Promise<number> {
       try {
         const exists = (await find(payload, "pages", { path: { equals: pagePath } })).docs.length > 0;
         if (exists) continue;
-        await payload.create({ collection: "pages", data: pageData(p, group.id) as never, overrideAccess: true, context });
+        await payload.create({ collection: "pages", data: pageData(p, group.id, pagePath) as never, overrideAccess: true, context });
         changes++;
       } catch (err) {
         payload.logger.warn({ err }, `[inhalte] Seite ${pagePath} konnte nicht angelegt werden`);
@@ -176,9 +183,9 @@ async function fillEmptyPages(payload: Payload): Promise<number> {
     if (Date.now() - started > FILL_BUDGET_MS) break;
     const doc = byPath.get(`/${f.path}`);
     if (!doc) continue; // Seite gibt es (nicht mehr) – nichts anlegen
-    if (doc.pageType === "money") continue; // Money Pages schreibt das Team selbst (mit Partnerlinks)
     if (String(doc.markdown ?? "").trim() || !isEmptyRich(doc.content)) continue; // schon Inhalt → nie überschreiben
     const seo = (doc.seo ?? {}) as Doc;
+    const prosCons = f.prosCons ?? createProsCons(f.path, doc.title, f.markdown);
     try {
       await payload.update({
         collection: "pages",
@@ -190,6 +197,11 @@ async function fillEmptyPages(payload: Payload): Promise<number> {
           publishedAt: new Date().toISOString(),
           markdown: f.markdown.trim(),
           faq: (f.faq ?? []).map(([q, a]) => ({ q, a })),
+          prosCons: {
+            pros: prosCons.pros.join("\n"),
+            cons: prosCons.cons.join("\n"),
+            note: prosCons.note ?? "",
+          },
           ...(f.comparison
             ? {
                 comparison: {
@@ -480,6 +492,7 @@ async function upgradePages(payload: Payload): Promise<number> {
       ((!current && richEmpty) || (old && current === old.markdown.trim() && (richEmpty || doc.textSource === "auto")));
     if (!untouched || current === u.markdown.trim()) continue; // von Hand bearbeitet oder schon neu → nicht anfassen
     const seo = (doc.seo ?? {}) as Doc;
+    const prosCons = u.prosCons ?? createProsCons(u.path, doc.title, u.markdown);
     const keepDescription = seo.metaDescription && seo.metaDescription !== old?.description;
     try {
       await payload.update({
@@ -494,6 +507,11 @@ async function upgradePages(payload: Payload): Promise<number> {
           content: null, // wird anschließend automatisch in den Editor übernommen
           textSource: "auto",
           faq: (u.faq ?? []).map(([q, a]) => ({ q, a })),
+          prosCons: {
+            pros: prosCons.pros.join("\n"),
+            cons: prosCons.cons.join("\n"),
+            note: prosCons.note ?? "",
+          },
           ...(u.comparison
             ? {
                 comparison: {
