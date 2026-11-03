@@ -466,6 +466,8 @@ export interface Media {
 export interface User {
   id: number;
   name?: string | null;
+  bamboo?: number | null;
+  bambooState?: unknown;
   /**
    * Admin: alles · Redakteur: Inhalte & Struktur · Autor: Entwürfe · Nutzer: kein Backend
    */

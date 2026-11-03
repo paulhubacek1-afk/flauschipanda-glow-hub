@@ -400,7 +400,9 @@ async function mapPages(docs: Doc[]): Promise<Page[]> {
 
   const pages: Page[] = [];
   for (const d of docs) {
-    const loc = groupIndex.get(idOf(d.group));
+    const groupId = idOf(d.group);
+    if (groupId === undefined) continue;
+    const loc = groupIndex.get(groupId);
     if (!loc) continue;
     const { category, group } = loc;
     const { groups: _g, ...cat } = category;

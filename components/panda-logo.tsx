@@ -2,8 +2,6 @@ import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 
-import logo from "@/public/logo.png";
-
 /**
  * Das Panda-Toolbox-Logo (public/logo.png, transparenter Hintergrund).
  * next/image liefert automatisch passend verkleinerte, moderne Bildformate aus.
@@ -24,7 +22,7 @@ export function PandaLogo({
 }) {
   return (
     <Image
-      src={logo}
+      src="/logo.png"
       alt={alt}
       priority={priority}
       sizes={sizes}
