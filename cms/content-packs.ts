@@ -186,14 +186,14 @@ async function ensureHierarchyPages(payload: Payload): Promise<number> {
         categories.set(categoryNode.slug, category);
         changes++;
       } catch (err) {
-        payload.logger.warn({ err }, \`[struktur] Kategorie /\${categoryNode.slug} konnte nicht angelegt werden\`);
+        payload.logger.warn({ err }, "[struktur] Kategorie /" + categoryNode.slug + " konnte nicht angelegt werden");
         continue;
       }
     }
 
     for (const [groupIndex, groupNode] of categoryNode.groups.entries()) {
       if (Date.now() - started > STRUCTURE_BUDGET_MS) break;
-      const groupPath = \`/\${categoryNode.slug}/\${groupNode.slug}\`;
+      const groupPath = "/" + categoryNode.slug + "/" + groupNode.slug;
       let group = groups.get(groupPath);
 
       if (!group) {
@@ -213,14 +213,14 @@ async function ensureHierarchyPages(payload: Payload): Promise<number> {
           groups.set(groupPath, group);
           changes++;
         } catch (err) {
-          payload.logger.warn({ err }, \`[struktur] Unterthema \${groupPath} konnte nicht angelegt werden\`);
+          payload.logger.warn({ err }, "[struktur] Unterthema " + groupPath + " konnte nicht angelegt werden");
           continue;
         }
       }
 
       for (const pageNode of groupNode.pages) {
         if (Date.now() - started > STRUCTURE_BUDGET_MS) break;
-        const pagePath = \`\${groupPath}/\${pageNode.slug}\`;
+        const pagePath = groupPath + "/" + pageNode.slug;
         if (pages.has(pagePath)) continue;
 
         try {
@@ -241,7 +241,7 @@ async function ensureHierarchyPages(payload: Payload): Promise<number> {
           pages.add(pagePath);
           changes++;
         } catch (err) {
-          payload.logger.warn({ err }, \`[struktur] Seite \${pagePath} konnte nicht angelegt werden\`);
+          payload.logger.warn({ err }, "[struktur] Seite " + pagePath + " konnte nicht angelegt werden");
         }
       }
     }
