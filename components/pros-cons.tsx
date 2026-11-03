@@ -4,7 +4,7 @@ import type { ProsConsData } from "@/lib/editorial";
 
 /** Kompakte, gut scannbare Übersicht der wichtigsten Vorteile und Grenzen. */
 export function ProsConsPanel({ data }: { data: ProsConsData }) {
-  if (!data.pros.length || !data.cons.length) return null;
+  if (data.display === false || !data.pros.length || !data.cons.length) return null;
 
   return (
     <section aria-labelledby="pros-cons-title" className="space-y-4">
