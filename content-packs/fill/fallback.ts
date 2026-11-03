@@ -22,7 +22,7 @@ const YOUTUBE = { title: "YouTube-Hilfe – Creator", url: "https://support.goog
 const BMEIA = { title: "BMEIA – Reiseinformationen Österreich", url: "https://www.bmeia.gv.at/reise-services/reiseinformation" };
 const OEAMTC = { title: "ÖAMTC – Auto und Mobilität", url: "https://www.oeamtc.at/" };
 
-function contextFor(category: string, group: string): GuideContext {
+function contextFor(category: string, group: string, title: string): GuideContext {
   if (category === "tiere") return {
     intro: "Bei Tier-Themen stehen die Bedürfnisse des jeweiligen Tieres im Mittelpunkt. Rasse, Art, Alter, Gesundheit und Lebensumfeld können die passende Lösung deutlich verändern.",
     checks: ["Welche Tierart und Lebensphase sind gemeint?", "Welche Haltungs-, Pflege- oder Sicherheitsanforderungen gelten?", "Welche Angaben stammen von anerkannten Fachstellen oder einer Tierarztpraxis?", "Welche laufenden Kosten und welcher Zeitaufwand entstehen?"],
@@ -146,7 +146,7 @@ ${title} lässt sich am besten angehen, wenn du Bedarf, Qualität, Aufwand und m
 export function createFallbackFillPages(): FillPage[] {
   return allPageNodes().map(({ id, category, group, page }) => {
     const path = id;
-    const guide = contextFor(category.slug, group.title);
+    const guide = contextFor(category.slug, group.title, page.title);
     const prosCons = createProsCons(path, page.title);
     return {
       path,
