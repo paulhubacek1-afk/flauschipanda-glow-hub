@@ -48,14 +48,25 @@ export function AccountPortal() {
   useEffect(() => {
     let active = true;
     fetch("/api/konto", { credentials: "same-origin", cache: "no-store" })
-      .then(async (response) => (response.ok ? (response.json() as Promise<AccountResponse>) : null))
-      .then((data) => {
-        if (!active || !data?.authenticated || !data.user || !data.bamboo) return;
+      .then(async (response) => {
+        const data = (await response.json().catch(() => ({}))) as AccountResponse;
+        if (!active) return;
+        if (!response.ok) {
+          setMessage(
+            response.status === 503
+              ? "Die Panda-Datenbank ist momentan nicht erreichbar oder hat ihr Nutzungslimit erreicht. Konto-Erstellung und Bamboo-Speicherung sind vorübergehend pausiert."
+              : data.message || "Dein Konto konnte nicht geladen werden. Bitte versuche es später erneut.",
+          );
+          return;
+        }
+        if (!data.authenticated || !data.user || !data.bamboo) return;
         setAccount(data.user);
         setBamboo(data.bamboo.count);
         hydrateAccountBamboo(data.bamboo);
       })
-      .catch(() => undefined)
+      .catch(() => {
+        if (active) setMessage("Der Kontodienst ist momentan nicht erreichbar. Bitte versuche es später erneut.");
+      })
       .finally(() => {
         if (active) setLoading(false);
       });
@@ -94,7 +105,13 @@ export function AccountPortal() {
           body: JSON.stringify({ username, name, email, password }),
         });
         const data = (await response.json().catch(() => ({}))) as { message?: string };
-        if (!response.ok) throw new Error(data.message || "Registrierung fehlgeschlagen.");
+        if (!response.ok) {
+          throw new Error(
+            response.status === 503
+              ? "Die Datenbank ist momentan nicht verfügbar. Dein Konto wurde nicht erstellt und es wurden keine Bambus-Punkte gutgeschrieben. Bitte versuche es später erneut."
+              : data.message || "Registrierung fehlgeschlagen.",
+          );
+        }
 
         try {
           await signIn(email, password);
