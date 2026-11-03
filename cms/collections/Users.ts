@@ -62,10 +62,15 @@ export const Users: CollectionConfig = {
       },
     ],
     beforeChange: [
-      async ({ data, operation, req }) => {
+      async ({ data, operation, req, context }) => {
         if (operation === "create") {
-          const { totalDocs } = await req.payload.count({ collection: "users", overrideAccess: true });
-          if (totalDocs === 0) data.role = "admin";
+          // Öffentliche Registrierungen bleiben immer normale Nutzer – auch bei einer leeren Datenbank.
+          if (context?.publicRegistration === true) {
+            data.role = "nutzer";
+          } else {
+            const { totalDocs } = await req.payload.count({ collection: "users", overrideAccess: true });
+            if (totalDocs === 0) data.role = "admin";
+          }
         }
         return data;
       },
@@ -73,6 +78,24 @@ export const Users: CollectionConfig = {
   },
   fields: [
     { name: "name", label: "Anzeigename", type: "text" },
+    {
+      name: "bamboo",
+      label: "Bambus",
+      type: "number",
+      defaultValue: 25,
+      min: 0,
+      max: 99999,
+      access: { update: isAdminField },
+      admin: { position: "sidebar", description: "Punktestand der Panda-Sammlung. Änderungen sind nur durch Admins möglich." },
+    },
+    {
+      name: "bambooState",
+      label: "Panda-Fortschritt",
+      type: "json",
+      defaultValue: { count: 25, off: [], views: 0 },
+      access: { update: isAdminField },
+      admin: { hidden: true },
+    },
     {
       name: "role",
       label: "Rolle",
