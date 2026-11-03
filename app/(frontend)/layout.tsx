@@ -69,14 +69,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // Teammitglieder werden serverseitig über ihr Payload-Login-Cookie erkannt.
   // Der Admin bleibt so auch während der Wartung in der Lage, die Website zu prüfen.
   let teamPreview = false;
-  if (maintenance && !draft.isEnabled) {
+  if (maintenance && !draft.isEnabled && String(process.env.DATABASE_URI ?? "").trim()) {
     try {
       const payload = await getPayload({ config: payloadConfig });
       const { user } = await payload.auth({ headers: await headers() });
       const role = (user as { role?: string } | null)?.role;
       teamPreview = ["admin", "redakteur", "autor"].includes(role ?? "");
     } catch (error) {
-      console.error("[wartung] Team-Sitzung konnte nicht geprüft werden", error);
+      console.warn("[wartung] Team-Sitzung konnte nicht geprüft werden.", error instanceof Error ? error.message : error);
       teamPreview = false;
     }
   }
