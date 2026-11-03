@@ -78,6 +78,24 @@ export async function ensureSchema(payload: Payload) {
       payload.logger.warn({ err }, "[schema] Vor-/Nachteile-Spalten konnten nicht ergänzt werden");
     }
   }
+  // Redaktionelle Vor- und Nachteile pro Seite.
+  // IF NOT EXISTS hält bestehende Inhalte unverändert.
+  for (const q of [
+    `ALTER TABLE IF EXISTS "pages"
+      ADD COLUMN IF NOT EXISTS "pros_cons_pros" varchar,
+      ADD COLUMN IF NOT EXISTS "pros_cons_cons" varchar,
+      ADD COLUMN IF NOT EXISTS "pros_cons_note" varchar`,
+    `ALTER TABLE IF EXISTS "_pages_v"
+      ADD COLUMN IF NOT EXISTS "version_pros_cons_pros" varchar,
+      ADD COLUMN IF NOT EXISTS "version_pros_cons_cons" varchar,
+      ADD COLUMN IF NOT EXISTS "version_pros_cons_note" varchar`,
+  ]) {
+    try {
+      await drizzle.execute(sql.raw(q));
+    } catch (err) {
+      payload.logger.warn({ err }, "[schema] Vor-/Nachteile-Spalten konnten nicht ergänzt werden");
+    }
+  }
   // Website-Links (Website-Einstellungen → Links): Shop-Adresse und Link-Listen
   const linkTable = (name: string, newTab: boolean) => `
     CREATE TABLE IF NOT EXISTS "site_settings_${name}" (
