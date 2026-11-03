@@ -19,6 +19,7 @@ import { GreenTechNotice } from "@/components/greencore-notice";
 import { JsonLd } from "@/components/json-ld";
 import { PageCard } from "@/components/page-card";
 import { PageList } from "@/components/page-list";
+import { ProsConsPanel } from "@/components/pros-cons";
 import { SourcesBox } from "@/components/sources-box";
 import { TableOfContents } from "@/components/table-of-contents";
 import { Badge } from "@/components/ui/badge";
@@ -151,7 +152,7 @@ export default async function LandingPage({ params }: Props) {
             <span>{page.author ?? siteConfig.defaultAuthor}</span>
           </div>
         </div>
-        <Cover icon={category.icon} hue={category.hue} size="lg" />
+        <Cover icon={category.icon} hue={category.hue} title={page.title} size="lg" />
       </header>
 
       <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -164,6 +165,7 @@ export default async function LandingPage({ params }: Props) {
 
           {/* 1 · Infotext (mit automatischer interner Verlinkung) */}
           <div className="prose-glow" dangerouslySetInnerHTML={{ __html: rendered.html }} />
+          <ProsConsPanel data={page.prosCons} />
           {widgets.includes("kostenrechner") && <CostCalculator />}
           <Calculators keys={widgets} />
 
