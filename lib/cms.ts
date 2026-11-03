@@ -344,15 +344,21 @@ export const getSettings = cache(async (): Promise<SiteSettingsData> => {
 
 /** Aktive Affiliate-Produkte mit echtem Link (Platzhalter werden nie öffentlich gezeigt). */
 const getAffiliateDocs = cache(async () => {
-  const payload = await getPayloadClient();
-  const res = await payload.find({
-    collection: "affiliates",
-    where: { and: [{ active: { equals: true } }, { placeholder: { not_equals: true } }] },
-    limit: 500,
-    depth: 0,
-    pagination: false,
-  });
-  return res.docs as Doc[];
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({
+      collection: "affiliates",
+      where: { and: [{ active: { equals: true } }, { placeholder: { not_equals: true } }] },
+      limit: 500,
+      depth: 0,
+      pagination: false,
+    });
+    return res.docs as Doc[];
+  } catch (error) {
+    // Empfehlungen sind optional: Ein CMS-/Datenbankausfall darf öffentliche Seiten nicht blockieren.
+    console.error("[cms] Affiliate-Daten konnten nicht geladen werden; leere Liste wird verwendet.", error);
+    return [];
+  }
 });
 
 const toAffiliate = (a: Doc): AffiliateItem => ({ key: a.key, name: a.name, label: a.label ?? "", pitch: a.pitch ?? "", url: a.url });
@@ -475,20 +481,26 @@ async function mapPages(docs: Doc[]): Promise<Page[]> {
 
 /** Alle öffentlich sichtbaren Seiten (veröffentlicht und Veröffentlichungszeit erreicht). */
 export const getLivePages = cache(async (): Promise<Page[]> => {
-  const payload = await getPayloadClient();
-  const res = await payload.find({
-    collection: "pages",
-    where: liveWhere(new Date()),
-    limit: 5000,
-    depth: 0,
-    sort: "-publishedAt",
-    pagination: false,
-  });
-  const pages = await mapPages(res.docs as Doc[]);
-  // verwandte Artikel: DB-IDs → Seiten-IDs (nur live)
-  const byDbId = new Map(pages.map((p) => [String(p.dbId), p.id]));
-  for (const p of pages) p.related = p.related.map((r) => byDbId.get(r)).filter((x): x is string => Boolean(x));
-  return pages;
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({
+      collection: "pages",
+      where: liveWhere(new Date()),
+      limit: 5000,
+      depth: 0,
+      sort: "-publishedAt",
+      pagination: false,
+    });
+    const pages = await mapPages(res.docs as Doc[]);
+    // verwandte Artikel: DB-IDs → Seiten-IDs (nur live)
+    const byDbId = new Map(pages.map((p) => [String(p.dbId), p.id]));
+    for (const p of pages) p.related = p.related.map((r) => byDbId.get(r)).filter((x): x is string => Boolean(x));
+    return pages;
+  } catch (error) {
+    // Öffentliche Seiten bleiben mit einem leeren CMS-Inhalt erreichbar, wenn die DB ausfällt.
+    console.error("[cms] Live-Seiten konnten nicht geladen werden; leere Liste wird verwendet.", error);
+    return [];
+  }
 });
 
 export async function getLivePage(category: string, group: string, slug: string) {
