@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { draftMode } from "next/headers";
+import { draftMode, headers } from "next/headers";
+import payloadConfig from "@payload-config";
+import { getPayload } from "payload";
 import { Inter, Space_Grotesk } from "next/font/google";
 
 import { ConsentBanner } from "@/components/consent-banner";
@@ -64,9 +66,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const maintenance = isMaintenanceActive(settings.maintenance);
   const seasonalTheme = getSeasonalTheme();
 
-  // Wartungsmodus: alle Besucher sehen nur den Wartungsscreen.
-  // Teammitglieder können über /api/vorschau trotzdem die echte Seite ansehen.
+  // Teammitglieder werden serverseitig über ihr Payload-Login-Cookie erkannt.
+  // Der Admin bleibt so auch während der Wartung in der Lage, die Website zu prüfen.
+  let teamPreview = false;
   if (maintenance && !draft.isEnabled) {
+    try {
+      const payload = await getPayload({ config: payloadConfig });
+      const { user } = await payload.auth({ headers: await headers() });
+      const role = (user as { role?: string } | null)?.role;
+      teamPreview = ["admin", "redakteur", "autor"].includes(role ?? "");
+    } catch (error) {
+      console.error("[wartung] Team-Sitzung konnte nicht geprüft werden", error);
+      teamPreview = false;
+    }
+  }
+
+  if (maintenance && !draft.isEnabled && !teamPreview) {
     return (
       <html lang="de" data-season-theme={seasonalTheme} className={`${inter.variable} ${grotesk.variable}`}>
         <body>
@@ -82,6 +97,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="flex min-h-dvh flex-col">
         <SeasonalTheme initialTheme={seasonalTheme} />
         {draft.isEnabled && <PreviewBar maintenance={maintenance} />}
+        {maintenance && teamPreview && (
+          <div className="sticky top-0 z-50 flex flex-wrap items-center justify-center gap-3 bg-warning px-4 py-2 text-center text-sm font-medium text-[oklch(0.2_0.03_60)]">
+            <span>🛠️ Wartungsmodus aktiv – du siehst die Website als Teammitglied.</span>
+            <a href="/admin" className="underline underline-offset-2">Zur Verwaltung</a>
+          </div>
+        )}
         <SiteHeader nav={nav} links={settings.links.header} />
         <main id="inhalt" className="flex-1">
           {children}

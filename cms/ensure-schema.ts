@@ -17,10 +17,25 @@ export async function ensureSchema(payload: Payload) {
         ADD COLUMN IF NOT EXISTS "maintenance_enabled" boolean DEFAULT false,
         ADD COLUMN IF NOT EXISTS "maintenance_title" varchar,
         ADD COLUMN IF NOT EXISTS "maintenance_message" varchar,
-        ADD COLUMN IF NOT EXISTS "maintenance_until" timestamp(3) with time zone
+        ADD COLUMN IF NOT EXISTS "maintenance_until" timestamp(3) with time zone,
+        ADD COLUMN IF NOT EXISTS "homepage_badge" varchar,
+        ADD COLUMN IF NOT EXISTS "homepage_title_lead" varchar,
+        ADD COLUMN IF NOT EXISTS "homepage_title_highlight" varchar,
+        ADD COLUMN IF NOT EXISTS "homepage_description" varchar
     `);
   } catch (err) {
     payload.logger.error({ err }, "[schema] Wartungsmodus-Spalten konnten nicht ergänzt werden");
+  }
+  // Bambus-Konten: Punktestand und Panda-Ausrüstung werden direkt beim Benutzer gespeichert.
+  // IF NOT EXISTS macht das Ergänzen auch für bestehende Produktionsdatenbanken sicher.
+  try {
+    await drizzle.execute(sql.raw(`
+      ALTER TABLE IF EXISTS "users"
+        ADD COLUMN IF NOT EXISTS "bamboo" numeric DEFAULT 25,
+        ADD COLUMN IF NOT EXISTS "bamboo_state" jsonb DEFAULT '{"count":25,"off":[],"views":0}'::jsonb
+    `));
+  } catch (err) {
+    payload.logger.error({ err }, "[schema] Bambus-Kontofelder konnten nicht ergänzt werden");
   }
   // kleine Zähler außerhalb von Payload (z. B. wie oft die GreenTech-Pflanze gegossen wurde)
   try {

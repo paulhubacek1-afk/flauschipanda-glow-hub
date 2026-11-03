@@ -33,12 +33,21 @@ Bereits technisch geprüft:
 
 ## Wartungsmodus
 
-Im Admin unter **Verwaltung → Website-Einstellungen → 🛠️ Wartungsmodus**. Nur **paul_hub** kann ihn ein- und ausschalten; für alle anderen sind die Felder gesperrt. Weitere Berechtigte kannst du über die Umgebungsvariable `MAINTENANCE_ADMINS` eintragen.
+Im Admin unter **Verwaltung → Website-Einstellungen → 🛠️ Wartungsmodus**. Jedes Konto mit der Rolle **Administrator** kann ihn ein- und ausschalten. Angemeldete Teammitglieder können die echte Website auch während der Wartung prüfen.
 
 - **Aktiv:** Alle Besucher sehen den Wartungsscreen mit Flauschipanda, deiner Überschrift und Nachricht. Suchmaschinen bekommen in dieser Zeit `noindex`.
 - **Voraussichtlich bis:** Optional. Besucher sehen einen Countdown. Danach endet die Wartung automatisch, spätestens nach einer Stunde.
-- **Team-Vorschau:** Angemeldete Teammitglieder sehen auf dem Wartungsscreen „Seite trotzdem ansehen“ und können die echte Seite prüfen, mit einer gelben Hinweisleiste.
+- **Team-Vorschau:** Angemeldete Teammitglieder sehen die echte Website direkt mit einer gelben Hinweisleiste; Besucher ohne Teamkonto sehen den Wartungsscreen.
 - **Automatisch:** Fällt etwas technisch aus, z. B. wenn die Datenbank kurz nicht erreichbar ist, erscheint statt einer Fehlerseite automatisch ein freundlicher Pausen-Screen mit „Nochmal versuchen“.
+
+## Community-Konten & Bambus
+
+Unter **/konto** können Besucher ein Konto registrieren oder sich anmelden. Neue Konten erhalten
+einmalig **25 Bambus**. Punktestand und Panda-Ausrüstung werden beim Benutzer in PostgreSQL
+gespeichert und sind dadurch auch nach einem Gerätewechsel wieder vorhanden. Im Admin unter
+**Verwaltung → Benutzer** lässt sich der Bambus-Punktestand einsehen und durch Admins korrigieren.
+Öffentliche Registrierungen erhalten immer die Rolle **Nutzer** und niemals automatisch Adminrechte.
+Die öffentliche Registrierung wird erst freigeschaltet, wenn mindestens ein Administratorkonto existiert.
 
 ## Sicherheit
 
@@ -127,7 +136,7 @@ Nach dem Speichern zeigt der Tab **„SEO & Verlinkung → Automatik-Vorschau“
 | **Affiliate-Produkte** | Partnerlinks, Zuordnung zu Kategorien/Unterthemen, Platzhalter werden nie öffentlich gezeigt |
 | **Medien** | Bilder und PDFs (kein SVG) |
 | **Benutzer** | Rollen: Admin · Redakteur · Autor (nur Entwürfe) · Nutzer (kein Backend) |
-| **Website-Einstellungen** | Name, Untertitel, Panda-GreenTech-Texte, Spendenzweck und -link |
+| **Website-Einstellungen** | Name, Untertitel, Startseiten-Hero, Menü- und Social-Links, Panda-GreenTech-Texte, Spendenzweck und -link |
 
 Jede Änderung im Backend ist sofort auf der Website sichtbar.
 

@@ -95,6 +95,15 @@ export function SiteHeader({ nav, links = [] }: { nav: NavLite[]; links?: SiteLi
               Spiele
             </Link>
             <Link
+              href="/konto"
+              className={cn(
+                "rounded-md px-3 py-2 text-sm text-foreground/75 hover:bg-accent hover:text-accent-foreground",
+                pathname === "/konto" && "bg-primary/10 text-primary",
+              )}
+            >
+              Konto
+            </Link>
+            <Link
               href="/neu"
               className={cn(
                 "rounded-md px-3 py-2 text-sm text-foreground/75 hover:bg-accent hover:text-accent-foreground",
@@ -283,6 +292,11 @@ export function SiteHeader({ nav, links = [] }: { nav: NavLite[]; links?: SiteLi
               <a href="https://www.youtube.com/@FlauschiPandas" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-md px-3 py-2.5 hover:bg-accent">
                 <Youtube className="size-4" aria-hidden="true" /> FlauschiPandas auf YouTube
               </a>
+            </li>
+            <li>
+              <Link href="/konto" className="block rounded-md px-3 py-2.5 hover:bg-accent">
+                Mein Panda-Konto
+              </Link>
             </li>
             <li>
               <Link href="/neu" className="block rounded-md px-3 py-2.5 hover:bg-accent">

@@ -14,6 +14,7 @@ import {
   hasOptIn,
   isPersisting,
   EARN_EVENT,
+  hydrateAccountBamboo,
   effectiveCustom,
   nextGoal,
   recordVisit,
@@ -564,6 +565,20 @@ export function PandaBuddy({ nav }: { nav: NavLite[] }) {
     };
     window.addEventListener("fp-buddy-collection", open);
     return () => window.removeEventListener("fp-buddy-collection", open);
+  }, []);
+
+  // Angemeldete Benutzer laden ihren Panda-Spielstand aus der Datenbank.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/konto", { credentials: "same-origin", cache: "no-store" })
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.authenticated && data?.bamboo) hydrateAccountBamboo(data.bamboo);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Bambus-Sammlung merken? (Einwilligung oder eigener Schalter)

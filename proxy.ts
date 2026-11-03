@@ -49,5 +49,6 @@ export const config = {
     "/api/users/reset-password",
     "/api/users/first-register",
     "/api/users/unlock",
+    "/api/konto/registrieren",
   ],
 };

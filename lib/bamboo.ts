@@ -87,6 +87,8 @@ const MAX = 99_999;
 let state: BambooState = { count: 0, off: [], views: 0 };
 let persist = false;
 let loaded = false;
+let accountLinked = false;
+let accountSyncTimer: number | null = null;
 const listeners = new Set<() => void>();
 
 function emit() {
@@ -94,12 +96,50 @@ function emit() {
 }
 
 function save() {
-  if (!persist) return;
-  try {
-    window.localStorage.setItem(KEY, JSON.stringify(state));
-  } catch {
-    /* Speicher blockiert – dann eben nur für diesen Besuch */
+  if (persist) {
+    try {
+      window.localStorage.setItem(KEY, JSON.stringify(state));
+    } catch {
+      /* Speicher blockiert – dann eben nur für diesen Besuch */
+    }
   }
+
+  // Ein angemeldetes Konto synchronisiert seinen Panda-Spielstand mit Postgres.
+  if (accountLinked && typeof window !== "undefined") {
+    if (accountSyncTimer !== null) window.clearTimeout(accountSyncTimer);
+    const snapshot = JSON.stringify(state);
+    accountSyncTimer = window.setTimeout(() => {
+      void fetch("/api/konto", {
+        method: "PATCH",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: snapshot,
+      }).catch(() => undefined);
+    }, 450);
+  }
+}
+
+/** Spielstand eines angemeldeten Kontos laden und künftig in der Datenbank sichern. */
+export function hydrateAccountBamboo(raw: unknown) {
+  const incoming = sanitize(raw);
+  if (!incoming) return;
+  accountLinked = true;
+  // Die Datenbank ist maßgeblich. So werden keine Bambus-Punkte eines anderen Kontos
+  // übernommen, das zuvor auf demselben Browser angemeldet war.
+  state = incoming;
+  save();
+  emit();
+}
+
+/** Kontosynchronisierung nach dem Abmelden beenden. */
+export function unlinkAccountBamboo() {
+  accountLinked = false;
+  if (accountSyncTimer !== null && typeof window !== "undefined") {
+    window.clearTimeout(accountSyncTimer);
+    accountSyncTimer = null;
+  }
+  state = { count: 0, off: [], views: 0 };
+  emit();
 }
 
 function sanitize(raw: unknown): BambooState | null {

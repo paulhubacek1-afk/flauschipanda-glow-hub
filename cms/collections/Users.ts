@@ -25,7 +25,7 @@ export const Users: CollectionConfig = {
   },
   admin: {
     useAsTitle: "username",
-    defaultColumns: ["username", "name", "role", "email"],
+    defaultColumns: ["username", "name", "role", "bamboo", "email"],
     group: "Verwaltung",
   },
   access: {

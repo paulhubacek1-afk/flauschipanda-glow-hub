@@ -138,6 +138,7 @@ export interface MaintenanceData {
 
 export interface SiteSettingsData {
   maintenance: MaintenanceData;
+  homepage: { badge: string; titleLead: string; titleHighlight: string; description: string };
   siteName: string;
   tagline: string;
   greencore: { name: string; headline: string; text: string; purpose: string; url: string; notice: string; aboutHref: string };
@@ -212,54 +213,60 @@ const liveWhere = (now: Date): Where => ({
 /* ------------------------------------------------------------------ */
 
 export const getNavigation = cache(async (): Promise<NavCategory[]> => {
-  const payload = await getPayloadClient();
-  const now = Date.now();
-  const [cats, groups, pages] = await Promise.all([
-    payload.find({ collection: "categories", limit: 200, depth: 0, joins: false, sort: ["order", "createdAt"], pagination: false }),
-    payload.find({ collection: "groups", limit: 2000, depth: 0, joins: false, sort: ["order", "createdAt"], pagination: false }),
-    payload.find({
-      collection: "pages",
-      limit: 10000,
-      depth: 0,
-      sort: "title",
-      pagination: false,
-      select: { title: true, label: true, slug: true, group: true, pageType: true, _status: true, publishedAt: true },
-    }),
-  ]);
+  try {
+    const payload = await getPayloadClient();
+    const now = Date.now();
+    const [cats, groups, pages] = await Promise.all([
+      payload.find({ collection: "categories", limit: 200, depth: 0, joins: false, sort: ["order", "createdAt"], pagination: false }),
+      payload.find({ collection: "groups", limit: 2000, depth: 0, joins: false, sort: ["order", "createdAt"], pagination: false }),
+      payload.find({
+        collection: "pages",
+        limit: 10000,
+        depth: 0,
+        sort: "title",
+        pagination: false,
+        select: { title: true, label: true, slug: true, group: true, pageType: true, _status: true, publishedAt: true },
+      }),
+    ]);
 
-  const pagesByGroup = new Map<string | number, Doc[]>();
-  for (const p of pages.docs as Doc[]) {
-    const gid = idOf(p.group);
-    if (gid === undefined) continue;
-    const key = String(gid);
-    pagesByGroup.set(key, [...(pagesByGroup.get(key) ?? []), p]);
-  }
+    const pagesByGroup = new Map<string, Doc[]>();
+    for (const page of pages.docs as Doc[]) {
+      const groupId = idOf(page.group);
+      if (groupId === undefined) continue;
+      const key = String(groupId);
+      pagesByGroup.set(key, [...(pagesByGroup.get(key) ?? []), page]);
+    }
 
-  return (cats.docs as Doc[]).map((c, i) => ({
-    dbId: c.id,
-    number: i + 1,
-    slug: c.slug,
-    title: c.title,
-    description: c.description?.trim() || `${c.title}: Ratgeber, Vergleiche und Tipps – verständlich und ehrlich erklärt.`,
-    icon: (c.icon ?? "paw") as IconName,
-    hue: typeof c.hue === "number" ? c.hue : 195,
-    groups: (groups.docs as Doc[])
-      .filter((g) => sameId(g.category, c.id))
-      .map((g) => ({
-        dbId: g.id,
-        slug: g.slug,
-        title: g.title,
-        description: g.description ?? `${g.title}: Ratgeber, Vergleiche und Tipps – verständlich und ehrlich erklärt.`,
-        pages: (pagesByGroup.get(String(g.id)) ?? []).map((p) => ({
-          id: `${c.slug}/${g.slug}/${p.slug}`,
-          slug: p.slug,
-          label: p.label || p.title,
-          title: p.title,
-          pageType: (p.pageType ?? "standard") as PageType,
-          live: p._status === "published" && (!p.publishedAt || new Date(p.publishedAt).getTime() <= now),
+    return (cats.docs as Doc[]).map((category, index) => ({
+      dbId: category.id,
+      number: index + 1,
+      slug: category.slug,
+      title: category.title,
+      description: category.description?.trim() || `${category.title}: Ratgeber, Vergleiche und Tipps – verständlich und ehrlich erklärt.`,
+      icon: (category.icon ?? "paw") as IconName,
+      hue: typeof category.hue === "number" ? category.hue : 195,
+      groups: (groups.docs as Doc[])
+        .filter((group) => sameId(group.category, category.id))
+        .map((group) => ({
+          dbId: group.id,
+          slug: group.slug,
+          title: group.title,
+          description: group.description ?? `${group.title}: Ratgeber, Vergleiche und Tipps – verständlich und ehrlich erklärt.`,
+          pages: (pagesByGroup.get(String(group.id)) ?? []).map((page) => ({
+            id: `${category.slug}/${group.slug}/${page.slug}`,
+            slug: page.slug,
+            label: page.label || page.title,
+            title: page.title,
+            pageType: (page.pageType ?? "standard") as PageType,
+            live: page._status === "published" && (!page.publishedAt || new Date(page.publishedAt).getTime() <= now),
+          })),
         })),
-      })),
-  }));
+    }));
+  } catch (error) {
+    // CMS-Ausfälle dürfen die Root-Layout-Renderpipeline nicht in den GlobalError schicken.
+    console.error("[navigation] CMS-Navigation konnte nicht geladen werden", error);
+    return [];
+  }
 });
 
 export async function getCategory(slug: string) {
@@ -287,34 +294,43 @@ export function navStats(nav: NavCategory[]) {
 /* ------------------------------------------------------------------ */
 
 export const getSettings = cache(async (): Promise<SiteSettingsData> => {
-  const payload = await getPayloadClient();
   let s: Doc = {};
   try {
+    const payload = await getPayloadClient();
     s = (await payload.findGlobal({ slug: "site-settings", depth: 0 })) as Doc;
-  } catch (err) {
-    // Einstellungen nicht lesbar (z. B. neue Spalte fehlt noch) → Website läuft mit Standardwerten weiter
-    payload.logger.error({ err }, "[einstellungen] Website-Einstellungen konnten nicht geladen werden");
+  } catch (error) {
+    // Fallback auch dann, wenn bereits der Aufbau der Payload-Verbindung fehlschlägt.
+    console.error("[einstellungen] Website-Einstellungen konnten nicht geladen werden", error);
   }
+
   const powered = mapLinks(s.poweredBy, false);
-  const g = (s.greencore ?? {}) as Doc;
-  const m = (s.maintenance ?? {}) as Doc;
+  const greencore = (s.greencore ?? {}) as Doc;
+  const maintenance = (s.maintenance ?? {}) as Doc;
+  const homepage = (s.homepage ?? {}) as Doc;
+
   return {
     maintenance: {
-      enabled: m.enabled === true,
-      title: m.title || "Wir schrauben gerade an der Panda Toolbox",
-      message: m.message || "Gleich sind wir wieder für dich da – danke für deine Geduld! 🐼",
-      until: m.until || undefined,
+      enabled: maintenance.enabled === true,
+      title: maintenance.title || "Wir schrauben gerade an der Panda Toolbox",
+      message: maintenance.message || "Gleich sind wir wieder für dich da – danke für deine Geduld! 🐼",
+      until: maintenance.until || undefined,
+    },
+    homepage: {
+      badge: homepage.badge || "Neu: Flauschipanda hat jetzt Skins – Saison-Design automatisch",
+      titleLead: homepage.titleLead || "Wissen, Tools & Tipps in ",
+      titleHighlight: homepage.titleHighlight || "einer Toolbox",
+      description: homepage.description || "Ratgeber, Vergleiche und Rechner zu Tieren, Zoos, Freizeitparks, KI, Urlaub, Autos, Finanzen, Wissenschaft und mehr – verständlich erklärt, ehrlich gekennzeichnet und immer kostenlos.",
     },
     siteName: s.siteName || "Panda Toolbox",
     tagline: s.tagline || "Die Panda Toolbox – Themen- und Communityportal",
     greencore: {
-      name: g.name || "Panda GreenTech",
-      headline: g.headline || "Unterstütze Panda GreenTech",
-      text: g.text || "Wenn dir diese Seite geholfen hat, kannst du Panda GreenTech freiwillig unterstützen.",
-      purpose: g.purpose || "",
-      url: g.url || "",
-      notice: g.notice || "Diese Seite ist Teil der Panda Toolbox.",
-      aboutHref: g.aboutHref || "/panda-branding/greentech",
+      name: greencore.name || "Panda GreenTech",
+      headline: greencore.headline || "Unterstütze Panda GreenTech",
+      text: greencore.text || "Wenn dir diese Seite geholfen hat, kannst du Panda GreenTech freiwillig unterstützen.",
+      purpose: greencore.purpose || "",
+      url: greencore.url || "",
+      notice: greencore.notice || "Diese Seite ist Teil der Panda Toolbox.",
+      aboutHref: greencore.aboutHref || "/panda-branding/greentech",
     },
     links: {
       merchUrl: safeHref(s.merchUrl) ?? DEFAULT_LINKS.merchUrl,

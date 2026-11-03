@@ -27,7 +27,7 @@ export const SiteSettings: GlobalConfig = {
       type: "group",
       admin: {
         description:
-          "Zeigt allen Besuchern einen Wartungsscreen. Nur paul_hub kann ihn ein- und ausschalten. Angemeldete Teammitglieder können die Seite über „Vorschau“ trotzdem ansehen.",
+          "Zeigt allen Besuchern einen Wartungsscreen. Jedes Administratorkonto kann ihn ein- und ausschalten; angemeldete Teammitglieder sehen die Website weiterhin.",
       },
       fields: [
         {
@@ -65,6 +65,18 @@ export const SiteSettings: GlobalConfig = {
     },
     { name: "siteName", label: "Website-Name", type: "text", defaultValue: "Panda Toolbox" },
     { name: "tagline", label: "Untertitel", type: "text", defaultValue: "Themen- und Communityportal" },
+    {
+      name: "homepage",
+      label: "Startseite – Hero-Bereich",
+      type: "group",
+      admin: { description: "Bearbeite die große Überschrift, den Beschreibungstext und den Hinweis oben auf der Startseite." },
+      fields: [
+        { name: "badge", label: "Hinweis / Neuigkeiten über der Überschrift", type: "text", defaultValue: "Neu: Flauschipanda hat jetzt Skins – Saison-Design automatisch" },
+        { name: "titleLead", label: "Überschrift (normaler Teil)", type: "text", defaultValue: "Wissen, Tools & Tipps in " },
+        { name: "titleHighlight", label: "Überschrift (hervorgehobener Teil)", type: "text", defaultValue: "einer Toolbox" },
+        { name: "description", label: "Beschreibungstext", type: "textarea", defaultValue: "Ratgeber, Vergleiche und Rechner zu Tieren, Zoos, Freizeitparks, KI, Urlaub, Autos, Finanzen, Wissenschaft und mehr – verständlich erklärt, ehrlich gekennzeichnet und immer kostenlos." },
+      ],
+    },
     {
       name: "greencore",
       label: "Panda GreenTech",

@@ -34,17 +34,8 @@ export const publishedOrTeam: Access = ({ req }) => {
 export const anyone: Access = () => true;
 
 /**
- * Wartungsmodus: nur bestimmte Administratoren dürfen ihn schalten – standardmäßig paul_hub.
- * Weitere Benutzernamen können über MAINTENANCE_ADMINS (kommagetrennt) erlaubt werden.
+ * Den Wartungsmodus darf jedes Administratorkonto verwalten.
+ * Die Berechtigung hängt bewusst an der Rolle und nicht an einem fest verdrahteten
+ * Benutzernamen, damit ein Admin sich nicht selbst aus der Website aussperrt.
  */
-export function maintenanceOwners() {
-  return (process.env.MAINTENANCE_ADMINS || "paul_hub")
-    .split(",")
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
-}
-
-export const isMaintenanceOwner: FieldAccess = ({ req }) => {
-  const user = req.user as { role?: string; username?: string | null } | null | undefined;
-  return user?.role === "admin" && maintenanceOwners().includes(String(user.username ?? "").toLowerCase());
-};
+export const isMaintenanceOwner: FieldAccess = ({ req }) => roleOf(req) === "admin";
