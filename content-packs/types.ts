@@ -1,4 +1,5 @@
 import type { PageType } from "../lib/auto";
+import type { ProsConsData } from "../lib/editorial";
 
 /** Ein Inhaltspaket: Unterthemen + fertige Seiten für eine bestehende Kategorie. */
 export interface PackPage {
@@ -12,6 +13,7 @@ export interface PackPage {
   markdown: string;
   faq?: { q: string; a: string }[];
   comparison?: { title: string; columns: string[]; rows: { label: string; values: string[] }[]; note?: string };
+  prosCons?: ProsConsData;
   sources?: { title: string; url: string }[];
 }
 
@@ -46,6 +48,7 @@ export interface FillPage {
   focusKeyword?: string;
   linkAnchors?: string[];
   comparison?: PackPage["comparison"];
+  prosCons?: ProsConsData;
   sources?: { title: string; url: string }[];
 }
 
