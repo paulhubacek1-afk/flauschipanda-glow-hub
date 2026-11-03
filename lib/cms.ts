@@ -11,7 +11,7 @@ import { lexicalToPlainText } from "@/cms/lexical-text";
 
 import { autoDescription, autoLinkAnchors, autoSeoTitle, type PageType } from "./auto";
 import { htmlConverters } from "./lexical-html";
-import type { IconName } from "./hierarchy";
+import { hierarchy, type IconName } from "./hierarchy";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Doc = Record<string, any>;
@@ -208,6 +208,37 @@ const liveWhere = (now: Date): Where => ({
   ],
 });
 
+/**
+ * Offline-Navigation aus der im Repository gespeicherten Grundstruktur.
+ * Wird nur verwendet, wenn Payload/Postgres nicht erreichbar ist. Die
+ * Seiten werden dabei bewusst nicht als veröffentlicht markiert.
+ */
+function fallbackNavigation(): NavCategory[] {
+  return hierarchy.map((category) => ({
+    dbId: `fallback-category-${category.slug}`,
+    number: category.number,
+    slug: category.slug,
+    title: category.title,
+    description: category.description,
+    icon: category.icon,
+    hue: category.hue,
+    groups: category.groups.map((group) => ({
+      dbId: `fallback-group-${category.slug}-${group.slug}`,
+      slug: group.slug,
+      title: group.title,
+      description: group.description,
+      pages: group.pages.map((page) => ({
+        id: `${category.slug}/${group.slug}/${page.slug}`,
+        slug: page.slug,
+        label: page.label,
+        title: page.title,
+        pageType: "standard" as PageType,
+        live: false,
+      })),
+    })),
+  }));
+}
+
 /* ------------------------------------------------------------------ */
 /* Navigation: komplette Hierarchie inkl. geplanter Seiten              */
 /* ------------------------------------------------------------------ */
@@ -263,9 +294,9 @@ export const getNavigation = cache(async (): Promise<NavCategory[]> => {
         })),
     }));
   } catch (error) {
-    // CMS-Ausfälle dürfen die Root-Layout-Renderpipeline nicht in den GlobalError schicken.
-    console.error("[navigation] CMS-Navigation konnte nicht geladen werden", error);
-    return [];
+    // Footer, Header und Kategoriestruktur bleiben auch bei einem DB-Ausfall sichtbar.
+    console.error("[navigation] CMS-Navigation konnte nicht geladen werden; lokale Grundstruktur wird verwendet.", error);
+    return fallbackNavigation();
   }
 });
 
