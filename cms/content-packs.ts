@@ -1,5 +1,6 @@
 import type { Payload } from "payload";
 
+import { createProsCons } from "../lib/editorial";
 import { contentPacks } from "../content-packs";
 import type { ContentPack, PackPage } from "../content-packs/types";
 
@@ -22,7 +23,7 @@ async function find(payload: Payload, collection: "categories" | "groups" | "pag
   return payload.find({ collection, where, limit, depth: 0, overrideAccess: true, draft: true });
 }
 
-function pageData(p: PackPage, groupId: number | string) {
+function pageData(p: PackPage, groupId: number | string, path: string) {
   return {
     title: p.title,
     label: p.label,
@@ -41,6 +42,11 @@ function pageData(p: PackPage, groupId: number | string) {
           note: p.comparison.note,
         }
       : undefined,
+    prosCons: {
+      pros: (p.prosCons ?? createProsCons(path, p.title, p.markdown)).pros.join("\\n"),
+      cons: (p.prosCons ?? createProsCons(path, p.title, p.markdown)).cons.join("\\n"),
+      note: (p.prosCons ?? createProsCons(path, p.title, p.markdown)).note ?? "",
+    },
     donation: true,
     seo: {
       metaDescription: p.description,
@@ -134,7 +140,7 @@ async function applyPack(payload: Payload, pack: ContentPack): Promise<number> {
       try {
         const exists = (await find(payload, "pages", { path: { equals: pagePath } })).docs.length > 0;
         if (exists) continue;
-        await payload.create({ collection: "pages", data: pageData(p, group.id) as never, overrideAccess: true, context });
+        await payload.create({ collection: "pages", data: pageData(p, group.id, pagePath) as never, overrideAccess: true, context });
         changes++;
       } catch (err) {
         payload.logger.warn({ err }, `[inhalte] Seite ${pagePath} konnte nicht angelegt werden`);
@@ -190,6 +196,11 @@ async function fillEmptyPages(payload: Payload): Promise<number> {
           publishedAt: new Date().toISOString(),
           markdown: f.markdown.trim(),
           faq: (f.faq ?? []).map(([q, a]) => ({ q, a })),
+          prosCons: {
+            pros: (f.prosCons ?? createProsCons(f.path, doc.title, f.markdown)).pros.join("\\n"),
+            cons: (f.prosCons ?? createProsCons(f.path, doc.title, f.markdown)).cons.join("\\n"),
+            note: (f.prosCons ?? createProsCons(f.path, doc.title, f.markdown)).note ?? "",
+          },
           ...(f.comparison
             ? {
                 comparison: {
@@ -494,6 +505,11 @@ async function upgradePages(payload: Payload): Promise<number> {
           content: null, // wird anschließend automatisch in den Editor übernommen
           textSource: "auto",
           faq: (u.faq ?? []).map(([q, a]) => ({ q, a })),
+          prosCons: {
+            pros: (u.prosCons ?? createProsCons(u.path, doc.title, u.markdown)).pros.join("\\n"),
+            cons: (u.prosCons ?? createProsCons(u.path, doc.title, u.markdown)).cons.join("\\n"),
+            note: (u.prosCons ?? createProsCons(u.path, doc.title, u.markdown)).note ?? "",
+          },
           ...(u.comparison
             ? {
                 comparison: {
