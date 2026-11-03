@@ -20,6 +20,7 @@ const recent = new Map<string, number>();
 type Exec = { execute: (q: unknown) => Promise<{ rows?: { value?: string | number }[] } | unknown> };
 
 async function db(): Promise<Exec | null> {
+  if (!String(process.env.DATABASE_URI ?? "").trim()) return null;
   const payload = await getPayload({ config });
   return ((payload.db as unknown as { drizzle?: Exec }).drizzle ?? null) as Exec | null;
 }
