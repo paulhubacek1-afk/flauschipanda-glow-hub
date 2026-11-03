@@ -1,6 +1,7 @@
 import type { Payload } from "payload";
 
 import { createProsCons } from "../lib/editorial";
+import { hierarchy } from "../lib/hierarchy";
 import { contentPacks } from "../content-packs";
 import type { ContentPack, PackPage } from "../content-packs/types";
 
@@ -8,14 +9,8 @@ import type { ContentPack, PackPage } from "../content-packs/types";
 type Doc = Record<string, any>;
 
 /**
- * Übernimmt Inhaltspakete (content-packs/) ins CMS.
- *
- * Sicherheitsregeln – es wird NIE etwas überschrieben oder gelöscht:
- *  • Unterthemen werden nur angelegt, solange die Kategorie noch gar keine Unterthemen hat.
- *  • Seiten werden nur in Paket-Unterthemen angelegt, die noch keine einzige Seite haben
- *    (so wird ein abgebrochener erster Lauf vervollständigt).
- *  • Gelöschte oder geänderte Inhalte im Admin bleiben daher gelöscht bzw. geändert.
- *  • Gleichzeitige Starts sind harmlos: URLs sind eindeutig, doppelte Anlagen schlagen fehl.
+ * Übernimmt ausgearbeitete Inhaltspakete und ergänzt fehlende Einträge der Seiten-Hierarchie.
+ * Bestehende Seiten und manuelle Änderungen bleiben unverändert.
  */
 const context = { skipChecks: true, skipRevalidate: true };
 
@@ -89,12 +84,11 @@ async function applyPack(payload: Payload, pack: ContentPack): Promise<number> {
   const ownGroups = existingGroups.filter((g) => packSlugs.has(g.slug));
   // Kategorie hat bereits eigene (fremde) Unterthemen → Paket nicht anwenden
   if (existingGroups.length > 0 && ownGroups.length === 0) return 0;
-  const createGroups = existingGroups.length === 0;
 
   let changes = 0;
 
   // Symbol/Farbe nur setzen, solange noch die Standardwerte eingestellt sind
-  if (createGroups && pack.icon && (cat.icon ?? "paw") === "paw") {
+  if (existingGroups.length === 0 && pack.icon && (cat.icon ?? "paw") === "paw") {
     try {
       await payload.update({
         collection: "categories",
@@ -113,7 +107,6 @@ async function applyPack(payload: Payload, pack: ContentPack): Promise<number> {
     let group = ownGroups.find((x) => x.slug === g.slug);
 
     if (!group) {
-      if (!createGroups) continue; // vom Team gelöschtes Unterthema nicht wiederherstellen
       try {
         group = (await payload.create({
           collection: "groups",
@@ -132,10 +125,6 @@ async function applyPack(payload: Payload, pack: ContentPack): Promise<number> {
       }
     }
 
-    const pagesInGroup = (await find(payload, "pages", { group: { equals: group.id } })).totalDocs ?? 0;
-    // Neu angelegtes Unterthema hat 0 Seiten; bestehendes nur befüllen, wenn es noch leer ist
-    if (pagesInGroup > 0 && !createGroups) continue;
-
     for (const p of g.pages) {
       const pagePath = `${groupPath}/${p.slug}`;
       try {
@@ -148,6 +137,116 @@ async function applyPack(payload: Payload, pack: ContentPack): Promise<number> {
       }
     }
   }
+  return changes;
+}
+
+/* ------------------------------------------------------------------ */
+/* Fehlende Seiten aus der zentralen Hierarchie im CMS anlegen         */
+/* ------------------------------------------------------------------ */
+
+const STRUCTURE_BUDGET_MS = 30_000;
+
+/**
+ * Legt Kategorien, Unterthemen und fehlende Landingpages an.
+ * Seiten ohne ausgearbeiteten Artikel bleiben Entwürfe und werden nicht veröffentlicht.
+ * Bereits vorhandene Einträge werden niemals überschrieben.
+ */
+async function ensureHierarchyPages(payload: Payload): Promise<number> {
+  const [categoryResult, groupResult, pageResult] = await Promise.all([
+    payload.find({ collection: "categories", limit: 500, depth: 0, pagination: false, draft: true, overrideAccess: true }),
+    payload.find({ collection: "groups", limit: 5000, depth: 0, pagination: false, draft: true, overrideAccess: true }),
+    payload.find({ collection: "pages", limit: 10000, depth: 0, pagination: false, draft: true, overrideAccess: true, select: { path: true } as never }),
+  ]);
+
+  const categories = new Map((categoryResult.docs as Doc[]).map((doc) => [String(doc.slug), doc]));
+  const groups = new Map((groupResult.docs as Doc[]).map((doc) => [String(doc.path ?? ""), doc]));
+  const pages = new Set((pageResult.docs as Doc[]).map((doc) => String(doc.path ?? "")));
+  const started = Date.now();
+  let changes = 0;
+
+  for (const [categoryIndex, categoryNode] of hierarchy.entries()) {
+    if (Date.now() - started > STRUCTURE_BUDGET_MS) break;
+
+    let category = categories.get(categoryNode.slug);
+    if (!category) {
+      try {
+        category = (await payload.create({
+          collection: "categories",
+          overrideAccess: true,
+          context,
+          data: {
+            title: categoryNode.title,
+            slug: categoryNode.slug,
+            description: categoryNode.description,
+            icon: categoryNode.icon,
+            hue: categoryNode.hue,
+            order: (categoryIndex + 1) * 10,
+          } as never,
+        })) as Doc;
+        categories.set(categoryNode.slug, category);
+        changes++;
+      } catch (err) {
+        payload.logger.warn({ err }, \`[struktur] Kategorie /\${categoryNode.slug} konnte nicht angelegt werden\`);
+        continue;
+      }
+    }
+
+    for (const [groupIndex, groupNode] of categoryNode.groups.entries()) {
+      if (Date.now() - started > STRUCTURE_BUDGET_MS) break;
+      const groupPath = \`/\${categoryNode.slug}/\${groupNode.slug}\`;
+      let group = groups.get(groupPath);
+
+      if (!group) {
+        try {
+          group = (await payload.create({
+            collection: "groups",
+            overrideAccess: true,
+            context,
+            data: {
+              title: groupNode.title,
+              slug: groupNode.slug,
+              category: category.id,
+              description: groupNode.description,
+              order: (groupIndex + 1) * 10,
+            } as never,
+          })) as Doc;
+          groups.set(groupPath, group);
+          changes++;
+        } catch (err) {
+          payload.logger.warn({ err }, \`[struktur] Unterthema \${groupPath} konnte nicht angelegt werden\`);
+          continue;
+        }
+      }
+
+      for (const pageNode of groupNode.pages) {
+        if (Date.now() - started > STRUCTURE_BUDGET_MS) break;
+        const pagePath = \`\${groupPath}/\${pageNode.slug}\`;
+        if (pages.has(pagePath)) continue;
+
+        try {
+          await payload.create({
+            collection: "pages",
+            overrideAccess: true,
+            context,
+            data: {
+              title: pageNode.title,
+              label: pageNode.label,
+              slug: pageNode.slug,
+              group: group.id,
+              pageType: "standard",
+              _status: "draft",
+              donation: true,
+            } as never,
+          });
+          pages.add(pagePath);
+          changes++;
+        } catch (err) {
+          payload.logger.warn({ err }, \`[struktur] Seite \${pagePath} konnte nicht angelegt werden\`);
+        }
+      }
+    }
+  }
+
   return changes;
 }
 
@@ -945,6 +1044,7 @@ export async function applyContentPacks(payload: Payload) {
       payload.logger.error({ err }, `[inhalte] Paket ${pack.id} fehlgeschlagen`);
     }
   }
+  await run("Fehlende Seitenstruktur ergänzen", ensureHierarchyPages);
   await run("Seiten befüllen", fillEmptyPages);
   await run("Ausführliche Neufassungen", upgradePages);
   await run("Texte in den Editor übernehmen", convertPagesToEditor);
