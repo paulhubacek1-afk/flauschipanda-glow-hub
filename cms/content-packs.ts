@@ -24,6 +24,7 @@ async function find(payload: Payload, collection: "categories" | "groups" | "pag
 }
 
 function pageData(p: PackPage, groupId: number | string, path: string) {
+  const prosCons = p.prosCons ?? createProsCons(path, p.title, p.markdown);
   return {
     title: p.title,
     label: p.label,
@@ -43,9 +44,9 @@ function pageData(p: PackPage, groupId: number | string, path: string) {
         }
       : undefined,
     prosCons: {
-      pros: (p.prosCons ?? createProsCons(path, p.title, p.markdown)).pros.join("\\n"),
-      cons: (p.prosCons ?? createProsCons(path, p.title, p.markdown)).cons.join("\\n"),
-      note: (p.prosCons ?? createProsCons(path, p.title, p.markdown)).note ?? "",
+      pros: prosCons.pros.join("\n"),
+      cons: prosCons.cons.join("\n"),
+      note: prosCons.note ?? "",
     },
     donation: true,
     seo: {
@@ -185,6 +186,7 @@ async function fillEmptyPages(payload: Payload): Promise<number> {
     if (doc.pageType === "money") continue; // Money Pages schreibt das Team selbst (mit Partnerlinks)
     if (String(doc.markdown ?? "").trim() || !isEmptyRich(doc.content)) continue; // schon Inhalt → nie überschreiben
     const seo = (doc.seo ?? {}) as Doc;
+    const prosCons = f.prosCons ?? createProsCons(f.path, doc.title, f.markdown);
     try {
       await payload.update({
         collection: "pages",
@@ -197,9 +199,9 @@ async function fillEmptyPages(payload: Payload): Promise<number> {
           markdown: f.markdown.trim(),
           faq: (f.faq ?? []).map(([q, a]) => ({ q, a })),
           prosCons: {
-            pros: (f.prosCons ?? createProsCons(f.path, doc.title, f.markdown)).pros.join("\\n"),
-            cons: (f.prosCons ?? createProsCons(f.path, doc.title, f.markdown)).cons.join("\\n"),
-            note: (f.prosCons ?? createProsCons(f.path, doc.title, f.markdown)).note ?? "",
+            pros: prosCons.pros.join("\n"),
+            cons: prosCons.cons.join("\n"),
+            note: prosCons.note ?? "",
           },
           ...(f.comparison
             ? {
@@ -491,6 +493,7 @@ async function upgradePages(payload: Payload): Promise<number> {
       ((!current && richEmpty) || (old && current === old.markdown.trim() && (richEmpty || doc.textSource === "auto")));
     if (!untouched || current === u.markdown.trim()) continue; // von Hand bearbeitet oder schon neu → nicht anfassen
     const seo = (doc.seo ?? {}) as Doc;
+    const prosCons = u.prosCons ?? createProsCons(u.path, doc.title, u.markdown);
     const keepDescription = seo.metaDescription && seo.metaDescription !== old?.description;
     try {
       await payload.update({
@@ -506,9 +509,9 @@ async function upgradePages(payload: Payload): Promise<number> {
           textSource: "auto",
           faq: (u.faq ?? []).map(([q, a]) => ({ q, a })),
           prosCons: {
-            pros: (u.prosCons ?? createProsCons(u.path, doc.title, u.markdown)).pros.join("\\n"),
-            cons: (u.prosCons ?? createProsCons(u.path, doc.title, u.markdown)).cons.join("\\n"),
-            note: (u.prosCons ?? createProsCons(u.path, doc.title, u.markdown)).note ?? "",
+            pros: prosCons.pros.join("\n"),
+            cons: prosCons.cons.join("\n"),
+            note: prosCons.note ?? "",
           },
           ...(u.comparison
             ? {
