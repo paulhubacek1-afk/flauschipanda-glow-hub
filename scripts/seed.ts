@@ -18,6 +18,7 @@ import config from "../payload.config";
 import { affiliateProducts } from "../lib/affiliate";
 import { allPageNodes, hierarchy } from "../lib/hierarchy";
 import { pageTypeFor } from "../lib/page-types";
+import { createProsCons } from "../lib/editorial";
 import { donationConfig } from "../lib/site";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -157,6 +158,10 @@ for (const n of allPageNodes()) {
       widgets: fm.widgets ?? [],
       faq: ((fm.faq ?? []) as Doc[]).map((f) => ({ q: f.q, a: f.a })),
       comparison,
+      prosCons: (() => {
+        const value = createProsCons(n.id, fm.title ?? n.page.title, content);
+        return { pros: value.pros.join("\\n"), cons: value.cons.join("\\n"), note: value.note ?? "" };
+      })(),
       products: ((fm.products ?? []) as string[]).map((k) => affiliateIds.get(k)).filter(Boolean),
       donation: fm.donation !== false,
       seo: {
