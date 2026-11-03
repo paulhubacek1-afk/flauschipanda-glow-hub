@@ -264,6 +264,26 @@ export const Pages: CollectionConfig = {
                 { name: "note", label: "Hinweis unter der Tabelle", type: "text" },
               ],
             },
+            {
+              name: "prosCons",
+              label: "Vorteile & Nachteile",
+              type: "group",
+              fields: [
+                {
+                  name: "pros",
+                  label: "Vorteile (ein Punkt pro Zeile)",
+                  type: "textarea",
+                  admin: { rows: 5, description: "Leer lassen = passende redaktionelle Zusammenfassung wird automatisch angezeigt." },
+                },
+                {
+                  name: "cons",
+                  label: "Nachteile und Grenzen (ein Punkt pro Zeile)",
+                  type: "textarea",
+                  admin: { rows: 5, description: "Leer lassen = passende redaktionelle Zusammenfassung wird automatisch angezeigt." },
+                },
+                { name: "note", label: "Hinweis", type: "textarea" },
+              ],
+            },
           ],
         },
         {
