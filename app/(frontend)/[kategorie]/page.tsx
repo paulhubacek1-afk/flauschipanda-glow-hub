@@ -15,7 +15,7 @@ import { PageList } from "@/components/page-list";
 import { getCategory, getLivePagesInCategory, getSettings, getTopicAffiliates, toSummary } from "@/lib/cms";
 import { collectionSchema } from "@/lib/schema";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 type Props = { params: Promise<{ kategorie: string }> };
 
