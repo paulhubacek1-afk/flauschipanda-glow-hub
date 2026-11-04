@@ -15,7 +15,7 @@ import { relatedGroupKeys } from "@/lib/linking";
 import { CATEGORY_TOOLS } from "@/lib/tools";
 import { collectionSchema } from "@/lib/schema";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 type Props = { params: Promise<{ kategorie: string; gruppe: string }> };
 
