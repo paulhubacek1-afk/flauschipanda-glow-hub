@@ -15,7 +15,7 @@ import { relatedGroupKeys } from "@/lib/linking";
 import { CATEGORY_TOOLS } from "@/lib/tools";
 import { collectionSchema } from "@/lib/schema";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ kategorie: string; gruppe: string }> };
 
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!found) return {};
   const { category, group } = found;
   const path = `/${category.slug}/${group.slug}`;
-  const hasContent = group.pages.some((p) => p.live);
+  const hasContent = (await getLivePagesInGroup(category.slug, group.slug)).length > 0;
   return {
     title: `${group.title} – ${category.title}`,
     description: group.description,
@@ -48,6 +48,12 @@ export default async function GroupPage({ params }: Props) {
     getSettings(),
     getNavigation(),
   ]);
+  // Live-Artikel aus dem CMS bleiben anklickbar, auch wenn die Navigationsabfrage
+  // vorübergehend auf ihre lokale Ersatzstruktur zurückgefallen ist.
+  const livePageSlugs = new Set(live.map((page) => page.slug));
+  const displayPages = group.pages.map((page) =>
+    livePageSlugs.has(page.slug) ? { ...page, live: true } : page,
+  );
   // Häufige Fragen aus den Ratgebern dieses Unterthemas – jede mit Link zur ausführlichen Antwort
   const questions = live.flatMap((p) => (p.faq[0] ? [{ q: p.faq[0].q, a: p.faq[0].a, href: p.href, title: p.title }] : [])).slice(0, 8);
   // verwandte Unterthemen in anderen Kategorien (nur mit Inhalt)
@@ -124,7 +130,7 @@ export default async function GroupPage({ params }: Props) {
         <aside className="space-y-4">
           <nav aria-label={`Alle Seiten in ${group.title}`} className="rounded-xl border bg-card/60 p-4">
             <p className="mb-2 px-2.5 text-sm font-semibold">Alle Themen in {group.title}</p>
-            <PageList categorySlug={category.slug} groupSlug={group.slug} pages={group.pages} dense />
+            <PageList categorySlug={category.slug} groupSlug={group.slug} pages={displayPages} dense />
           </nav>
           {toolLinks.length > 0 && (
             <nav aria-label="Passende Rechner" className="rounded-xl border bg-card/60 p-4">
