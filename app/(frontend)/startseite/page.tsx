@@ -14,7 +14,7 @@ import { getLivePages, getNavigation, getSearchItems, getSettings, navStats, toS
 import { getPopularPaths, getVisitorStats } from "@/lib/counters";
 import { MERCH_URL, siteConfig } from "@/lib/site";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: { absolute: `${siteConfig.name} – Wissen, Tools & Tipps` },
@@ -43,6 +43,19 @@ export default async function StartPage() {
     getSettings(),
   ]);
   const stats = navStats(nav);
+  // Die CMS-Navigation und die vollständigen Artikeldaten können bei einem
+  // vorübergehenden Datenbankausfall unterschiedlich aktuell sein.
+  // Für öffentliche Zähler gilt deshalb der jeweils höhere bestätigte Wert.
+  const liveCount = Math.max(stats.live, live.length);
+  const liveCountByCategory = new Map(
+    nav.map((c) => [
+      c.slug,
+      Math.max(
+        live.filter((p) => p.category.slug === c.slug).length,
+        c.groups.reduce((total, g) => total + g.pages.filter((p) => p.live).length, 0),
+      ),
+    ]),
+  );
   const liveHrefs = new Set(live.map((p) => p.href));
   const byHref = new Map(live.map((p) => [p.href, p]));
   const popular = popularPaths
@@ -52,7 +65,7 @@ export default async function StartPage() {
   const tools = TOOLS.filter((t) => liveHrefs.has(t.href));
   // Schnellzugriff: die Kategorien mit den meisten Seiten
   const quick = [...nav]
-    .map((c) => ({ c, n: live.filter((p) => p.category.slug === c.slug).length }))
+    .map((c) => ({ c, n: liveCountByCategory.get(c.slug) ?? 0 }))
     .sort((a, b) => b.n - a.n)
     .slice(0, 6);
 
@@ -69,7 +82,7 @@ export default async function StartPage() {
               href="/neu"
               className="inline-flex animate-fade-up items-center gap-2 rounded-full border border-purple/40 bg-card/70 px-3.5 py-1.5 text-xs font-medium text-foreground/85 shadow-[var(--glow-sm)] transition-transform hover:scale-[1.03] active:scale-95"
             >
-              <Sparkles className="size-3.5 text-primary" aria-hidden="true" /> {settings.homepage.badge} · {fmt(stats.live)} Seiten online
+              <Sparkles className="size-3.5 text-primary" aria-hidden="true" /> {settings.homepage.badge} · {fmt(liveCount)} Seiten online
               <ArrowRight className="size-3.5" aria-hidden="true" />
             </Link>
             <h1 className="animate-fade-up text-4xl font-bold leading-tight [animation-delay:120ms] md:text-6xl">
@@ -97,7 +110,7 @@ export default async function StartPage() {
             <dl className="grid animate-fade-up grid-cols-3 gap-3 [animation-delay:540ms] sm:max-w-lg lg:max-w-none">
               {[
                 { label: "Kategorien", value: stats.categories },
-                { label: "Seiten online", value: stats.live },
+                { label: "Seiten online", value: liveCount },
                 { label: visitors.total > 0 ? "Besuche" : "Unterthemen", value: visitors.total > 0 ? visitors.total : stats.groups },
               ].map((s) => (
                 <div key={s.label} className="rounded-xl border bg-card/60 px-3 py-3 text-center lg:text-left">
@@ -126,7 +139,7 @@ export default async function StartPage() {
         </div>
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {nav.map((c, i) => {
-            const count = live.filter((p) => p.category.slug === c.slug).length;
+            const count = liveCountByCategory.get(c.slug) ?? 0;
             return (
               <li key={c.slug} data-reveal data-reveal-delay={(i % 4) * 70} data-panda-topic={c.slug} data-panda-label={c.title} data-panda-href={`/${c.slug}`}>
                 <Link

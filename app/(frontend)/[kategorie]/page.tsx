@@ -15,7 +15,7 @@ import { PageList } from "@/components/page-list";
 import { getCategory, getLivePagesInCategory, getSettings, getTopicAffiliates, toSummary } from "@/lib/cms";
 import { collectionSchema } from "@/lib/schema";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 type Props = { params: Promise<{ kategorie: string }> };
 
@@ -46,6 +46,15 @@ export default async function CategoryPage({ params }: Props) {
     getTopicAffiliates("categories", category.dbId),
     getSettings(),
   ]);
+  // Bei einer temporär nicht erreichbaren Navigationsabfrage können Artikel
+  // bereits geladen sein. Diese müssen trotzdem als veröffentlichte Links erscheinen.
+  const liveGroupPages = new Set(live.map((page) => `${page.group.slug}/${page.slug}`));
+  const displayGroups = category.groups.map((group) => ({
+    ...group,
+    pages: group.pages.map((page) =>
+      liveGroupPages.has(`${group.slug}/${page.slug}`) ? { ...page, live: true } : page,
+    ),
+  }));
 
   return (
     <div className="mx-auto max-w-7xl space-y-14 px-4 py-10">
@@ -83,7 +92,7 @@ export default async function CategoryPage({ params }: Props) {
         <h2 id="unterthemen" className="mb-6 text-2xl font-semibold">
           Unterthemen
         </h2>
-        {category.groups.length === 0 && (
+        {displayGroups.length === 0 && (
           <div className="rounded-xl border border-dashed border-purple/30 p-10 text-center">
             <p className="font-medium">Diese Kategorie ist ganz neu – die ersten Unterthemen entstehen gerade.</p>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -96,8 +105,8 @@ export default async function CategoryPage({ params }: Props) {
           </div>
         )}
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {category.groups.map((g) => {
-            const count = g.pages.filter((p) => p.live).length;
+          {displayGroups.map((g) => {
+            const count = Math.max(g.pages.filter((p) => p.live).length, live.filter((p) => p.group.slug === g.slug).length);
             return (
               <section
                 key={g.slug}
