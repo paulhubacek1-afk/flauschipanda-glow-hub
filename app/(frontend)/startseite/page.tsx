@@ -14,7 +14,7 @@ import { getLivePages, getNavigation, getSearchItems, getSettings, navStats, toS
 import { getPopularPaths, getVisitorStats } from "@/lib/counters";
 import { MERCH_URL, siteConfig } from "@/lib/site";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: { absolute: `${siteConfig.name} – Wissen, Tools & Tipps` },
