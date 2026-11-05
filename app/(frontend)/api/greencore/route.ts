@@ -2,6 +2,8 @@ import config from "@payload-config";
 import { sql } from "@payloadcms/db-postgres";
 import { getPayload } from "payload";
 
+import { isSameOrigin } from "@/lib/security";
+
 /**
  * Wie oft die GreenTech-Pflanze schon „gegossen“ wurde (= Besuche auf GreenTech-Seiten).
  * Je mehr Leute lesen, desto größer wird die Pflanze, die der Panda gießt.
@@ -45,18 +47,8 @@ export async function GET() {
   }
 }
 
-function sameSite(request: Request) {
-  const origin = request.headers.get("origin");
-  if (!origin) return false;
-  try {
-    return new URL(origin).host === new URL(request.url).host;
-  } catch {
-    return false;
-  }
-}
-
 export async function POST(request: Request) {
-  if (!sameSite(request)) return Response.json({ ok: false }, { status: 403 });
+  if (!isSameOrigin(request)) return Response.json({ ok: false }, { status: 403 });
   const ip = (request.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unbekannt";
   const now = Date.now();
   if (recent.size > 5000) for (const [k, t] of recent) if (now - t > WINDOW_MS) recent.delete(k);

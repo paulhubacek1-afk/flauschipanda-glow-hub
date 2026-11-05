@@ -14,8 +14,14 @@ const MAX_ATTEMPTS = 10; // pro IP und Zeitfenster
 const hits = new Map<string, { count: number; reset: number }>();
 
 function clientIp(req: NextRequest) {
+  // `x-real-ip` wird von der Plattform (Vercel) auf die echte Client-IP gesetzt und kann vom
+  // Client nicht vorangestellt werden. `x-forwarded-for` lässt sich dagegen mit beliebigen
+  // Werten „auffüllen“ (der linke Eintrag wäre dann angreiferkontrolliert) und würde das
+  // Zählen pro IP aushebeln – deshalb zuerst `x-real-ip`.
+  const realIp = req.headers.get("x-real-ip")?.trim();
+  if (realIp) return realIp;
   const forwarded = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return forwarded || req.headers.get("x-real-ip") || "unbekannt";
+  return forwarded || "unbekannt";
 }
 
 export function proxy(req: NextRequest) {

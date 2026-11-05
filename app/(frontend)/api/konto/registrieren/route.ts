@@ -1,19 +1,9 @@
 import config from "@payload-config";
 import { getPayload } from "payload";
 
-export const dynamic = "force-dynamic";
+import { isSameOrigin } from "@/lib/security";
 
-function sameSite(request: Request) {
-  const origin = request.headers.get("origin");
-  if (!origin) return false;
-  try {
-    const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
-    const expectedHost = forwardedHost || new URL(request.url).host;
-    return new URL(origin).host === expectedHost;
-  } catch {
-    return false;
-  }
-}
+export const dynamic = "force-dynamic";
 
 function passwordIsStrong(password: string) {
   const classes = [/[a-z]/, /[A-Z]/, /\d/, /[^A-Za-z0-9]/].filter((pattern) => pattern.test(password)).length;
@@ -21,7 +11,7 @@ function passwordIsStrong(password: string) {
 }
 
 export async function POST(request: Request) {
-  if (!sameSite(request)) return Response.json({ message: "Ungültige Anfrage." }, { status: 403 });
+  if (!isSameOrigin(request)) return Response.json({ message: "Ungültige Anfrage." }, { status: 403 });
 
   const body = (await request.json().catch(() => null)) as
     | { username?: unknown; name?: unknown; email?: unknown; password?: unknown }

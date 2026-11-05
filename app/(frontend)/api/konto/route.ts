@@ -1,20 +1,23 @@
 import config from "@payload-config";
 import { getPayload } from "payload";
 
+import { isSameOrigin } from "@/lib/security";
+
 export const dynamic = "force-dynamic";
 
 const MAX_BAMBOO = 99999;
+// Größe der frei befüllbaren Fortschritts-Objekte begrenzen (Schutz vor Speicher-Missbrauch).
+const MAX_STATE_BYTES = 4000;
 
-function sameSite(request: Request) {
-  const origin = request.headers.get("origin");
-  if (!origin) return false;
+/** Objekt nur übernehmen, wenn es klein genug ist – sonst verwerfen. */
+function boundedObject(value: unknown): Record<string, unknown> | undefined {
+  if (!value || typeof value !== "object") return undefined;
   try {
-    const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
-    const expectedHost = forwardedHost || new URL(request.url).host;
-    return new URL(origin).host === expectedHost;
+    if (JSON.stringify(value).length > MAX_STATE_BYTES) return undefined;
   } catch {
-    return false;
+    return undefined;
   }
+  return value as Record<string, unknown>;
 }
 
 function accountSummary(user: Record<string, unknown>) {
@@ -30,8 +33,8 @@ function accountSummary(user: Record<string, unknown>) {
     views: Math.max(0, Math.floor(Number(stored.views) || 0)),
     thanked: typeof stored.thanked === "string" ? stored.thanked.slice(0, 10) : undefined,
     skin: typeof stored.skin === "string" ? stored.skin.slice(0, 48) : undefined,
-    visits: stored.visits && typeof stored.visits === "object" ? stored.visits : undefined,
-    custom: stored.custom && typeof stored.custom === "object" ? stored.custom : undefined,
+    visits: boundedObject(stored.visits),
+    custom: boundedObject(stored.custom),
     daily: typeof stored.daily === "string" ? stored.daily.slice(0, 10) : undefined,
     gachaNextAt: Number.isFinite(Number(stored.gachaNextAt)) ? Number(stored.gachaNextAt) : undefined,
     gachaLastOfferAt: Number.isFinite(Number(stored.gachaLastOfferAt)) ? Number(stored.gachaLastOfferAt) : undefined,
@@ -80,7 +83,7 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  if (!sameSite(request)) return Response.json({ message: "Ungültige Anfrage." }, { status: 403 });
+  if (!isSameOrigin(request)) return Response.json({ message: "Ungültige Anfrage." }, { status: 403 });
 
   try {
     const { payload, user, doc } = await authenticatedUser(request);
@@ -102,8 +105,8 @@ export async function PATCH(request: Request) {
       views: Math.max(0, Math.floor(Number(body.views) || 0)),
       thanked: typeof body.thanked === "string" ? body.thanked.slice(0, 10) : undefined,
       skin: typeof body.skin === "string" ? body.skin.slice(0, 48) : undefined,
-      visits: body.visits && typeof body.visits === "object" ? body.visits : undefined,
-      custom: body.custom && typeof body.custom === "object" ? body.custom : undefined,
+      visits: boundedObject(body.visits),
+      custom: boundedObject(body.custom),
       daily: typeof body.daily === "string" ? body.daily.slice(0, 10) : undefined,
       gachaNextAt: Number.isFinite(Number(body.gachaNextAt)) ? Number(body.gachaNextAt) : undefined,
       gachaLastOfferAt: Number.isFinite(Number(body.gachaLastOfferAt)) ? Number(body.gachaLastOfferAt) : undefined,

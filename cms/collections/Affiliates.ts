@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 
-import { anyone, isEditorOrAdmin } from "../access";
+import { isEditorOrAdmin, roleOf } from "../access";
 import { autoSlug, revalidateAfterChange, revalidateAfterDelete } from "../hooks";
 
 /**
@@ -17,7 +17,17 @@ export const Affiliates: CollectionConfig = {
     description:
       "Partnerlinks anlegen und verwenden: als Empfehlungsbox (Seite → Tab „Monetarisierung“) oder direkt im Text (Wort markieren → Link → „Interner Link“ → Produkt wählen). Auf der Website immer als Affiliate-Link gekennzeichnet.",
   },
-  access: { read: anyone, create: isEditorOrAdmin, update: isEditorOrAdmin, delete: isEditorOrAdmin },
+  access: {
+    // Öffentlich nur aktive, echte Partnerlinks – Platzhalter und deaktivierte Einträge
+    // (noch nicht veröffentlichte Partnerschaften) bleiben dem Team vorbehalten.
+    read: ({ req }) =>
+      ["admin", "redakteur", "autor"].includes(roleOf(req) ?? "")
+        ? true
+        : { and: [{ active: { equals: true } }, { placeholder: { equals: false } }] },
+    create: isEditorOrAdmin,
+    update: isEditorOrAdmin,
+    delete: isEditorOrAdmin,
+  },
   hooks: { afterChange: [revalidateAfterChange], afterDelete: [revalidateAfterDelete] },
   fields: [
     { name: "name", label: "Produktname", type: "text", required: true },
