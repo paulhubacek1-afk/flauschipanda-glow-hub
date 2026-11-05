@@ -2,6 +2,7 @@ import config from "@payload-config";
 import { getPayload } from "payload";
 
 import { VISITS_TOTAL, getVisitorStats, incrementCounters, pageViewKey, visitsDayKey } from "@/lib/counters";
+import { isSameOrigin } from "@/lib/security";
 
 /**
  * Anonymer Besucherzähler.
@@ -17,23 +18,13 @@ const recent = new Map<string, number>();
 const PATH = /^\/[a-z0-9-]{1,80}\/[a-z0-9-]{1,80}\/[a-z0-9-]{1,120}$/;
 const BOT = /bot|crawl|spider|slurp|preview|headless|lighthouse|monitor|curl|wget|python|httpclient/i;
 
-function sameSite(request: Request) {
-  const origin = request.headers.get("origin");
-  if (!origin) return false;
-  try {
-    return new URL(origin).host === new URL(request.url).host;
-  } catch {
-    return false;
-  }
-}
-
 export async function GET() {
   const stats = await getVisitorStats();
   return Response.json(stats, { headers: { "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600" } });
 }
 
 export async function POST(request: Request) {
-  if (!sameSite(request)) return Response.json({ ok: false }, { status: 403 });
+  if (!isSameOrigin(request)) return Response.json({ ok: false }, { status: 403 });
   if (BOT.test(request.headers.get("user-agent") ?? "")) return Response.json({ ok: true, counted: false });
   const ip = (request.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unbekannt";
   let path = "";

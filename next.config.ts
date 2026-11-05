@@ -13,6 +13,25 @@ const securityHeaders = [
   {
     key: "Content-Security-Policy",
     value: [
+      // Standard: alles nur von der eigenen Domain
+      "default-src 'self'",
+      // Skripte: nur eigene Domain. 'unsafe-inline' ist nötig, weil Next.js/React Inline-Skripte
+      // zur Hydration ausliefert. Dadurch werden zwar keine Inline-Skripte blockiert, aber das
+      // NACHLADEN fremder Skript-Dateien (z. B. <script src="//boese.example/x.js">) wird verhindert.
+      // Härtere Variante (Folgeschritt): Nonce-basierte CSP per Middleware (proxy.ts) + dynamisches
+      // Rendering – dann kann 'unsafe-inline' entfallen.
+      "script-src 'self' 'unsafe-inline'",
+      // Styles: eigene Domain + Inline-Styles (styled-jsx und style-Attribute im Markup)
+      "style-src 'self' 'unsafe-inline'",
+      // Bilder: eigene Domain, data:/blob: (Vorschauen) und https (CMS-Medien via Vercel Blob)
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' data:",
+      "connect-src 'self'",
+      "worker-src 'self' blob:",
+      "manifest-src 'self'",
+      "frame-src 'self'",
+      // Keine Plugins/Objekte, <base> nicht manipulierbar, kein Einbetten durch fremde Seiten,
+      // Formulare nur an die eigene Domain
       "base-uri 'self'",
       "object-src 'none'",
       "frame-ancestors 'self'",
