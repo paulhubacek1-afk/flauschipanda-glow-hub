@@ -180,7 +180,7 @@ const DEFAULT_LINKS: SiteLinks = {
   header: [],
   footer: [],
   social: [],
-  poweredBy: [{ label: "Designix", url: "https://designix.figma.site" }, { label: "WebDock", url: "https://spitzli.cloud" }],
+  poweredBy: [{ label: "Designix", url: "https://designix.figma.site" }, { label: "Spitzli Cloud", url: "https://spitzli.cloud" }],
 };
 
 function mapLinks(list: unknown, requireUrl = true): SiteLink[] {
