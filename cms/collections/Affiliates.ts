@@ -1,4 +1,4 @@
-import type { CollectionConfig } from "payload";
+import type { CollectionConfig, Where } from "payload";
 
 import { isEditorOrAdmin, roleOf } from "../access";
 import { autoSlug, revalidateAfterChange, revalidateAfterDelete } from "../hooks";
@@ -20,7 +20,7 @@ export const Affiliates: CollectionConfig = {
   access: {
     // Öffentlich nur aktive, echte Partnerlinks – Platzhalter und deaktivierte Einträge
     // (noch nicht veröffentlichte Partnerschaften) bleiben dem Team vorbehalten.
-    read: ({ req }) =>
+    read: ({ req }): true | Where =>
       ["admin", "redakteur", "autor"].includes(roleOf(req) ?? "")
         ? true
         : { and: [{ active: { equals: true } }, { placeholder: { equals: false } }] },
