@@ -171,7 +171,7 @@ const DEFAULT_LINKS: SiteLinks = {
   header: [],
   footer: [],
   social: [],
-  poweredBy: [{ label: "Designix", url: "" }, { label: "WebDock", url: "http://webdock.dev/" }],
+  poweredBy: [{ label: "Designix", url: "https://designix.figma.site" }, { label: "WebDock", url: "https://spitzli.cloud" }],
 };
 
 function mapLinks(list: unknown, requireUrl = true): SiteLink[] {
