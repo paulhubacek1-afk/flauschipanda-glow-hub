@@ -8,9 +8,67 @@ import type { Payload } from "payload";
  * Migrationen wird hier beim Start nur HINZUGEFÜGT, was fehlt („IF NOT EXISTS“) –
  * es wird nie etwas gelöscht oder verändert. Mehrfaches Ausführen ist gefahrlos.
  */
+/** Zeilen aus einem drizzle/pg-Ergebnis lesen (je nach Treiber `rows` oder direkt ein Array). */
+const rowsOf = (res: unknown): Record<string, unknown>[] =>
+  Array.isArray(res) ? (res as Record<string, unknown>[]) : (((res as { rows?: unknown[] } | null)?.rows ?? []) as Record<string, unknown>[]);
+
 export async function ensureSchema(payload: Payload) {
   const drizzle = (payload.db as unknown as { drizzle?: { execute: (q: unknown) => Promise<unknown> } }).drizzle;
   if (!drizzle) return;
+
+  /*
+   * WICHTIG: ALTER TABLE braucht eine exklusive Sperre auf die Tabelle – auch bei „IF NOT EXISTS“,
+   * wenn die Spalte längst existiert. Läuft gleichzeitig eine Schreib-Transaktion (z. B. das Befüllen
+   * von Seiten), wartet das ALTER, und alle weiteren Abfragen auf diese Tabelle stauen sich dahinter.
+   * Das hat Builds (Timeout nach 60 s) und Seitenaufrufe blockiert.
+   * Deshalb zuerst ohne Sperre im Katalog nachsehen und nur dann ändern, wenn wirklich etwas fehlt.
+   */
+  let known: Set<string>;
+  try {
+    const res = await drizzle.execute(sql`
+      SELECT table_name || '.' || column_name AS k FROM information_schema.columns WHERE table_schema = current_schema()
+      UNION ALL
+      SELECT tablename || '#' FROM pg_catalog.pg_tables WHERE schemaname = current_schema()
+      UNION ALL
+      SELECT '@' || indexname FROM pg_catalog.pg_indexes WHERE schemaname = current_schema()
+      UNION ALL
+      SELECT 'enum_categories_icon:' || e.enumlabel FROM pg_catalog.pg_enum e
+        JOIN pg_catalog.pg_type t ON t.oid = e.enumtypid WHERE t.typname = 'enum_categories_icon'
+    `);
+    known = new Set(rowsOf(res).map((r) => String(r.k)));
+  } catch (err) {
+    payload.logger.warn({ err }, "[schema] Katalog konnte nicht gelesen werden – Schema-Prüfung übersprungen");
+    return;
+  }
+  const hasColumns = (table: string, columns: string[]) => !known.has(`${table}#`) || columns.every((c) => known.has(`${table}.${c}`));
+  const hasTable = (table: string) => known.has(`${table}#`);
+  const hasIndex = (name: string) => known.has(`@${name}`);
+
+  if (
+    hasColumns("site_settings", [
+      "maintenance_enabled", "maintenance_title", "maintenance_message", "maintenance_until",
+      "homepage_badge", "homepage_title_lead", "homepage_title_highlight", "homepage_description", "merch_url",
+    ]) &&
+    hasColumns("users", ["bamboo", "bamboo_state"]) &&
+    hasTable("fp_counters") &&
+    hasColumns("pages", ["text_source", "pros_cons_pros", "pros_cons_cons", "pros_cons_note"]) &&
+    hasColumns("_pages_v", ["version_text_source", "version_pros_cons_pros", "version_pros_cons_cons", "version_pros_cons_note"]) &&
+    ["header_links", "footer_links", "social_links", "powered_by"].every(
+      (n) => hasTable(`site_settings_${n}`) && hasIndex(`site_settings_${n}_order_idx`) && hasIndex(`site_settings_${n}_parent_id_idx`),
+    ) &&
+    known.has("enum_categories_icon:monitor") &&
+    known.has("enum_categories_icon:atom")
+  ) {
+    return; // alles vorhanden – keine Sperren nötig
+  }
+
+  // Ab hier fehlt tatsächlich etwas. Nie länger als ein paar Sekunden auf eine Sperre warten,
+  // damit ein Start niemals die ganze Website aufhält – beim nächsten Start wird es erneut versucht.
+  try {
+    await drizzle.execute(sql.raw(`SET lock_timeout = '5s'`));
+  } catch {
+    /* ohne Timeout weiter */
+  }
   try {
     await drizzle.execute(sql`
       ALTER TABLE IF EXISTS "site_settings"
@@ -111,10 +169,16 @@ export async function ensureSchema(payload: Payload) {
   }
   // neue Auswahlwerte für Kategorie-Symbole (Postgres-Enum)
   for (const value of ["monitor", "atom"]) {
+    if (known.has(`enum_categories_icon:${value}`)) continue;
     try {
       await drizzle.execute(sql.raw(`ALTER TYPE "enum_categories_icon" ADD VALUE IF NOT EXISTS '${value}'`));
     } catch (err) {
       payload.logger.warn({ err }, `[schema] Symbol „${value}“ konnte nicht ergänzt werden`);
     }
+  }
+  try {
+    await drizzle.execute(sql.raw(`SET lock_timeout = 0`));
+  } catch {
+    /* Verbindung wird ohnehin neu aufgebaut */
   }
 }
