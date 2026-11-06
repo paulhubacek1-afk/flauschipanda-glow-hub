@@ -8,6 +8,11 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const revalidate = 3600;
 
+/** Bilder beim ersten Abruf erzeugen und danach aus dem Cache ausliefern (wie die Seiten selbst). */
+export async function generateStaticParams() {
+  return [];
+}
+
 /** Automatisch erzeugtes Open-Graph-Bild für jede Landingpage (Social Media). */
 export default async function Image({ params }: { params: Promise<{ kategorie: string; gruppe: string; seite: string }> }) {
   const { kategorie, gruppe, seite } = await params;

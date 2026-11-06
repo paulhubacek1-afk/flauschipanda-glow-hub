@@ -39,6 +39,17 @@ import { formatDate, toIsoDate } from "@/lib/utils";
  */
 export const revalidate = 3600;
 
+/**
+ * Leere Liste = beim Build nichts vorab erzeugen, aber jede Seite beim ersten Aufruf erzeugen und
+ * danach aus dem Cache ausliefern (ISR). Ohne diese Funktion rendert Next.js dynamische Routen bei
+ * jedem Aufruf neu – inklusive aller Datenbankabfragen. Änderungen im CMS leeren den Cache sofort
+ * (revalidatePath in cms/hooks.ts), sonst gilt die revalidate-Zeit oben.
+ */
+export async function generateStaticParams() {
+  return [];
+}
+
+
 type Props = { params: Promise<{ kategorie: string; gruppe: string; seite: string }> };
 
 /** Öffentliche Seite – oder im Team-Vorschaumodus auch Entwürfe (z. B. direkt aus dem Admin „Vorschau“). */
