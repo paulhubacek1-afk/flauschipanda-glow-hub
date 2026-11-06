@@ -10,8 +10,10 @@ import { PageCard } from "@/components/page-card";
 import { ShareButtons } from "@/components/share-buttons";
 import { SiteSearch } from "@/components/site-search";
 import { Button } from "@/components/ui/button";
+import { JsonLd } from "@/components/json-ld";
 import { getLivePages, getNavigation, getSearchItems, getSettings, navStats, toSummary } from "@/lib/cms";
 import { getPopularPaths, getVisitorStats } from "@/lib/counters";
+import { siteSchema } from "@/lib/schema";
 import { MERCH_URL, siteConfig } from "@/lib/site";
 
 export const revalidate = 300;
@@ -71,6 +73,7 @@ export default async function StartPage() {
 
   return (
     <>
+      <JsonLd data={siteSchema(["https://www.youtube.com/@FlauschiPandas", MERCH_URL])} />
       {/* ---------------- Hero ---------------- */}
       <section className="relative overflow-hidden border-b border-purple/20">
         <div className="bg-grid absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]" />

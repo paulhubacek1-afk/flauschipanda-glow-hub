@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { getAffiliateLookup, getDraftPage, getGroup, getLivePage, getLivePages, getSettings, lastModified, toSummary } from "@/lib/cms";
 import { getInlineLinks, getRelatedPages } from "@/lib/linking";
 import { renderPage } from "@/lib/markdown";
-import { articleSchema, faqSchema } from "@/lib/schema";
+import { articleSchema, faqSchema, organizationSchema } from "@/lib/schema";
 import { siteConfig } from "@/lib/site";
 import { CATEGORY_TOOLS, widgetsFor } from "@/lib/tools";
 import { formatDate, toIsoDate } from "@/lib/utils";
@@ -111,6 +111,7 @@ export default async function LandingPage({ params }: Props) {
     <article className="mx-auto max-w-7xl px-4 py-10">
       <JsonLd data={articleSchema(page)} />
       <JsonLd data={faqSchema(page)} />
+      <JsonLd data={organizationSchema()} />
       <div hidden data-panda-guide={JSON.stringify({ links: guideLinks })} />
       <EditButton collection="pages" id={page.dbId} label="Seite bearbeiten" />
 
