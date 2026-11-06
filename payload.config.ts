@@ -62,6 +62,9 @@ export default buildConfig({
   csrf: trustedOrigins,
   // fehlende neue Spalten (z. B. Wartungsmodus) sicher ergänzen
   onInit: async (payload) => {
+    // Während `next build` keine Schema-Änderungen und keine Inhalts-Updates: Die Build-Worker
+    // würden sonst mit der laufenden Live-Seite um Datenbank-Sperren konkurrieren (Build-Timeout).
+    if (process.env.NEXT_PHASE === "phase-production-build") return;
     await ensureSchema(payload);
     // Inhaltspakete, Text-Updates und Übernahme in den Editor: im Hintergrund, damit Admin und Website
     // nach einem Kaltstart sofort antworten (nicht auf diese Arbeit warten müssen)
