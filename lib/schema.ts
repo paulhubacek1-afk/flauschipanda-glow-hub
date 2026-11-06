@@ -25,13 +25,61 @@ export function articleSchema(p: Page) {
     inLanguage: siteConfig.language,
     datePublished: p.publishedAt.toISOString(),
     dateModified: (p.updatedAt ?? p.publishedAt).toISOString(),
-    author: { "@type": "Organization", name: p.author ?? siteConfig.defaultAuthor },
-    publisher: { "@type": "Organization", name: siteConfig.name },
+    author: { "@type": "Organization", name: p.author ?? siteConfig.defaultAuthor, url: absoluteUrl("/startseite") },
+    publisher: { "@id": absoluteUrl("/#organization") },
     mainEntityOfPage: absoluteUrl(p.href),
     articleSection: `${p.category.title} › ${p.group.title}`,
     keywords: [p.focusKeyword, ...p.keywords].join(", "),
     image: absoluteUrl(`${p.href}/opengraph-image`),
     ...(p.sources.length ? { citation: p.sources.map((s) => s.url) } : {}),
+  };
+}
+
+/**
+ * Website + Organisation für die Startseite. Hilft Google, den Website-Namen und das Logo
+ * in den Suchergebnissen korrekt anzuzeigen, und verknüpft die interne Suche.
+ */
+export function siteSchema(sameAs: string[] = []) {
+  const organization = {
+    "@type": "Organization",
+    "@id": absoluteUrl("/#organization"),
+    name: siteConfig.name,
+    alternateName: "FlauschiPandas",
+    url: absoluteUrl("/startseite"),
+    logo: { "@type": "ImageObject", url: absoluteUrl("/logo.png") },
+    ...(sameAs.length ? { sameAs } : {}),
+  };
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      organization,
+      {
+        "@type": "WebSite",
+        "@id": absoluteUrl("/#website"),
+        name: siteConfig.name,
+        alternateName: ["Panda Toolbox", "FlauschiPandas"],
+        url: absoluteUrl("/startseite"),
+        inLanguage: siteConfig.language,
+        publisher: { "@id": organization["@id"] },
+        potentialAction: {
+          "@type": "SearchAction",
+          target: { "@type": "EntryPoint", urlTemplate: `${absoluteUrl("/suche")}?q={search_term_string}` },
+          "query-input": "required name=search_term_string",
+        },
+      },
+    ],
+  };
+}
+
+/** Organisation als eigenständiges Objekt, damit `publisher: { "@id" }` auf jeder Seite auflösbar ist. */
+export function organizationSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": absoluteUrl("/#organization"),
+    name: siteConfig.name,
+    url: absoluteUrl("/startseite"),
+    logo: { "@type": "ImageObject", url: absoluteUrl("/logo.png") },
   };
 }
 

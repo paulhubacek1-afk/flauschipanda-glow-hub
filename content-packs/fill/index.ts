@@ -8,6 +8,9 @@ import { tiereWildtiere } from "./tiere-wildtiere";
 import { urlaubAutosMisc } from "./urlaub-autos-misc";
 import { toolsMusikFinanzen } from "./tools-musik-finanzen";
 import { zoosFreizeitparks } from "./zoos-freizeitparks";
+import { releaseRatgeber } from "./release-ratgeber";
+import { releaseAusfluegeAutos } from "./release-ausfluege-autos";
+import { releasePanda } from "./release-panda";
 
 /**
  * Nur redaktionell ausgearbeitete Seiten werden automatisch übernommen.
@@ -24,4 +27,7 @@ export const fillPages: FillPage[] = [
   ...toolsMusikFinanzen,
   ...zoosFreizeitparks,
   ...urlaubAutosMisc,
+  ...releaseRatgeber,
+  ...releaseAusfluegeAutos,
+  ...releasePanda,
 ];

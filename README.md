@@ -149,6 +149,13 @@ Jede Änderung im Backend ist sofort auf der Website sichtbar.
 
 ## Vor dem Livegang
 
+**Release-Checkliste SEO (Stand November 2026):**
+
+- `NEXT_PUBLIC_SITE_URL` in Vercel (Production) auf die **echte Domain** setzen, z. B. `https://flauschigespanda.webdock.dev`, und neu deployen. Steht dort eine `*.vercel.app`-Adresse, zeigen Canonical-URLs und Sitemap auf eine Domain mit `noindex` – Google indexiert dann nichts.
+- Nach dem Deploy prüfen: `/sitemap.xml` und `/robots.txt` enthalten die echte Domain, `/startseite` hat den richtigen Canonical-Link.
+- Search Console einrichten (siehe oben) und die Sitemap einreichen.
+- Seiten mit persönlichen Angaben bleiben Entwürfe, bis sie im Admin ausgefüllt sind: Über mich, Kontakt, Blog, Discord-Community, KiToolsReport (3 Seiten), Merch-Neuheiten, Digitale Produkte, Kostenlose Downloads.
+
 - Im Admin unter **Website-Einstellungen**: Spendenzweck und Spendenlink für Panda GreenTech eintragen.
 - Faktenprüfung der importierten Seiten durchgehen (Quellen auf konkrete Unterseiten präzisieren).
 - Impressum und Datenschutz (`app/(frontend)/impressum`, `…/datenschutz`) mit echten Angaben füllen. Datenbank und Hosting dort nennen.
