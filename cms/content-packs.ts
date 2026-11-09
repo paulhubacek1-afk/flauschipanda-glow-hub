@@ -1019,8 +1019,48 @@ async function renamePanda(payload: Payload): Promise<number> {
   return changes;
 }
 
+/**
+ * Kennung des aktuellen Code-Stands. Die Inhaltspakete laufen pro Stand nur EINMAL (nicht bei
+ * jedem Kaltstart), damit die Datenbank nicht bei jedem Start komplett durchsucht wird.
+ */
+const PACK_RUN_KEY = `inhalte:${(process.env.VERCEL_GIT_COMMIT_SHA || process.env.VERCEL_DEPLOYMENT_ID || "lokal").slice(0, 40)}`;
+let packsStarted = false;
+
+type Exec = { execute: (q: unknown) => Promise<unknown> };
+const drizzleOf = (payload: Payload) => (payload.db as unknown as { drizzle?: Exec }).drizzle;
+
+async function alreadyApplied(payload: Payload): Promise<boolean> {
+  const db = drizzleOf(payload);
+  if (!db) return false;
+  try {
+    const { sql } = await import("@payloadcms/db-postgres");
+    const res = (await db.execute(sql`SELECT 1 AS hit FROM "fp_counters" WHERE "key" = ${PACK_RUN_KEY} LIMIT 1`)) as { rows?: unknown[] } | unknown[];
+    const rows = Array.isArray(res) ? res : (res?.rows ?? []);
+    return rows.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+async function markApplied(payload: Payload) {
+  const db = drizzleOf(payload);
+  if (!db) return;
+  try {
+    const { sql } = await import("@payloadcms/db-postgres");
+    await db.execute(sql`
+      INSERT INTO "fp_counters" ("key", "value", "updated_at") VALUES (${PACK_RUN_KEY}, 1, now())
+      ON CONFLICT ("key") DO UPDATE SET "value" = "fp_counters"."value" + 1, "updated_at" = now()
+    `);
+  } catch (err) {
+    payload.logger.warn({ err }, "[inhalte] Lauf konnte nicht vermerkt werden");
+  }
+}
+
 export async function applyContentPacks(payload: Payload) {
   if (process.env.CONTENT_PACKS === "off") return;
+  if (packsStarted) return;
+  packsStarted = true;
+  if (process.env.CONTENT_PACKS !== "always" && (await alreadyApplied(payload))) return;
   let total = 0;
   const run = async (name: string, step: (p: Payload) => Promise<number>) => {
     try {
@@ -1051,9 +1091,11 @@ export async function applyContentPacks(payload: Payload) {
   await run("Partnerlink-Plätze", ensureAffiliateSlots);
   await run("Affiliate-Plan", ensureAffiliatePlan);
   await run("Feste Partnerlinks", ensureFixedAffiliates);
+  await markApplied(payload);
   if (total > 0) {
     try {
-      const { revalidatePath } = await import("next/cache");
+      const { revalidatePath, revalidateTag } = await import("next/cache");
+      revalidateTag("cms", { expire: 0 });
       revalidatePath("/", "layout");
     } catch {
       /* außerhalb einer Anfrage – der nächste Cache-Ablauf übernimmt */

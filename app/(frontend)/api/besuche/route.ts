@@ -1,7 +1,7 @@
 import config from "@payload-config";
 import { getPayload } from "payload";
 
-import { VISITS_TOTAL, getVisitorStats, incrementCounters, pageViewKey, visitsDayKey } from "@/lib/counters";
+import { VISITS_TOTAL, getVisitorStats, incrementCounters, pageViewKey, visitorCountingEnabled, visitsDayKey } from "@/lib/counters";
 import { isSameOrigin } from "@/lib/security";
 
 /**
@@ -25,6 +25,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return Response.json({ ok: false }, { status: 403 });
+  // Zählung abgeschaltet: keine Datenbank anfassen (auch für noch zwischengespeicherte alte Seiten)
+  if (!visitorCountingEnabled()) return Response.json({ ok: true, counted: false });
   if (BOT.test(request.headers.get("user-agent") ?? "")) return Response.json({ ok: true, counted: false });
   const ip = (request.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unbekannt";
   let path = "";

@@ -147,6 +147,19 @@ Jede Änderung im Backend ist sofort auf der Website sichtbar.
 - Affiliate-Links sind gekennzeichnet (`rel="sponsored"`, Sternchen und Hinweis), Werbung nur mit Einwilligung.
 - Platzhalter-Partnerlinks werden nicht angezeigt.
 
+## Datenbank schonen (Neon)
+
+Die Website fragt die Datenbank **nicht bei jedem Seitenaufruf** ab, damit eine nach Rechenzeit abgerechnete Neon-Datenbank schlafen kann:
+
+- **Daten-Cache:** Navigation, Einstellungen, Partnerlinks, der Seitenindex und jeder Seitentext werden dauerhaft im Next.js-Daten-Cache gespeichert (`lib/cms.ts`, `unstable_cache`), über alle Server-Instanzen und Deployments hinweg.
+- **Nur Änderungen wecken die Datenbank:** Speichern im CMS leert gezielt die betroffenen Einträge (`cms/hooks.ts`). Eine geänderte Seite lädt nur Index, Navigation und diese eine Seite neu.
+- **Ausfallsicher:** Fehler werden nicht gecacht. Ist die Datenbank nicht erreichbar, liefert die Website weiter den letzten gespeicherten Stand.
+- **Besucherzählung ist standardmäßig aus** (`NEXT_PUBLIC_VISITOR_COUNTER=on` schaltet sie ein). Anonyme Besucher wecken die Datenbank auch nicht über `/api/konto`.
+- **Inhaltspakete** laufen pro Code-Stand nur einmal statt bei jedem Kaltstart.
+- Geplante Veröffentlichungen erscheinen trotzdem: Das Datum wird beim Rendern geprüft, der tägliche Cronjob baut die Seiten aus dem Cache neu auf.
+
+Was die Datenbank weiterhin braucht: das Admin, Login und Bambus-Konten angemeldeter Nutzer, die Team-Vorschau und das erste Laden nach einer Änderung im CMS.
+
 ## Vor dem Livegang
 
 **Release-Checkliste SEO (Stand November 2026):**

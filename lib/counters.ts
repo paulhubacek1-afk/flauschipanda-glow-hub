@@ -1,5 +1,6 @@
 import config from "@payload-config";
 import { sql } from "@payloadcms/db-postgres";
+import { unstable_cache } from "next/cache";
 import { getPayload } from "payload";
 
 /**
@@ -44,6 +45,13 @@ export async function incrementCounters(keys: string[]): Promise<Record<string, 
   return out;
 }
 
+/**
+ * Besucherzählung an/aus. Standard: AUS – jede Zählung ist ein Schreibzugriff auf die Datenbank
+ * und hält die (nach Rechenzeit abgerechnete) Neon-Datenbank wach.
+ * Einschalten mit der Umgebungsvariable NEXT_PUBLIC_VISITOR_COUNTER=on (danach neu deployen).
+ */
+export const visitorCountingEnabled = () => process.env.NEXT_PUBLIC_VISITOR_COUNTER === "on";
+
 /** Datum in Wien als JJJJ-MM-TT (für den Tageszähler). */
 export function viennaDay(d = new Date()) {
   return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Vienna" }).format(d);
@@ -52,12 +60,20 @@ export function viennaDay(d = new Date()) {
 export const VISITS_TOTAL = "besuche";
 export const visitsDayKey = (day = viennaDay()) => `besuche:${day}`;
 
+/** Zähler höchstens einmal pro Stunde aus der Datenbank lesen (statt bei jedem Neuaufbau der Startseite). */
+const hourly = <A extends unknown[], T>(name: string, fn: (...args: A) => Promise<T>) =>
+  unstable_cache(fn, ["counters-v1", name], { tags: ["counters"], revalidate: 3600 });
+
+const readVisitorStats = hourly("visitors", async (dayKey: string) => {
+  const c = await readCounters([VISITS_TOTAL, dayKey]);
+  return { total: c[VISITS_TOTAL] ?? 0, today: c[dayKey] ?? 0 };
+});
+
 /** Besucherzahlen für die Startseite – Fehler werden still als 0 behandelt. */
 export async function getVisitorStats(): Promise<{ total: number; today: number }> {
+  if (!visitorCountingEnabled()) return { total: 0, today: 0 };
   try {
-    const dayKey = visitsDayKey();
-    const c = await readCounters([VISITS_TOTAL, dayKey]);
-    return { total: c[VISITS_TOTAL] ?? 0, today: c[dayKey] ?? 0 };
+    return await readVisitorStats(visitsDayKey());
   } catch {
     return { total: 0, today: 0 };
   }
@@ -65,18 +81,24 @@ export async function getVisitorStats(): Promise<{ total: number; today: number 
 
 export const pageViewKey = (path: string) => `seite:${path}`;
 
+const readPopularPaths = hourly("popular", async (limit: number) => {
+  const d = await db();
+  if (!d) return [] as { path: string; views: number }[];
+  const res = await d.execute(
+    sql`SELECT "key", "value" FROM "fp_counters" WHERE "key" LIKE 'seite:%' ORDER BY "value" DESC LIMIT ${Math.max(1, Math.min(50, limit))}`,
+  );
+  return rowsOf(res)
+    .filter((r) => typeof r.key === "string")
+    .map((r) => ({ path: String(r.key).slice(6), views: Number(r.value ?? 0) }));
+});
+
 /** Meistgelesene Seiten (Pfad → Aufrufe), absteigend. */
 export async function getPopularPaths(limit = 12): Promise<{ path: string; views: number }[]> {
+  if (!visitorCountingEnabled()) return [];
   try {
-    const d = await db();
-    if (!d) return [];
-    const res = await d.execute(
-      sql`SELECT "key", "value" FROM "fp_counters" WHERE "key" LIKE 'seite:%' ORDER BY "value" DESC LIMIT ${Math.max(1, Math.min(50, limit))}`,
-    );
-    return rowsOf(res)
-      .filter((r) => typeof r.key === "string")
-      .map((r) => ({ path: String(r.key).slice(6), views: Number(r.value ?? 0) }));
+    return await readPopularPaths(limit);
   } catch {
     return [];
   }
 }
+

@@ -54,7 +54,16 @@ async function authenticatedUser(request: Request) {
   return { payload, user, doc: doc as unknown as Record<string, unknown> };
 }
 
+/**
+ * Ohne Login-Cookie gibt es kein Konto – dann gar nicht erst Payload starten.
+ * Der Panda fragt bei JEDEM Seitenaufruf nach dem Konto; so weckt ein normaler Besuch die Datenbank nicht.
+ */
+const hasLoginCookie = (request: Request) => /(?:^|;\s*)payload-token=/.test(request.headers.get("cookie") ?? "");
+
 export async function GET(request: Request) {
+  if (!hasLoginCookie(request)) {
+    return Response.json({ authenticated: false }, { headers: { "Cache-Control": "no-store" } });
+  }
   try {
     const { user, doc } = await authenticatedUser(request);
     if (!user || !doc) {
@@ -84,6 +93,7 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   if (!isSameOrigin(request)) return Response.json({ message: "Ungültige Anfrage." }, { status: 403 });
+  if (!hasLoginCookie(request)) return Response.json({ message: "Bitte melde dich zuerst an." }, { status: 401 });
 
   try {
     const { payload, user, doc } = await authenticatedUser(request);

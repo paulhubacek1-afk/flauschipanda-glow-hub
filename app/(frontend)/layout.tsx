@@ -15,6 +15,7 @@ import { ScrollReveal } from "@/components/scroll-reveal";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { VisitorPing } from "@/components/visitor-ping";
+import { visitorCountingEnabled } from "@/lib/counters";
 import { SeasonalTheme } from "@/components/seasonal-theme";
 import { getSeasonalTheme } from "@/lib/seasonal-theme";
 import { getNavigation, getSettings, isMaintenanceActive, toNavLite } from "@/lib/cms";
@@ -114,7 +115,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <PandaBuddy nav={nav} />
         <PandaGachaReminder />
         <ScrollReveal />
-        <VisitorPing />
+        {visitorCountingEnabled() && <VisitorPing />}
       </body>
     </html>
   );

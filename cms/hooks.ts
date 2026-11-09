@@ -20,29 +20,54 @@ export const autoSlug =
 
 /**
  * Website-Cache leeren, sobald im CMS etwas gespeichert wird – Änderungen sind sofort sichtbar.
+ *
+ * Geleert werden die gespeicherten Seiten (revalidatePath) und nur die betroffenen Einträge im
+ * Daten-Cache (Tags aus lib/cms.ts → CMS_TAGS). Nur diese werden danach neu aus der Datenbank
+ * geladen; alles andere bleibt im Cache, und die Datenbank kann wieder schlafen.
  * Läuft außerhalb von Next.js (z. B. beim Import-Skript) einfach ins Leere.
  */
-async function revalidateSite() {
+export async function revalidateSite(tags: string[] = ["cms"]) {
   try {
-    const { revalidatePath } = await import("next/cache");
+    const { revalidatePath, revalidateTag } = await import("next/cache");
+    for (const tag of new Set(tags)) revalidateTag(tag, { expire: 0 });
     revalidatePath("/", "layout");
   } catch {
     /* außerhalb von Next.js – nichts zu tun */
   }
 }
 
-export const revalidateAfterChange: CollectionAfterChangeHook = async ({ doc, context }) => {
-  if (!context?.skipRevalidate) await revalidateSite();
+/** Welche Cache-Einträge hängen von dieser Sammlung ab? (Namen wie CMS_TAGS in lib/cms.ts) */
+function tagsFor(collection: string, id: unknown): string[] {
+  switch (collection) {
+    case "pages":
+      return ["cms-page-index", "cms-navigation", ...(id !== undefined && id !== null ? [`cms-page-${String(id)}`] : [])];
+    case "categories":
+    case "groups":
+      return ["cms-navigation", "cms-page-index"];
+    case "affiliates":
+      return ["cms-affiliates"];
+    default:
+      return ["cms"];
+  }
+}
+
+/** Reine Entwurfs-Speicherungen (auch Autosave) ändern nichts Öffentliches – kein Cache leeren. */
+const isDraftOnly = (doc: { _status?: unknown } | undefined, previousDoc: { _status?: unknown } | undefined) =>
+  doc?._status === "draft" && previousDoc?._status !== "published";
+
+export const revalidateAfterChange: CollectionAfterChangeHook = async ({ doc, previousDoc, collection, context }) => {
+  if (context?.skipRevalidate || isDraftOnly(doc, previousDoc)) return doc;
+  await revalidateSite(tagsFor(collection.slug, doc?.id));
   return doc;
 };
 
-export const revalidateAfterDelete: CollectionAfterDeleteHook = async ({ doc, context }) => {
-  if (!context?.skipRevalidate) await revalidateSite();
+export const revalidateAfterDelete: CollectionAfterDeleteHook = async ({ doc, collection, context }) => {
+  if (!context?.skipRevalidate) await revalidateSite(tagsFor(collection.slug, doc?.id));
   return doc;
 };
 
 export const revalidateGlobal: GlobalAfterChangeHook = async ({ doc, context }) => {
-  if (!context?.skipRevalidate) await revalidateSite();
+  if (!context?.skipRevalidate) await revalidateSite(["cms-settings"]);
   return doc;
 };
 
