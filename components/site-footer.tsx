@@ -15,7 +15,7 @@ const YOUTUBE_URL = "https://www.youtube.com/@FlauschiPandas";
 export function SiteFooter({ nav, links, greentechUrl }: { nav: NavLite[]; links?: SiteLinks; greentechUrl?: string }) {
   const merchUrl = links?.merchUrl || MERCH_URL;
   const ext = (newTab?: boolean) => (newTab ? { target: "_blank", rel: "noopener noreferrer" } : {});
-  const powered = links?.poweredBy?.length ? links.poweredBy : [{ label: "Designix", url: "" }, { label: "WebDock", url: "http://webdock.dev/" }];
+  const powered = links?.poweredBy?.length ? links.poweredBy : [{ label: "Spitzli Cloud", url: "https://spitzli.cloud" }];
   return (
     <footer className="mt-24 border-t border-purple/20 bg-card/40">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-[1.2fr_2.5fr]">
