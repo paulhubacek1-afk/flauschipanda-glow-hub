@@ -180,7 +180,7 @@ const DEFAULT_LINKS: SiteLinks = {
   header: [],
   footer: [],
   social: [],
-  poweredBy: [{ label: "Designix", url: "https://designix.figma.site" }, { label: "Spitzli Cloud", url: "https://spitzli.cloud" }],
+  poweredBy: [{ label: "Spitzli Cloud", url: "https://spitzli.cloud" }],
 };
 
 function mapLinks(list: unknown, requireUrl = true): SiteLink[] {
@@ -380,7 +380,10 @@ export const getSettings = cache(async (): Promise<SiteSettingsData> => {
     console.warn("[einstellungen] CMS nicht erreichbar; Standard-Einstellungen werden verwendet.", error instanceof Error ? error.message : error);
   }
 
-  const powered = mapLinks(s.poweredBy, false);
+  // Alte Einträge aus dem CMS angleichen: Designix entfällt, WebDock heißt jetzt Spitzli Cloud.
+  const powered = mapLinks(s.poweredBy, false)
+    .filter((l) => !/designix/i.test(l.label))
+    .map((l) => (/web\s*dock/i.test(l.label) ? { ...l, label: "Spitzli Cloud", url: "https://spitzli.cloud" } : l));
   const greencore = (s.greencore ?? {}) as Doc;
   const maintenance = (s.maintenance ?? {}) as Doc;
   const homepage = (s.homepage ?? {}) as Doc;

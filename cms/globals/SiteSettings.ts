@@ -143,7 +143,7 @@ export const SiteSettings: GlobalConfig = {
           label: "„powered by“ in der Fußzeile",
           type: "array",
           labels: { singular: "Partner", plural: "Partner" },
-          admin: { description: "Leer = Designix & Spitzli Cloud. Link leer lassen = nur Name ohne Link." },
+          admin: { description: "Leer = Spitzli Cloud. Link leer lassen = nur Name ohne Link." },
           fields: linkFields(false, false),
         },
       ],
