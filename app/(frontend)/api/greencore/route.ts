@@ -1,7 +1,9 @@
 import config from "@payload-config";
 import { sql } from "@payloadcms/db-postgres";
+import { unstable_cache } from "next/cache";
 import { getPayload } from "payload";
 
+import { visitorCountingEnabled } from "@/lib/counters";
 import { isSameOrigin } from "@/lib/security";
 
 /**
@@ -32,12 +34,17 @@ function rowsOf(res: unknown): { value?: string | number }[] {
   return Array.isArray(r) ? r : (r?.rows ?? []);
 }
 
-async function read(): Promise<number> {
-  const d = await db();
-  if (!d) return 0;
-  const res = await d.execute(sql`SELECT "value" FROM "fp_counters" WHERE "key" = ${KEY}`);
-  return Number(rowsOf(res)[0]?.value ?? 0);
-}
+/** Stand höchstens einmal pro Stunde aus der Datenbank lesen – die Pflanze wächst ohnehin langsam. */
+const read = unstable_cache(
+  async (): Promise<number> => {
+    const d = await db();
+    if (!d) return 0;
+    const res = await d.execute(sql`SELECT "value" FROM "fp_counters" WHERE "key" = ${KEY}`);
+    return Number(rowsOf(res)[0]?.value ?? 0);
+  },
+  ["greencore-count-v1"],
+  { tags: ["counters"], revalidate: 3600 },
+);
 
 export async function GET() {
   try {
@@ -49,6 +56,14 @@ export async function GET() {
 
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return Response.json({ ok: false }, { status: 403 });
+  // Zählung abgeschaltet (Standard): nur den gespeicherten Stand zeigen, nichts schreiben
+  if (!visitorCountingEnabled()) {
+    try {
+      return Response.json({ count: await read(), counted: false });
+    } catch {
+      return Response.json({ count: 0, counted: false });
+    }
+  }
   const ip = (request.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unbekannt";
   const now = Date.now();
   if (recent.size > 5000) for (const [k, t] of recent) if (now - t > WINDOW_MS) recent.delete(k);

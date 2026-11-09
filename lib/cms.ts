@@ -1,10 +1,19 @@
 /**
  * Datenzugriff der Website auf das CMS (Payload Local API – direkt, ohne HTTP).
- * Alle Funktionen sind pro Anfrage zwischengespeichert (React cache).
+ *
+ * Zwei Cache-Ebenen:
+ *  1. Daten-Cache (unstable_cache, Tag „cms“): Die Rohdaten aus Postgres werden dauerhaft
+ *     gespeichert – über alle Anfragen, Server-Instanzen und Deployments hinweg. Die Datenbank
+ *     wird nur gefragt, wenn sich im CMS etwas ändert (Hooks in cms/hooks.ts leeren den Tag).
+ *     So kann die Neon-Datenbank schlafen, statt bei jedem Seitenaufruf aufzuwachen.
+ *     Fehler werden NICHT gecacht: Ist die Datenbank nicht erreichbar, bleibt der letzte
+ *     gute Stand im Cache, und erst wenn gar nichts da ist, greift die lokale Grundstruktur.
+ *  2. React cache: pro Anfrage, damit dieselben Daten nicht mehrfach umgerechnet werden.
  */
 import config from "@payload-config";
 import { convertLexicalToHTML } from "@payloadcms/richtext-lexical/html";
-import { getPayload, type Where } from "payload";
+import { unstable_cache } from "next/cache";
+import { getPayload } from "payload";
 import { cache } from "react";
 
 import { lexicalToPlainText } from "@/cms/lexical-text";
@@ -189,6 +198,31 @@ export const getPayloadClient = cache(async () => getPayload({ config }));
 /** Preview-Deployments ohne Datenbank verwenden bewusst die lokale Seitenstruktur. */
 const hasCmsDatabase = () => Boolean(String(process.env.DATABASE_URI ?? "").trim());
 
+/**
+ * Cache-Tags für die CMS-Daten. cms/hooks.ts leert beim Speichern nur, was sich geändert hat
+ * (z. B. eine Seite → Index, Navigation und genau diese Seite). „cms“ leert alles.
+ */
+export const CMS_TAGS = {
+  all: "cms",
+  navigation: "cms-navigation",
+  settings: "cms-settings",
+  affiliates: "cms-affiliates",
+  index: "cms-page-index",
+  page: (id: string | number) => `cms-page-${id}`,
+} as const;
+
+/**
+ * Dauerhafter Daten-Cache für CMS-Abfragen (bis zur nächsten Änderung im CMS).
+ * Die Version im Schlüssel erhöhen, wenn sich die Form der gespeicherten Daten ändert.
+ * Einträge müssen unter 2 MB bleiben – deshalb werden Seitentexte einzeln gespeichert.
+ */
+function cmsCache<A extends unknown[], T>(name: string, tag: string, fn: (...args: A) => Promise<T>) {
+  return unstable_cache(fn, ["cms-v1", name], { tags: [CMS_TAGS.all, tag], revalidate: false });
+}
+
+/** Felder, die nur die Einzelseite braucht – in Listen weggelassen, damit der Cache klein bleibt. */
+const HEAVY_PAGE_FIELDS = ["content", "markdown", "comparison", "sources", "prosCons"] as const;
+
 
 const idOf = (v: unknown): string | number | undefined => {
   if (v === null || v === undefined) return undefined;
@@ -207,12 +241,8 @@ const sameId = (left: unknown, right: unknown) => {
 
 const slugKey = (value: unknown) => String(value ?? "").trim().toLowerCase();
 
-const liveWhere = (now: Date): Where => ({
-  and: [
-    { _status: { equals: "published" } },
-    { or: [{ publishedAt: { exists: false } }, { publishedAt: { less_than_equal: now.toISOString() } }] },
-  ],
-});
+/** Veröffentlicht und Veröffentlichungszeit erreicht (wird bei jedem Rendern neu geprüft, nicht im Cache). */
+const isLiveDoc = (d: Doc, now = Date.now()) => d._status === "published" && (!d.publishedAt || new Date(d.publishedAt).getTime() <= now);
 
 /**
  * Offline-Navigation aus der im Repository gespeicherten Grundstruktur.
@@ -249,33 +279,38 @@ function fallbackNavigation(): NavCategory[] {
 /* Navigation: komplette Hierarchie inkl. geplanter Seiten              */
 /* ------------------------------------------------------------------ */
 
+const loadNavigationDocs = cmsCache("navigation", CMS_TAGS.navigation, async () => {
+  const payload = await getPayload({ config });
+  const [cats, groups, pages] = await Promise.all([
+    payload.find({ collection: "categories", limit: 200, depth: 0, joins: false, sort: ["order", "createdAt"], pagination: false }),
+    payload.find({ collection: "groups", limit: 2000, depth: 0, joins: false, sort: ["order", "createdAt"], pagination: false }),
+    payload.find({
+      collection: "pages",
+      limit: 10000,
+      depth: 0,
+      sort: "title",
+      pagination: false,
+      select: { title: true, label: true, slug: true, group: true, pageType: true, _status: true, publishedAt: true },
+    }),
+  ]);
+  return { cats: cats.docs as Doc[], groups: groups.docs as Doc[], pages: pages.docs as Doc[] };
+});
+
 export const getNavigation = cache(async (): Promise<NavCategory[]> => {
   if (!hasCmsDatabase()) return fallbackNavigation();
   try {
-    const payload = await getPayloadClient();
+    const { cats, groups, pages } = await loadNavigationDocs();
     const now = Date.now();
-    const [cats, groups, pages] = await Promise.all([
-      payload.find({ collection: "categories", limit: 200, depth: 0, joins: false, sort: ["order", "createdAt"], pagination: false }),
-      payload.find({ collection: "groups", limit: 2000, depth: 0, joins: false, sort: ["order", "createdAt"], pagination: false }),
-      payload.find({
-        collection: "pages",
-        limit: 10000,
-        depth: 0,
-        sort: "title",
-        pagination: false,
-        select: { title: true, label: true, slug: true, group: true, pageType: true, _status: true, publishedAt: true },
-      }),
-    ]);
 
     const pagesByGroup = new Map<string, Doc[]>();
-    for (const page of pages.docs as Doc[]) {
+    for (const page of pages) {
       const groupId = idOf(page.group);
       if (groupId === undefined) continue;
       const key = String(groupId);
       pagesByGroup.set(key, [...(pagesByGroup.get(key) ?? []), page]);
     }
 
-    return (cats.docs as Doc[]).map((category, index) => ({
+    return cats.map((category, index) => ({
       dbId: category.id,
       number: index + 1,
       slug: category.slug,
@@ -283,7 +318,7 @@ export const getNavigation = cache(async (): Promise<NavCategory[]> => {
       description: category.description?.trim() || `${category.title}: Ratgeber, Vergleiche und Tipps – verständlich und ehrlich erklärt.`,
       icon: (category.icon ?? "paw") as IconName,
       hue: typeof category.hue === "number" ? category.hue : 195,
-      groups: (groups.docs as Doc[])
+      groups: groups
         .filter((group) => sameId(group.category, category.id))
         .map((group) => ({
           dbId: group.id,
@@ -296,7 +331,7 @@ export const getNavigation = cache(async (): Promise<NavCategory[]> => {
             label: page.label || page.title,
             title: page.title,
             pageType: (page.pageType ?? "standard") as PageType,
-            live: page._status === "published" && (!page.publishedAt || new Date(page.publishedAt).getTime() <= now),
+            live: isLiveDoc(page, now),
           })),
         })),
     }));
@@ -331,11 +366,15 @@ export function navStats(nav: NavCategory[]) {
 /* Einstellungen & Affiliates                                           */
 /* ------------------------------------------------------------------ */
 
+const loadSettingsDoc = cmsCache("settings", CMS_TAGS.settings, async () => {
+  const payload = await getPayload({ config });
+  return (await payload.findGlobal({ slug: "site-settings", depth: 0 })) as Doc;
+});
+
 export const getSettings = cache(async (): Promise<SiteSettingsData> => {
   let s: Doc = {};
   if (hasCmsDatabase()) try {
-    const payload = await getPayloadClient();
-    s = (await payload.findGlobal({ slug: "site-settings", depth: 0 })) as Doc;
+    s = await loadSettingsDoc();
   } catch (error) {
     // Fallback auch dann, wenn bereits der Aufbau der Payload-Verbindung fehlschlägt.
     console.warn("[einstellungen] CMS nicht erreichbar; Standard-Einstellungen werden verwendet.", error instanceof Error ? error.message : error);
@@ -381,18 +420,22 @@ export const getSettings = cache(async (): Promise<SiteSettingsData> => {
 });
 
 /** Aktive Affiliate-Produkte mit echtem Link (Platzhalter werden nie öffentlich gezeigt). */
+const loadAffiliateDocs = cmsCache("affiliates", CMS_TAGS.affiliates, async () => {
+  const payload = await getPayload({ config });
+  const res = await payload.find({
+    collection: "affiliates",
+    where: { and: [{ active: { equals: true } }, { placeholder: { not_equals: true } }] },
+    limit: 500,
+    depth: 0,
+    pagination: false,
+  });
+  return res.docs as Doc[];
+});
+
 const getAffiliateDocs = cache(async () => {
   if (!hasCmsDatabase()) return [] as Doc[];
   try {
-    const payload = await getPayloadClient();
-    const res = await payload.find({
-      collection: "affiliates",
-      where: { and: [{ active: { equals: true } }, { placeholder: { not_equals: true } }] },
-      limit: 500,
-      depth: 0,
-      pagination: false,
-    });
-    return res.docs as Doc[];
+    return await loadAffiliateDocs();
   } catch (error) {
     // Empfehlungen sind optional: Ein CMS-/Datenbankausfall darf öffentliche Seiten nicht blockieren.
     console.warn("[cms] Affiliate-Daten nicht verfügbar; leere Liste wird verwendet.", error instanceof Error ? error.message : error);
@@ -456,10 +499,12 @@ async function mapPages(docs: Doc[]): Promise<Page[]> {
     const seo = (d.seo ?? {}) as Doc;
     const ctx = { categorySlug: category.slug, groupTitle: group.title, pageType, year };
 
-    const hasRich = lexicalToPlainText(d.content).length > 0;
+    // Listen-Einträge (_lite) haben keinen Text – die Wortzahl wurde beim Cachen vorberechnet.
+    const lite = d._lite === true;
+    const hasRich = !lite && lexicalToPlainText(d.content).length > 0;
     const contentHtml = hasRich ? convertLexicalToHTML({ data: d.content, converters: htmlConverters }) : undefined;
-    const text = hasRich ? lexicalToPlainText(d.content) : String(d.markdown ?? "");
-    const wordCount = text.split(/\s+/).filter(Boolean).length;
+    const text = lite ? "" : hasRich ? lexicalToPlainText(d.content) : String(d.markdown ?? "");
+    const wordCount = lite ? Number(d._wordCount) || 0 : text.split(/\s+/).filter(Boolean).length;
 
     // Affiliate-Bereich: selbst gewählte Produkte – sonst automatisch passende aus Unterthema/Kategorie
     let products: AffiliateItem[] = [];
@@ -519,20 +564,53 @@ async function mapPages(docs: Doc[]): Promise<Page[]> {
   return pages;
 }
 
-/** Alle öffentlich sichtbaren Seiten (veröffentlicht und Veröffentlichungszeit erreicht). */
+/**
+ * Seitenindex für Listen, Suche, Sitemap und Verlinkung: alle veröffentlichten Seiten ohne den
+ * eigentlichen Text (der liegt pro Seite in loadPageDoc). Die Wortzahl wird hier vorberechnet.
+ * Geplante Seiten sind enthalten und werden erst beim Rendern nach Datum gefiltert.
+ */
+const loadPageIndex = cmsCache("page-index", CMS_TAGS.index, async () => {
+  const payload = await getPayload({ config });
+  const res = await payload.find({
+    collection: "pages",
+    where: { _status: { equals: "published" } },
+    limit: 5000,
+    depth: 0,
+    sort: "-publishedAt",
+    pagination: false,
+  });
+  return (res.docs as Doc[]).map((d) => {
+    const rich = lexicalToPlainText(d.content);
+    const text = rich.length > 0 ? rich : String(d.markdown ?? "");
+    const lite: Doc = { ...d, _lite: true, _wordCount: text.split(/\s+/).filter(Boolean).length };
+    for (const field of HEAVY_PAGE_FIELDS) delete lite[field];
+    return lite;
+  });
+});
+
+/** Vollständige, veröffentlichte Fassung einer einzelnen Seite (eigener Cache-Eintrag und Tag pro Seite). */
+const loadPageDoc = (id: string) =>
+  unstable_cache(
+    async () => {
+      const payload = await getPayload({ config });
+      try {
+        return (await payload.findByID({ collection: "pages", id, depth: 0 })) as Doc;
+      } catch (error) {
+        if ((error as { status?: number })?.status === 404) return null;
+        throw error;
+      }
+    },
+    ["cms-v1", "page", id],
+    { tags: [CMS_TAGS.all, CMS_TAGS.page(id)], revalidate: false },
+  )();
+
+/** Alle öffentlich sichtbaren Seiten (veröffentlicht und Veröffentlichungszeit erreicht) – ohne Text. */
 export const getLivePages = cache(async (): Promise<Page[]> => {
   if (!hasCmsDatabase()) return [];
   try {
-    const payload = await getPayloadClient();
-    const res = await payload.find({
-      collection: "pages",
-      where: liveWhere(new Date()),
-      limit: 5000,
-      depth: 0,
-      sort: "-publishedAt",
-      pagination: false,
-    });
-    const pages = await mapPages(res.docs as Doc[]);
+    const now = Date.now();
+    const docs = (await loadPageIndex()).filter((d) => isLiveDoc(d, now));
+    const pages = await mapPages(docs);
     // verwandte Artikel: DB-IDs → Seiten-IDs (nur live)
     const byDbId = new Map(pages.map((p) => [String(p.dbId), p.id]));
     for (const p of pages) p.related = p.related.map((r) => byDbId.get(r)).filter((x): x is string => Boolean(x));
@@ -544,9 +622,20 @@ export const getLivePages = cache(async (): Promise<Page[]> => {
   }
 });
 
-export async function getLivePage(category: string, group: string, slug: string) {
-  return (await getLivePages()).find((p) => p.id === `${category}/${group}/${slug}`);
-}
+/** Eine Seite vollständig (mit Text, FAQ, Vergleich, Quellen) – nur wenn sie live ist. */
+export const getLivePage = cache(async (category: string, group: string, slug: string): Promise<Page | undefined> => {
+  const listed = (await getLivePages()).find((p) => p.id === `${category}/${group}/${slug}`);
+  if (!listed) return undefined;
+  try {
+    const doc = await loadPageDoc(String(listed.dbId));
+    if (!doc || !isLiveDoc(doc)) return listed;
+    const [page] = await mapPages([doc]);
+    return page ? { ...page, related: listed.related } : listed;
+  } catch (error) {
+    console.warn("[cms] Seitentext nicht verfügbar; Kurzfassung wird verwendet.", error instanceof Error ? error.message : error);
+    return listed;
+  }
+});
 
 /**
  * Team-Vorschau: neueste Fassung einer Seite, auch wenn sie noch ein Entwurf ist.
@@ -568,8 +657,7 @@ export async function getDraftPage(category: string, group: string, slug: string
   if (!doc) return undefined;
   const [page] = await mapPages([doc]);
   if (!page) return undefined;
-  const live = doc._status === "published" && (!doc.publishedAt || new Date(doc.publishedAt).getTime() <= Date.now());
-  return { ...page, related: [], isDraft: !live };
+  return { ...page, related: [], isDraft: !isLiveDoc(doc) };
 }
 
 export async function getLivePagesInCategory(category: string) {
